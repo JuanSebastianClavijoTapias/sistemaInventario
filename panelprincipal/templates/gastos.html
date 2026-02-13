@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gastos - InventarioPiñeres</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="page-header gastos-header">
+            <a href="{% url 'inicio' %}" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="header-info">
+                <h1><i class="fas fa-file-invoice-dollar"></i> Gastos</h1>
+                <p>Control y registro de gastos</p>
+            </div>
+        </header>
+
+        <!-- Formulario de agregar -->
+        <section class="form-section">
+            <h2 class="section-title"><i class="fas fa-plus-circle"></i> Nuevo Gasto</h2>
+            <form id="formGastos" class="form-agregar">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gastoDescripcion">Descripción del Gasto</label>
+                        <input type="text" id="gastoDescripcion" placeholder="¿En qué se gastó?" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gastoCategoria">Categoría</label>
+                        <select id="gastoCategoria" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="operativo">Operativo</option>
+                            <option value="personal">Personal</option>
+                            <option value="insumos">Insumos</option>
+                            <option value="transporte">Transporte</option>
+                            <option value="servicios">Servicios</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gastoMonto">Monto</label>
+                        <input type="number" id="gastoMonto" placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gastoFecha">Fecha</label>
+                        <input type="date" id="gastoFecha" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-agregar gastos-btn">
+                    <i class="fas fa-plus"></i> Registrar Gasto
+                </button>
+            </form>
+        </section>
+
+        <!-- Resumen -->
+        <section class="resumen-section">
+            <div class="resumen-card gastos-card">
+                <div class="resumen-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Total Gastos</span>
+                    <span class="resumen-valor" id="totalGastos">$0.00</span>
+                </div>
+            </div>
+            <div class="resumen-card">
+                <div class="resumen-icon secondary">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Gastos del Día</span>
+                    <span class="resumen-valor" id="gastosHoy">$0.00</span>
+                </div>
+            </div>
+            <div class="resumen-card">
+                <div class="resumen-icon secondary">
+                    <i class="fas fa-list-ol"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Registros</span>
+                    <span class="resumen-valor" id="cantidadGastos">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Buscador y Lista -->
+        <section class="lista-section">
+            <div class="lista-header">
+                <h2 class="section-title"><i class="fas fa-list"></i> Historial de Gastos</h2>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscarGastos" placeholder="Buscar gasto..." onkeyup="buscar()">
+                </div>
+            </div>
+            <div class="filtros-container">
+                <button class="filtro-btn active" onclick="filtrar('todos')">Todos</button>
+                <button class="filtro-btn" onclick="filtrar('operativo')">Operativo</button>
+                <button class="filtro-btn" onclick="filtrar('personal')">Personal</button>
+                <button class="filtro-btn" onclick="filtrar('insumos')">Insumos</button>
+                <button class="filtro-btn" onclick="filtrar('transporte')">Transporte</button>
+                <button class="filtro-btn" onclick="filtrar('servicios')">Servicios</button>
+            </div>
+            <div class="lista-container" id="listaGastos">
+                <p class="empty-message">No hay gastos registrados</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="{% static 'js/gastos.js' %}"></script>
+</body>
+</html>

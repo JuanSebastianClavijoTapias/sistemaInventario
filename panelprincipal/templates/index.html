@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InventarioPiñeres - Panel Principal</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-leaf"></i>
+                <h1>InventarioPiñeres</h1>
+            </div>
+            <p class="subtitle">Sistema de Gestión</p>
+        </header>
+
+        <!-- Panel de Finanzas -->
+        <section class="finance-panel">
+            <div class="finance-card">
+                <div class="finance-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="finance-info">
+                    <h3>Total Finanzas</h3>
+                    <p class="finance-amount" id="totalFinanzas">$0.00</p>
+                    <div class="finance-details">
+                        <span class="income"><i class="fas fa-arrow-up"></i> Ingresos: <span id="totalIngresos">$0.00</span></span>
+                        <span class="expense"><i class="fas fa-arrow-down"></i> Gastos: <span id="totalGastos">$0.00</span></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Menú Principal -->
+        <section class="main-menu">
+            <h2 class="section-title">Panel de Control</h2>
+            <div class="menu-grid">
+                <!-- Botón Venta Diaria -->
+                <a href="{% url 'ventas' %}" class="menu-card ventas">
+                    <div class="card-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Venta Diaria</h3>
+                        <p>Registro de ventas</p>
+                        <span class="card-count" id="countVentas">0 hoy</span>
+                    </div>
+                </a>
+
+                <!-- Botón Clientes -->
+                <a href="{% url 'clientes' %}" class="menu-card clientes">
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Clientes</h3>
+                        <p>Gestión de clientes</p>
+                        <span class="card-count" id="countClientes">0 registros</span>
+                    </div>
+                </a>
+
+                <!-- Botón Proveedores -->
+                <a href="{% url 'proveedores' %}" class="menu-card proveedores">
+                    <div class="card-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Proveedores</h3>
+                        <p>Gestión de proveedores</p>
+                        <span class="card-count" id="countProveedores">0 activos</span>
+                    </div>
+                </a>
+
+                <!-- Botón Gastos -->
+                <a href="{% url 'gastos' %}" class="menu-card gastos">
+                    <div class="card-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Gastos</h3>
+                        <p>Control de gastos</p>
+                        <span class="card-count" id="countGastos">$0.00</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Resumen de Deudas -->
+        <section class="deudas-panel">
+            <h2 class="section-title">Resumen de Cuentas</h2>
+            <div class="deudas-grid">
+                <div class="deuda-card cobrar">
+                    <div class="deuda-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <div class="deuda-info">
+                        <span class="deuda-label">Por Cobrar (Clientes)</span>
+                        <span class="deuda-valor" id="totalPorCobrar">$0.00</span>
+                    </div>
+                </div>
+                <div class="deuda-card pagar">
+                    <div class="deuda-icon">
+                        <i class="fas fa-money-check-alt"></i>
+                    </div>
+                    <div class="deuda-info">
+                        <span class="deuda-label">Por Pagar (Proveedores)</span>
+                        <span class="deuda-valor" id="totalPorPagar">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 InventarioPiñeres - Sistema de Gestión</p>
+        </footer>
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

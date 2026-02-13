@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - InventarioPiñeres</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="page-header clientes-header">
+            <a href="{% url 'inicio' %}" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="header-info">
+                <h1><i class="fas fa-users"></i> Clientes</h1>
+                <p>Gestión de clientes y sus compras</p>
+            </div>
+        </header>
+
+        <!-- Formulario de agregar -->
+        <section class="form-section">
+            <h2 class="section-title"><i class="fas fa-user-plus"></i> Nuevo Cliente</h2>
+            <form id="formClientes" class="form-agregar">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clienteNombre">Nombre del Cliente</label>
+                        <input type="text" id="clienteNombre" placeholder="Nombre completo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clienteTelefono">Teléfono</label>
+                        <input type="tel" id="clienteTelefono" placeholder="Número de contacto">
+                    </div>
+                </div>
+                <button type="submit" class="btn-agregar clientes-btn">
+                    <i class="fas fa-plus"></i> Agregar Cliente
+                </button>
+            </form>
+        </section>
+
+        <!-- Resumen -->
+        <section class="resumen-section">
+            <div class="resumen-card clientes-card">
+                <div class="resumen-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Total Clientes</span>
+                    <span class="resumen-valor" id="totalClientes">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Buscador y Lista -->
+        <section class="lista-section">
+            <div class="lista-header">
+                <h2 class="section-title"><i class="fas fa-list"></i> Lista de Clientes</h2>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscarClientes" placeholder="Buscar cliente..." onkeyup="buscar()">
+                </div>
+            </div>
+            <div class="lista-container" id="listaClientes">
+                <p class="empty-message">No hay clientes registrados</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal de Detalles del Cliente -->
+    <div class="modal" id="modalCliente">
+        <div class="modal-content">
+            <div class="modal-header clientes-header">
+                <h2><i class="fas fa-user"></i> <span id="modalClienteNombre">Cliente</span></h2>
+                <span class="close-btn" onclick="cerrarModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="cliente-info-modal">
+                    <p><i class="fas fa-phone"></i> <span id="modalClienteTelefono">Sin teléfono</span></p>
+                    <p><i class="fas fa-calendar"></i> Registrado: <span id="modalClienteFecha"></span></p>
+                </div>
+                
+                <div class="resumen-cliente-modal">
+                    <div class="resumen-item total-compras">
+                        <span class="resumen-titulo"><i class="fas fa-shopping-cart"></i> Total Compras</span>
+                        <span class="resumen-valor" id="modalTotalCompras">$0.00</span>
+                    </div>
+                    <div class="resumen-item total-pagado">
+                        <span class="resumen-titulo"><i class="fas fa-money-bill-wave"></i> Total Pagado</span>
+                        <span class="resumen-valor" id="modalTotalPagado">$0.00</span>
+                    </div>
+                    <div class="resumen-item total-deuda">
+                        <span class="resumen-titulo"><i class="fas fa-exclamation-triangle"></i> Total Deuda</span>
+                        <span class="resumen-valor" id="modalTotalDeuda">$0.00</span>
+                    </div>
+                </div>
+
+                <h3 class="seccion-titulo"><i class="fas fa-list"></i> Historial de Compras</h3>
+                <div class="lista-compras-modal" id="listaComprasCliente">
+                    <p class="empty-message">No hay compras registradas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/clientes.js' %}"></script>
+</body>
+</html>
