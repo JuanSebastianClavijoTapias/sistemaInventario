@@ -14,7 +14,7 @@
         <header class="header">
             <div class="logo">
                 <i class="fas fa-leaf"></i>
-                <h1>InventarioPiñeres</h1>
+                <h1>Inventario PAPA</h1>
             </div>
             <p class="subtitle">Sistema de Gestión</p>
         </header>
@@ -48,19 +48,19 @@
                     <div class="card-content">
                         <h3>Venta Diaria</h3>
                         <p>Registro de ventas</p>
-                        <span class="card-count" id="countVentas">0 hoy</span>
+                        <span class="card-count" id="countVentas">{{ total_ventas }} hoy</span>
                     </div>
                 </a>
 
                 <!-- Botón Clientes -->
-                <a href="{% url 'clientes' %}" class="menu-card clientes">
+                <a href="{% url 'cliente_list' %}" class="menu-card clientes">
                     <div class="card-icon">
                         <i class="fas fa-users"></i>
                     </div>
                     <div class="card-content">
                         <h3>Clientes</h3>
                         <p>Gestión de clientes</p>
-                        <span class="card-count" id="countClientes">0 registros</span>
+                        <span class="card-count" id="countClientes">{{ total_clientes }} registros</span>
                     </div>
                 </a>
 
@@ -72,7 +72,7 @@
                     <div class="card-content">
                         <h3>Proveedores</h3>
                         <p>Gestión de proveedores</p>
-                        <span class="card-count" id="countProveedores">0 activos</span>
+                        <span class="card-count" id="countProveedores">{{ total_proveedores }} activos</span>
                     </div>
                 </a>
 
@@ -84,7 +84,7 @@
                     <div class="card-content">
                         <h3>Gastos</h3>
                         <p>Control de gastos</p>
-                        <span class="card-count" id="countGastos">$0.00</span>
+                        <span class="card-count" id="countGastos">{{ total_gastos }} registros</span>
                     </div>
                 </a>
             </div>
@@ -121,6 +121,6 @@
         </footer>
     </div>
 
-    <script src="{% static 'js/main.js' %}"></script>
+   
 </body>
 </html>
