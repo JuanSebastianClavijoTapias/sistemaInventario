@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gastos - InventarioPiñeres</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -96,11 +96,11 @@
             </div>
             <div class="resumen-card">
                 <div class="resumen-icon secondary">
-                    <i class="fas fa-calendar-day"></i>
+                    <i class="fas fa-calendar-alt"></i>
                 </div>
                 <div class="resumen-info">
-                    <span class="resumen-label">Gastos del Día</span>
-                    <span class="resumen-valor" id="gastosHoy">${{ gastos_hoy }}</span>
+                    <span class="resumen-label">Gastos del Mes ({{ mes_actual }})</span>
+                    <span class="resumen-valor" id="gastosMes">${{ gastos_mes_actual }}</span>
                 </div>
             </div>
             <div class="resumen-card">

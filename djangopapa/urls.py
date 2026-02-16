@@ -27,6 +27,7 @@ urlpatterns = [
     path('clientes/', include('apps.clientes.urls')),
     path('proveedores/', include('apps.proveedores.urls')),
     path('gastos/', include('apps.gastos.urls')),
+    path('trabajadores/', include('apps.trabajadores.urls')),
 ]
 
 print("URLs loaded")  # Debug

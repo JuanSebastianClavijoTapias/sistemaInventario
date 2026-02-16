@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InventarioPiñeres - Panel Principal</title>
+    <title>Inventario</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -14,7 +14,7 @@
         <header class="header">
             <div class="logo">
                 <i class="fas fa-leaf"></i>
-                <h1>Inventario PAPA</h1>
+                <h1>PAPA</h1>
             </div>
 
         </header>
@@ -97,6 +97,18 @@
                         <h3>Gastos</h3>
                         <p>Control de gastos</p>
                         <span class="card-count" id="countGastos">{{ total_gastos }} registros</span>
+                    </div>
+                </a>
+
+                <!-- Botón Trabajadores -->
+                <a href="{% url 'trabajadores_list' %}" class="menu-card trabajadores">
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Trabajadores</h3>
+                        <p>Gestión del personal</p>
+                        <span class="card-count" id="countTrabajadores">{{ total_trabajadores }} registros</span>
                     </div>
                 </a>
             </div>
@@ -284,10 +296,7 @@
             }
         </style>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <p>&copy; 2026 InventarioPiñeres - Sistema de Gestión</p>
-        </footer>
+       
     </div>
 
    

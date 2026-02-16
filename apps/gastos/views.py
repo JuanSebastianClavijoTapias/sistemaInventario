@@ -9,6 +9,17 @@ from .models import Gastos
 from apps.proveedores.models import Proveedores
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.db.models import Sum
+from django.utils import timezone
+from datetime import datetime
+from decimal import Decimal, InvalidOperation
+
+from .models import Gastos
+from apps.proveedores.models import Proveedores
+
+
 def gastos_list(request):
     """Vista principal de gastos con listado y formulario."""
     gastos = Gastos.objects.all()
@@ -16,9 +27,11 @@ def gastos_list(request):
     
     # Calcular totales
     hoy = timezone.now().date()
+    mes_actual = hoy.month
+    ano_actual = hoy.year
     
     total_gastos = gastos.aggregate(total=Sum('monto'))['total'] or 0
-    gastos_hoy = gastos.filter(fecha__date=hoy).aggregate(total=Sum('monto'))['total'] or 0
+    gastos_mes_actual = gastos.filter(fecha__month=mes_actual, fecha__year=ano_actual).aggregate(total=Sum('monto'))['total'] or 0
     cantidad_gastos = gastos.count()
     
     # Gastos por categoría
@@ -34,10 +47,11 @@ def gastos_list(request):
         'gastos': gastos,
         'proveedores': proveedores,
         'total_gastos': total_gastos,
-        'gastos_hoy': gastos_hoy,
+        'gastos_mes_actual': gastos_mes_actual,
         'cantidad_gastos': cantidad_gastos,
         'gastos_por_categoria': gastos_por_categoria,
         'categorias': Gastos.CATEGORIA_CHOICES,
+        'mes_actual': hoy.strftime('%B %Y'),  # Nombre del mes y año
     }
     return render(request, 'gastos.html', context)
 
