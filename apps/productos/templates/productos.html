@@ -1,0 +1,265 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - InventarioPiñeres</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <style>
+        .messages {
+            margin: 20px 0;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .form-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        .btn-agregar {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-agregar:hover {
+            background: #45a049;
+        }
+        .lista-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .lista-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .search-container {
+            position: relative;
+        }
+        .search-container i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        .search-container input {
+            padding: 8px 12px 8px 35px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 250px;
+        }
+        .item-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fafafa;
+        }
+        .item-card:hover {
+            background: #f0f0f0;
+        }
+        .item-info h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        .item-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .item-actions a {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        .btn-editar {
+            background: #2196F3;
+            color: white;
+            text-decoration: none;
+        }
+        .btn-editar:hover {
+            background: #1976D2;
+        }
+        .btn-eliminar {
+            background: #f44336;
+            color: white;
+            text-decoration: none;
+        }
+        .btn-eliminar:hover {
+            background: #d32f2f;
+        }
+        .empty-message {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="page-header productos-header">
+            <a href="{% url 'inicio' %}" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="header-info">
+                <h1> 📦 Productos</h1>
+                <p>Gestión de inventario de productos</p>
+            </div>
+        </header>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Formulario de agregar -->
+        <section class="form-section">
+            <h2 class="section-title"><i class="fas fa-plus-circle"></i> Nuevo Producto</h2>
+            <form method="post" class="form-agregar">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.nombre.label_tag }}
+                        {{ form.nombre }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.precio.label_tag }}
+                        {{ form.precio }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.stock.label_tag }}
+                        {{ form.stock }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.proveedor.label_tag }}
+                        {{ form.proveedor }}
+                    </div>
+                </div>
+                <button type="submit" class="btn-agregar productos-btn">
+                    <i class="fas fa-plus"></i> Agregar Producto
+                </button>
+            </form>
+        </section>
+
+        <!-- Lista de productos -->
+        <section class="lista-section">
+            <div class="lista-header">
+                <h2 class="section-title"><i class="fas fa-list"></i> Lista de Productos</h2>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscarProductos" placeholder="Buscar producto..." onkeyup="buscar()">
+                </div>
+            </div>
+            <div class="lista-container" id="listaProductos">
+                {% if productos %}
+                    {% for producto in productos %}
+                        <div class="item-card">
+                            <div class="item-info">
+                                <h3>{{ producto.nombre }}</h3>
+                                <p><strong>Precio:</strong> ${{ producto.precio }}</p>
+                                <p><strong>Stock:</strong> {{ producto.stock }}</p>
+                                <p><strong>Proveedor:</strong> {{ producto.proveedor.nombre }}</p>
+                            </div>
+                            <div class="item-actions">
+                                <a href="{% url 'producto_update' producto.pk %}" class="btn-editar">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="{% url 'producto_delete' producto.pk %}" class="btn-eliminar">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="empty-message">No hay productos registrados</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function buscar() {
+            const input = document.getElementById('buscarProductos');
+            const filter = input.value.toUpperCase();
+            const items = document.querySelectorAll('.item-card');
+            
+            items.forEach(item => {
+                const text = item.textContent.toUpperCase();
+                item.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clientes - InventarioPiñeres</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
     <style>
         /* Estilos para el formulario */
         .form-row {
@@ -91,6 +91,82 @@
         .btn-eliminar:hover {
             background: #d32f2f;
         }
+        .btn-compras {
+            background: #9C27B0;
+            color: white;
+        }
+        .btn-compras:hover {
+            background: #7B1FA2;
+        }
+        /* Nuevos estilos para secciones de deuda */
+        .deuda-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .cliente-deuda-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ffebee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fff5f5;
+            border-left: 4px solid;
+        }
+        .cliente-deuda-item.pendiente {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+        }
+        .cliente-deuda-item.urgente {
+            border-left-color: #ff9800;
+            background: #fff3e0;
+            animation: pulse 2s infinite;
+        }
+        .cliente-deuda-item.vencido {
+            border-left-color: #f44336;
+            background: #ffebee;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .deuda-info {
+            flex: 1;
+        }
+        .deuda-monto {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f44336;
+        }
+        .deuda-detalle {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .cliente-pagado-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+        .pagado-info {
+            flex: 1;
+        }
+        .pagado-monto {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
     </style>
 </head>
 <body>
@@ -142,31 +218,92 @@
                     <span class="resumen-valor">{{ clientes|length }}</span>
                 </div>
             </div>
+            <div class="resumen-card">
+                <div class="resumen-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Clientes con Deuda</span>
+                    <span class="resumen-valor">{{ clientes_con_deuda|length }}</span>
+                </div>
+            </div>
+            <div class="resumen-card">
+                <div class="resumen-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Clientes al Día</span>
+                    <span class="resumen-valor">{{ clientes_pagados|length }}</span>
+                </div>
+            </div>
         </section>
 
-        <!-- Lista de Clientes -->
-        <section class="lista-section">
+        <!-- Clientes con Deuda -->
+        {% if clientes_con_deuda %}
+        <section class="deuda-section">
             <div class="lista-header">
-                <h2 class="section-title"><i class="fas fa-list"></i> Lista de Clientes</h2>
+                <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i> Clientes con Deuda Pendiente</h2>
             </div>
-            <div class="lista-container" id="listaClientes">
-                {% for cliente in clientes %}
-                <div class="cliente-item">
-                    <div class="cliente-info">
-                        <span class="cliente-nombre">{{ cliente.nombre }} {{ cliente.apellido }}</span>
-                        <span class="cliente-telefono"><i class="fas fa-phone"></i> {{ cliente.telefono }}</span>
+            <div class="lista-container">
+                {% for deuda in clientes_con_deuda %}
+                <div class="cliente-deuda-item {{ deuda.estado }}">
+                    <div class="deuda-info">
+                        <span class="cliente-nombre">{{ deuda.cliente.nombre }} {{ deuda.cliente.apellido }}</span>
+                        <span class="cliente-telefono"><i class="fas fa-phone"></i> {{ deuda.cliente.telefono }}</span>
+                        <div class="deuda-detalle">
+                            {{ deuda.ventas_pendientes }} venta(s) pendiente(s)
+                            {% if deuda.dias_minimos is not None %}
+                                {% if deuda.dias_minimos < 0 %}
+                                    - Vencida hace {{ deuda.dias_minimos.abs }} día(s)
+                                {% elif deuda.dias_minimos == 0 %}
+                                    - Vence hoy
+                                {% elif deuda.dias_minimos == 1 %}
+                                    - Vence mañana
+                                {% else %}
+                                    - Vence en {{ deuda.dias_minimos }} día(s)
+                                {% endif %}
+                            {% endif %}
+                        </div>
                     </div>
                     <div class="cliente-acciones">
-                        <a href="{% url 'cliente_update' cliente.pk %}" class="btn-editar">
+                        <div class="deuda-monto">${{ deuda.total_deuda }}</div>
+                        <a href="{% url 'cliente_compras' deuda.cliente.pk %}" class="btn-compras">
+                            <i class="fas fa-shopping-bag"></i> Ver Compras
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Clientes al Día -->
+        <section class="deuda-section">
+            <div class="lista-header">
+                <h2 class="section-title"><i class="fas fa-check-circle"></i> Clientes al Día</h2>
+            </div>
+            <div class="lista-container">
+                {% for pagado in clientes_pagados %}
+                <div class="cliente-pagado-item">
+                    <div class="pagado-info">
+                        <span class="cliente-nombre">{{ pagado.cliente.nombre }} {{ pagado.cliente.apellido }}</span>
+                        <span class="cliente-telefono"><i class="fas fa-phone"></i> {{ pagado.cliente.telefono }}</span>
+                    </div>
+                    <div class="cliente-acciones">
+                        <div class="pagado-monto">${{ pagado.total_compras }}</div>
+                        <a href="{% url 'cliente_compras' pagado.cliente.pk %}" class="btn-compras">
+                            <i class="fas fa-shopping-bag"></i> Ver Compras
+                        </a>
+                        <a href="{% url 'cliente_update' pagado.cliente.pk %}" class="btn-editar">
                             <i class="fas fa-edit"></i> Editar
                         </a>
-                        <a href="{% url 'cliente_delete' cliente.pk %}" class="btn-eliminar">
+                        <a href="{% url 'cliente_delete' pagado.cliente.pk %}" class="btn-eliminar">
                             <i class="fas fa-trash"></i> Eliminar
                         </a>
                     </div>
                 </div>
                 {% empty %}
-                <p class="empty-message">No hay clientes registrados</p>
+                <p class="empty-message">No hay clientes al día</p>
                 {% endfor %}
             </div>
         </section>

@@ -1,0 +1,344 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proveedores - InventarioPiñeres</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <style>
+        .messages {
+            margin: 20px 0;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .form-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        .btn-agregar {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-agregar:hover {
+            background: #45a049;
+        }
+        .resumen-section {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .resumen-card {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .resumen-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .resumen-icon.danger {
+            color: #f44336;
+        }
+        .resumen-icon.success {
+            color: #4CAF50;
+        }
+        .resumen-valor {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .lista-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .proveedor-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fafafa;
+        }
+        .proveedor-item:hover {
+            background: #f0f0f0;
+        }
+        .proveedor-info {
+            flex: 1;
+        }
+        .proveedor-nombre {
+            font-weight: 600;
+            color: #333;
+            font-size: 18px;
+        }
+        .proveedor-telefono, .proveedor-inicial, .proveedor-saldo {
+            color: #666;
+            margin-top: 5px;
+        }
+        .proveedor-acciones {
+            display: flex;
+            gap: 10px;
+        }
+        .proveedor-acciones a {
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .btn-editar {
+            background: #2196F3;
+            color: white;
+        }
+        .btn-editar:hover {
+            background: #1976D2;
+        }
+        .btn-eliminar {
+            background: #f44336;
+            color: white;
+        }
+        .btn-eliminar:hover {
+            background: #d32f2f;
+        }
+        .empty-message {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="page-header proveedores-header">
+            <a href="{% url 'inicio' %}" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="header-info">
+                <h1><i class="fas fa-truck"></i> Proveedores</h1>
+                <p>Gestión de proveedores y compras</p>
+            </div>
+        </header>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Formulario de agregar -->
+        <section class="form-section">
+            <h2 class="section-title"><i class="fas fa-truck-loading"></i> Nueva Compra a Proveedor</h2>
+            <form method="post" class="form-agregar">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="proveedorNombre">Nombre del Proveedor</label>
+                        <input type="text" id="proveedorNombre" name="proveedorNombre" placeholder="Nombre o empresa" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="proveedorTelefono">Teléfono</label>
+                        <input type="tel" id="proveedorTelefono" name="proveedorTelefono" placeholder="Número de contacto">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="proveedorDescripcion">¿Qué Compraste?</label>
+                        <input type="text" id="proveedorDescripcion" name="proveedorDescripcion" placeholder="Descripción de la compra">
+                    </div>
+                    <div class="form-group">
+                        <label for="proveedorCantidad">Cantidad</label>
+                        <input type="number" id="proveedorCantidad" name="proveedorCantidad" placeholder="Cantidad comprada" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="proveedorCompra">Monto Total de Compra</label>
+                        <input type="number" id="proveedorCompra" name="proveedorCompra" placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" id="initialGroup">
+                        <label for="proveedorInicial">Pago Inicial (Abono)</label>
+                        <input type="number" id="proveedorInicial" name="proveedorInicial" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="proveedorTipo">Tipo de Compra</label>
+                        <select id="proveedorTipo" name="proveedorTipo" required onchange="toggleFields()">
+                            <option value="">Seleccionar...</option>
+                            <option value="completa">Pago Completo (al contado)</option>
+                            <option value="fiada">Compra Fiada (a crédito)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" id="rowSaldo" style="display: none;">
+                    <div class="form-group full-width">
+                        <label>Saldo que Debo</label>
+                        <div class="saldo-preview deuda">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span id="saldoPendiente">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn-agregar proveedores-btn">
+                    <i class="fas fa-plus"></i> Registrar Compra
+                </button>
+            </form>
+        </section>
+
+        <!-- Resumen -->
+        <section class="resumen-section">
+            <div class="resumen-card proveedores-card">
+                <div class="resumen-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Total Proveedores</span>
+                    <span class="resumen-valor" id="totalProveedores">{{ total_proveedores }}</span>
+                </div>
+            </div>
+            <div class="resumen-card danger-card">
+                <div class="resumen-icon danger">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Total por Pagar</span>
+                    <span class="resumen-valor" id="totalPorPagar">${{ total_por_pagar }}</span>
+                </div>
+            </div>
+            <div class="resumen-card success-card">
+                <div class="resumen-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Total Pagado</span>
+                    <span class="resumen-valor" id="totalPagado">${{ total_pagado }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Buscador y Lista -->
+        <section class="lista-section">
+            <div class="lista-header">
+                <h2 class="section-title"><i class="fas fa-list"></i> Lista de Proveedores</h2>
+            </div>
+            <div class="lista-container" id="listaProveedores">
+                {% for proveedor in proveedores %}
+                <div class="proveedor-item">
+                    <div class="proveedor-info">
+                        <div class="proveedor-nombre">{{ proveedor.nombre }}</div>
+                        <div class="proveedor-telefono">{{ proveedor.telefono }}</div>
+                        <div class="proveedor-inicial">Inicial: ${{ proveedor.inicial }}</div>
+                        <div class="proveedor-saldo">Saldo: ${{ proveedor.saldo }}</div>
+                    </div>
+                    <div class="proveedor-acciones">
+                        <a href="{% url 'proveedor_update' proveedor.pk %}" class="btn-editar">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a href="{% url 'proveedor_delete' proveedor.pk %}" class="btn-eliminar">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="empty-message">No hay proveedores registrados</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function toggleFields() {
+            const tipo = document.getElementById('proveedorTipo').value;
+            const initialGroup = document.getElementById('initialGroup');
+            const saldoRow = document.getElementById('rowSaldo');
+            const initialInput = document.getElementById('proveedorInicial');
+            
+            if (tipo === 'completa') {
+                initialGroup.style.display = 'none';
+                saldoRow.style.display = 'none';
+                initialInput.required = false;
+                initialInput.value = '';
+            } else if (tipo === 'fiada') {
+                initialGroup.style.display = 'block';
+                saldoRow.style.display = 'block';
+                initialInput.required = true;
+            } else {
+                initialGroup.style.display = 'none';
+                saldoRow.style.display = 'none';
+                initialInput.required = false;
+            }
+        }
+
+        // Calcular saldo
+        document.getElementById('proveedorCompra').addEventListener('input', calcularSaldo);
+        document.getElementById('proveedorInicial').addEventListener('input', calcularSaldo);
+
+        function calcularSaldo() {
+            const compra = parseFloat(document.getElementById('proveedorCompra').value) || 0;
+            const inicial = parseFloat(document.getElementById('proveedorInicial').value) || 0;
+            const saldo = compra - inicial;
+            document.getElementById('saldoPendiente').textContent = '$' + saldo.toFixed(2);
+        }
+    </script>
+</body>
+</html>

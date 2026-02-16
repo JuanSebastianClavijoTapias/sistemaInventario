@@ -1,0 +1,291 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compras de {{ cliente.nombre }} - InventarioPiñeres</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <style>
+        .cliente-header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .btn-volver-top {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .btn-volver-top:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .cliente-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+        }
+        .cliente-info h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+        .cliente-info p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+        .cliente-stats {
+            text-align: right;
+        }
+        .cliente-stats .total-label {
+            display: block;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .cliente-stats .total-valor {
+            display: block;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .compras-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .compra-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fafafa;
+        }
+        .compra-item:hover {
+            background: #f0f0f0;
+        }
+        .compra-info h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .compra-info p {
+            margin: 3px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .compra-total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .empty-message {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 40px;
+        }
+        /* Estilos para pagos pendientes */
+        .pendientes-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .compra-pendiente {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ffebee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fff5f5;
+            border-left: 4px solid #f44336;
+        }
+        .compra-pendiente.urgente {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+        }
+        .compra-pendiente.vencido {
+            background: #ffebee;
+            border-left-color: #f44336;
+            animation: pulse 1s infinite;
+        }
+        .pendiente-info h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .pendiente-info p {
+            margin: 3px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .pendiente-saldo {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f44336;
+        }
+        .pago-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .pago-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100px;
+        }
+        .btn-pagar {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-pagar:hover {
+            background: #45a049;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .btn-volver {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+        .btn-volver:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header del cliente -->
+        <div class="cliente-header">
+            <a href="{% url 'cliente_list' %}" class="btn-volver-top">
+                <i class="fas fa-arrow-left"></i> Volver a Clientes
+            </a>
+            <div class="cliente-content">
+                <div class="cliente-info">
+                    <h1><i class="fas fa-user"></i> {{ cliente.nombre }} {{ cliente.apellido }}</h1>
+                    <p><i class="fas fa-phone"></i> {{ cliente.telefono }}</p>
+                    <p><i class="fas fa-shopping-bag"></i> {{ compras.count }} compras realizadas</p>
+                </div>
+                <div class="cliente-stats">
+                    <span class="total-label">Total Histórico de Compras</span>
+                    <span class="total-valor">${{ total_compras }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de compras -->
+        {% for compra in compras %}
+            {% if compra.estado_pago != 'pagado' %}
+                {% if forloop.first %}
+                    <!-- Ventas Pendientes -->
+                    <section class="pendientes-section">
+                        <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i> Ventas Pendientes de Pago</h2>
+                        <div class="lista-container">
+                {% endif %}
+                <div class="compra-pendiente {% if compra.esta_vencido %}vencido{% elif compra.dias_para_vencimiento and compra.dias_para_vencimiento <= 1 %}urgente{% endif %}">
+                    <div class="pendiente-info">
+                        <h4>{{ compra.producto.nombre }}</h4>
+                        <p><strong>Cantidad:</strong> {{ compra.cantidad }}</p>
+                        <p><strong>Fecha:</strong> {{ compra.fecha|date:'d/m/Y H:i' }}</p>
+                        <p><strong>Pagado:</strong> ${{ compra.monto_pagado }} | <strong>Debe:</strong> ${{ compra.saldo_pendiente }}</p>
+                        {% if compra.fecha_vencimiento %}
+                            <p><strong>Vence:</strong> {{ compra.fecha_vencimiento|date:'d/m/Y' }}
+                                {% if compra.dias_para_vencimiento is not None %}
+                                    {% if compra.dias_para_vencimiento < 0 %}
+                                        <span style="color: #f44336;">(Vencida hace {{ compra.dias_para_vencimiento.abs }} día(s))</span>
+                                    {% elif compra.dias_para_vencimiento == 0 %}
+                                        <span style="color: #ff9800;">(Vence hoy)</span>
+                                    {% elif compra.dias_para_vencimiento == 1 %}
+                                        <span style="color: #ff9800;">(Vence mañana)</span>
+                                    {% else %}
+                                        <span>(Faltan {{ compra.dias_para_vencimiento }} día(s))</span>
+                                    {% endif %}
+                                {% endif %}
+                            </p>
+                        {% endif %}
+                    </div>
+                    <div class="pago-form">
+                        <form method="post" action="{% url 'registrar_pago' cliente.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="venta_id" value="{{ compra.idVenta }}">
+                            <input type="number" name="monto_pago" class="pago-input" placeholder="Monto" min="0.01" max="{{ compra.saldo_pendiente }}" step="0.01" required>
+                            <button type="submit" class="btn-pagar">Pagar</button>
+                        </form>
+                    </div>
+                </div>
+                {% if forloop.last %}
+                        </div>
+                    </section>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        <!-- Historial de Compras Completadas -->
+        <section class="compras-section">
+            <h2 class="section-title"><i class="fas fa-history"></i> Historial de Compras</h2>
+            <div class="lista-container">
+                {% for compra in compras %}
+                <div class="compra-item">
+                    <div class="compra-info">
+                        <h4>{{ compra.producto.nombre }}</h4>
+                        <p><strong>Cantidad:</strong> {{ compra.cantidad }}</p>
+                        <p><strong>Fecha:</strong> {{ compra.fecha|date:'d/m/Y H:i' }}</p>
+                        {% if compra.tipo_pago == 'fiado' %}
+                            <p><strong>Tipo:</strong> A crédito | <strong>Pagado:</strong> ${{ compra.monto_pagado }} | <strong>Estado:</strong> 
+                                {% if compra.estado_pago == 'pagado' %}
+                                    <span style="color: #4CAF50;">Pagado</span>
+                                {% elif compra.estado_pago == 'vencido' %}
+                                    <span style="color: #f44336;">Vencido</span>
+                                {% else %}
+                                    <span style="color: #ff9800;">Pendiente</span>
+                                {% endif %}
+                            </p>
+                        {% else %}
+                            <p><strong>Tipo:</strong> Pago completo</p>
+                        {% endif %}
+                    </div>
+                    <div class="compra-total">
+                        ${{ compra.total }}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="empty-message">Este cliente no tiene compras registradas</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</body>
+</html>

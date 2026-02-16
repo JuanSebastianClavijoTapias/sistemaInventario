@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InventarioPiñeres - Panel Principal</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
 </head>
 <body>
     <div class="container">
@@ -16,7 +16,7 @@
                 <i class="fas fa-leaf"></i>
                 <h1>Inventario PAPA</h1>
             </div>
-            <p class="subtitle">Sistema de Gestión</p>
+
         </header>
 
         <!-- Panel de Finanzas -->
@@ -27,16 +27,16 @@
                 </div>
                 <div class="finance-info">
                     <h3>Total Finanzas</h3>
-                    <p class="finance-amount" id="totalFinanzas">$0.00</p>
+                    <p class="finance-amount" id="totalFinanzas">${{ total_finanzas|floatformat:2 }}</p>
                     <div class="finance-details">
-                        <span class="income"><i class="fas fa-arrow-up"></i> Ingresos: <span id="totalIngresos">$0.00</span></span>
-                        <span class="expense"><i class="fas fa-arrow-down"></i> Gastos: <span id="totalGastos">$0.00</span></span>
+                        <span class="income"><i class="fas fa-arrow-up"></i> Ingresos: <span id="totalIngresos">${{ total_ingresos|floatformat:2 }}</span></span>
+                        <span class="expense"><i class="fas fa-arrow-down"></i> Gastos: <span id="totalGastos">${{ total_gastos_finanzas|floatformat:2 }}</span></span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Menú Principal -->
+<!-- Menú Principal -->
         <section class="main-menu">
             <h2 class="section-title">Panel de Control</h2>
             <div class="menu-grid">
@@ -49,6 +49,18 @@
                         <h3>Venta Diaria</h3>
                         <p>Registro de ventas</p>
                         <span class="card-count" id="countVentas">{{ total_ventas }} hoy</span>
+                    </div>
+                </a>
+
+                <!-- Botón Productos -->
+                <a href="{% url 'productos' %}" class="menu-card productos">
+                    <div class="card-icon">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Productos</h3>
+                        <p>Gestión de inventario</p>
+                        <span class="card-count" id="countProductos">{{ total_productos }} productos</span>
                     </div>
                 </a>
 
@@ -100,7 +112,7 @@
                     </div>
                     <div class="deuda-info">
                         <span class="deuda-label">Por Cobrar (Clientes)</span>
-                        <span class="deuda-valor" id="totalPorCobrar">$0.00</span>
+                        <span class="deuda-valor" id="totalPorCobrar">${{ total_por_cobrar|floatformat:2 }}</span>
                     </div>
                 </div>
                 <div class="deuda-card pagar">
@@ -109,11 +121,168 @@
                     </div>
                     <div class="deuda-info">
                         <span class="deuda-label">Por Pagar (Proveedores)</span>
-                        <span class="deuda-valor" id="totalPorPagar">$0.00</span>
+                        <span class="deuda-valor" id="totalPorPagar">${{ total_por_pagar|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Listas detalladas -->
+            <div class="deudas-listas">
+                <!-- Lista Por Cobrar -->
+                <div class="lista-deudas">
+                    <h3 class="lista-titulo"><i class="fas fa-users"></i> Clientes Por Cobrar</h3>
+                    <div class="lista-items">
+                        {% if ventas_pendientes %}
+                        {% for venta in ventas_pendientes %}
+                        <div class="deuda-item {% if venta.estado_pago == 'vencido' %}vencido{% endif %}">
+                            <div class="deuda-item-info">
+                                <span class="deuda-item-nombre">{{ venta.cliente.nombre }} {{ venta.cliente.apellido }}</span>
+                                <span class="deuda-item-detalle">{{ venta.producto.nombre }} - Venta #{{ venta.idVenta }}</span>
+                            </div>
+                            <div class="deuda-item-fecha">
+                                {% if venta.fecha_vencimiento %}
+                                <i class="fas fa-calendar-alt"></i> {{ venta.fecha_vencimiento|date:"d/m/Y" }}
+                                {% if venta.estado_pago == 'vencido' %}
+                                <span class="badge-vencido">Vencido</span>
+                                {% endif %}
+                                {% else %}
+                                <span class="sin-fecha">Sin fecha límite</span>
+                                {% endif %}
+                            </div>
+                            <div class="deuda-item-monto">
+                                ${{ venta.saldo_pendiente|floatformat:2 }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <p class="lista-vacia">No hay cuentas por cobrar</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Lista Por Pagar -->
+                <div class="lista-deudas">
+                    <h3 class="lista-titulo"><i class="fas fa-truck"></i> Proveedores Por Pagar</h3>
+                    <div class="lista-items">
+                        {% if proveedores_pendientes %}
+                        {% for proveedor in proveedores_pendientes %}
+                        <div class="deuda-item pagar-item">
+                            <div class="deuda-item-info">
+                                <span class="deuda-item-nombre">{{ proveedor.nombre }}</span>
+                                <span class="deuda-item-detalle"><i class="fas fa-phone"></i> {{ proveedor.telefono }}</span>
+                            </div>
+                            <div class="deuda-item-monto pagar">
+                                ${{ proveedor.saldo|floatformat:2 }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <p class="lista-vacia">No hay cuentas por pagar</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </section>
+        
+        <style>
+            .deudas-listas {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+            .lista-deudas {
+                background: white;
+                border-radius: 10px;
+                padding: 15px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            .lista-titulo {
+                font-size: 1rem;
+                color: #333;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #eee;
+            }
+            .lista-titulo i {
+                margin-right: 8px;
+                color: #666;
+            }
+            .lista-items {
+                max-height: 300px;
+                overflow-y: auto;
+            }
+            .deuda-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 12px;
+                border-radius: 8px;
+                margin-bottom: 8px;
+                background: #f8f9fa;
+                transition: background 0.3s;
+            }
+            .deuda-item:hover {
+                background: #e9ecef;
+            }
+            .deuda-item.vencido {
+                background: #fff5f5;
+                border-left: 4px solid #dc3545;
+            }
+            .deuda-item-info {
+                flex: 1;
+            }
+            .deuda-item-nombre {
+                display: block;
+                font-weight: 600;
+                color: #333;
+            }
+            .deuda-item-detalle {
+                display: block;
+                font-size: 0.85rem;
+                color: #666;
+                margin-top: 2px;
+            }
+            .deuda-item-fecha {
+                text-align: center;
+                font-size: 0.85rem;
+                color: #666;
+                padding: 0 15px;
+            }
+            .deuda-item-fecha i {
+                margin-right: 5px;
+            }
+            .badge-vencido {
+                display: inline-block;
+                background: #dc3545;
+                color: white;
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-size: 0.7rem;
+                margin-left: 5px;
+            }
+            .sin-fecha {
+                color: #999;
+                font-style: italic;
+            }
+            .deuda-item-monto {
+                font-weight: bold;
+                font-size: 1.1rem;
+                color: #28a745;
+            }
+            .deuda-item-monto.pagar {
+                color: #dc3545;
+            }
+            .lista-vacia {
+                text-align: center;
+                color: #999;
+                padding: 20px;
+                font-style: italic;
+            }
+            .pagar-item {
+                border-left: 4px solid #ffc107;
+            }
+        </style>
 
         <!-- Footer -->
         <footer class="footer">

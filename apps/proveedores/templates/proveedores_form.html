@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Cliente - InventarioPiñeres</title>
+    <title>Editar Proveedor - InventarioPiñeres</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
     <style>
@@ -20,7 +20,7 @@
         }
         .form-group label {
             display: block;
-            margin-bottom: 25px;
+            margin-bottom: 5px;
             font-weight: 600;
             color: #333;
         }
@@ -38,59 +38,85 @@
             border-color: #4CAF50;
             box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
         }
-        .btn-cancelar {
-            background: #6c757d;
+        .form-input::placeholder {
+            color: #999;
+        }
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-guardar {
+            background: #4CAF50;
             color: white;
             padding: 12px 24px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .btn-guardar:hover {
+            background: #45a049;
+        }
+        .btn-cancelar {
+            background: #f44336;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
             text-decoration: none;
-            margin-left: 10px;
+            transition: background 0.3s;
         }
         .btn-cancelar:hover {
-            background: #5a6268;
+            background: #d32f2f;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
-        <header class="page-header clientes-header">
-            <a href="{% url 'cliente_list' %}" class="btn-volver">
+        <header class="page-header proveedores-header">
+            <a href="{% url 'proveedores' %}" class="btn-volver">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div class="header-info">
-                <h1><i class="fas fa-user-edit"></i> Editar Cliente</h1>
-                <p>Modificar información del cliente</p>
+                <h1><i class="fas fa-edit"></i> Editar Proveedor</h1>
+                <p>Modificar información del proveedor</p>
             </div>
         </header>
 
         <!-- Formulario de editar -->
         <section class="form-section">
-            <form class="form-agregar" method="post">
+            <form method="post" class="form-agregar">
                 {% csrf_token %}
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="id_nombre">Nombre</label>
-                        <input type="text" name="nombre" id="id_nombre" class="form-input" value="{{ object.nombre }}" required>
+                        {{ form.nombre.label_tag }}
+                        {{ form.nombre }}
                     </div>
                     <div class="form-group">
-                        <label for="id_apellido">Apellido</label>
-                        <input type="text" name="apellido" id="id_apellido" class="form-input" value="{{ object.apellido }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_telefono">Teléfono</label>
-                        <input type="text" name="telefono" id="id_telefono" class="form-input" value="{{ object.telefono }}" required>
+                        {{ form.telefono.label_tag }}
+                        {{ form.telefono }}
                     </div>
                 </div>
-                <div>
-                    <button type="submit" class="btn-agregar clientes-btn">
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.inicial.label_tag }}
+                        {{ form.inicial }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.saldo.label_tag }}
+                        {{ form.saldo }}
+                    </div>
+                </div>
+                <div class="btn-container">
+                    <button type="submit" class="btn-guardar">
                         <i class="fas fa-save"></i> Guardar Cambios
                     </button>
-                </div>
-                <div style="margin-top: 33px;">
-                    <a href="{% url 'cliente_list' %}" class="btn-cancelar">
+                    <a href="{% url 'proveedores' %}" class="btn-cancelar">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
                 </div>

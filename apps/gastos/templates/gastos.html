@@ -1,0 +1,448 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gastos - InventarioPiñeres</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="page-header gastos-header">
+            <a href="{% url 'inicio' %}" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="header-info">
+                <h1><i class="fas fa-file-invoice-dollar"></i> Gastos</h1>
+                <p>Control y registro de gastos</p>
+            </div>
+        </header>
+
+        <!-- Mensajes -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Formulario de agregar -->
+        <section class="form-section">
+            <h2 class="section-title"><i class="fas fa-plus-circle"></i> Nuevo Gasto</h2>
+            <form action="{% url 'gastos_crear' %}" method="POST" class="form-agregar">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="descripcion">Descripción del Gasto</label>
+                        <input type="text" name="descripcion" id="descripcion" placeholder="¿En qué se gastó?" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoria">Categoría</label>
+                        <select name="categoria" id="categoria" required>
+                            <option value="">Seleccionar...</option>
+                            {% for value, nombre in categorias %}
+                            <option value="{{ value }}">{{ nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="monto">Monto</label>
+                        <input type="number" name="monto" id="monto" placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha">Fecha</label>
+                        <input type="date" name="fecha" id="fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hora">Hora</label>
+                        <input type="time" name="hora" id="hora" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="proveedor">Proveedor (Opcional)</label>
+                        <select name="proveedor" id="proveedor">
+                            <option value="">Sin proveedor</option>
+                            {% for prov in proveedores %}
+                            <option value="{{ prov.idProveedor }}">{{ prov.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-agregar gastos-btn">
+                    <i class="fas fa-plus"></i> Registrar Gasto
+                </button>
+            </form>
+        </section>
+
+        <!-- Resumen -->
+        <section class="resumen-section">
+            <div class="resumen-card gastos-card">
+                <div class="resumen-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Total Gastos</span>
+                    <span class="resumen-valor" id="totalGastos">${{ total_gastos }}</span>
+                </div>
+            </div>
+            <div class="resumen-card">
+                <div class="resumen-icon secondary">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Gastos del Día</span>
+                    <span class="resumen-valor" id="gastosHoy">${{ gastos_hoy }}</span>
+                </div>
+            </div>
+            <div class="resumen-card">
+                <div class="resumen-icon secondary">
+                    <i class="fas fa-list-ol"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Registros</span>
+                    <span class="resumen-valor" id="cantidadGastos">{{ cantidad_gastos }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Buscador y Lista -->
+        <section class="lista-section">
+            <div class="lista-header">
+                <h2 class="section-title"><i class="fas fa-list"></i> Historial de Gastos</h2>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscarGastos" placeholder="Buscar gasto..." onkeyup="buscarGastos()">
+                </div>
+            </div>
+            <div class="filtros-container">
+                <button class="filtro-btn active" data-filtro="todos" onclick="filtrarCategoria('todos', this)">Todos</button>
+                {% for value, nombre in categorias %}
+                <button class="filtro-btn" data-filtro="{{ value }}" onclick="filtrarCategoria('{{ value }}', this)">{{ nombre }}</button>
+                {% endfor %}
+            </div>
+            <div class="lista-container" id="listaGastos">
+                {% if gastos %}
+                {% for gasto in gastos %}
+                <div class="item-card gasto-item" data-categoria="{{ gasto.categoria }}">
+                    <div class="item-info">
+                        <div class="item-header">
+                            <h3>{{ gasto.descripcion }}</h3>
+                            <span class="badge {{ gasto.categoria }}">{{ gasto.get_categoria_display }}</span>
+                        </div>
+                        <div class="item-details">
+                            <span><i class="fas fa-calendar"></i> {{ gasto.fecha|date:"d/m/Y" }}</span>
+                            <span><i class="fas fa-clock"></i> {{ gasto.fecha|time:"H:i" }}</span>
+                            {% if gasto.proveedor %}
+                            <span><i class="fas fa-truck"></i> {{ gasto.proveedor.nombre }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="item-monto">
+                        <span class="monto">${{ gasto.monto }}</span>
+                    </div>
+                    <div class="item-acciones">
+                        <button class="btn-editar" onclick="abrirModalEditar({{ gasto.idGasto }}, '{{ gasto.descripcion }}', '{{ gasto.categoria }}', '{{ gasto.monto }}', '{{ gasto.fecha|date:'Y-m-d' }}', '{{ gasto.fecha|time:'H:i' }}', '{{ gasto.proveedor.idProveedor|default:'' }}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <form action="{% url 'gastos_eliminar' gasto.idGasto %}" method="POST" style="display: inline;" onsubmit="return confirm('¿Estás seguro de eliminar este gasto?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="empty-message">No hay gastos registrados</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal Editar Gasto -->
+    <div id="modalEditar" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Editar Gasto</h2>
+                <button class="modal-close" onclick="cerrarModal()">&times;</button>
+            </div>
+            <form id="formEditar" method="POST" class="form-agregar">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit_descripcion">Descripción del Gasto</label>
+                        <input type="text" name="descripcion" id="edit_descripcion" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_categoria">Categoría</label>
+                        <select name="categoria" id="edit_categoria" required>
+                            {% for value, nombre in categorias %}
+                            <option value="{{ value }}">{{ nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit_monto">Monto</label>
+                        <input type="number" name="monto" id="edit_monto" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_fecha">Fecha</label>
+                        <input type="date" name="fecha" id="edit_fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_hora">Hora</label>
+                        <input type="time" name="hora" id="edit_hora" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit_proveedor">Proveedor (Opcional)</label>
+                        <select name="proveedor" id="edit_proveedor">
+                            <option value="">Sin proveedor</option>
+                            {% for prov in proveedores %}
+                            <option value="{{ prov.idProveedor }}">{{ prov.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn-agregar gastos-btn">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Establecer fecha y hora actuales por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const fecha = now.toISOString().split('T')[0];
+            const hora = now.toTimeString().slice(0, 5);
+            document.getElementById('fecha').value = fecha;
+            document.getElementById('hora').value = hora;
+        });
+
+        // Modal de edición
+        function abrirModalEditar(id, descripcion, categoria, monto, fecha, hora, proveedorId) {
+            document.getElementById('formEditar').action = '/gastos/editar/' + id + '/';
+            document.getElementById('edit_descripcion').value = descripcion;
+            document.getElementById('edit_categoria').value = categoria;
+            document.getElementById('edit_monto').value = monto;
+            document.getElementById('edit_fecha').value = fecha;
+            document.getElementById('edit_hora').value = hora;
+            document.getElementById('edit_proveedor').value = proveedorId;
+            document.getElementById('modalEditar').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalEditar').style.display = 'none';
+        }
+
+        // Buscar gastos
+        function buscarGastos() {
+            const busqueda = document.getElementById('buscarGastos').value.toLowerCase();
+            const items = document.querySelectorAll('.gasto-item');
+            
+            items.forEach(item => {
+                const texto = item.textContent.toLowerCase();
+                item.style.display = texto.includes(busqueda) ? 'flex' : 'none';
+            });
+        }
+
+        // Filtrar por categoría
+        function filtrarCategoria(categoria, btn) {
+            // Actualizar botones activos
+            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const items = document.querySelectorAll('.gasto-item');
+            items.forEach(item => {
+                if (categoria === 'todos' || item.dataset.categoria === categoria) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalEditar');
+            if (event.target === modal) {
+                cerrarModal();
+            }
+        }
+    </script>
+
+    <style>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+        }
+        .modal-close:hover {
+            color: #333;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .btn-cancelar {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-cancelar:hover {
+            background: #5a6268;
+        }
+        .item-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .item-info {
+            flex: 1;
+        }
+        .item-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .item-header h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+        .badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            background: #e9ecef;
+            color: #495057;
+        }
+        .badge.operativo { background: #cce5ff; color: #004085; }
+        .badge.personal { background: #d4edda; color: #155724; }
+        .badge.insumos { background: #fff3cd; color: #856404; }
+        .badge.transporte { background: #d1ecf1; color: #0c5460; }
+        .badge.servicios { background: #e2d5f1; color: #6f42c1; }
+        .badge.mantenimiento { background: #f8d7da; color: #721c24; }
+        .badge.otros { background: #f5f5f5; color: #666; }
+        .item-details {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        .item-details i {
+            margin-right: 5px;
+        }
+        .item-monto {
+            padding: 0 20px;
+        }
+        .item-monto .monto {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        .item-acciones {
+            display: flex;
+            gap: 5px;
+        }
+        .btn-editar, .btn-eliminar {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-editar {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn-editar:hover {
+            background: #e0a800;
+        }
+        .btn-eliminar {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-eliminar:hover {
+            background: #c82333;
+        }
+        .messages {
+            margin: 20px 0;
+        }
+        .message {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</body>
+</html>

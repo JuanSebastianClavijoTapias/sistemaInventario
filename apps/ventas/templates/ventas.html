@@ -1,0 +1,637 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venta Diaria - InventarioPiñeres</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <style>
+        .messages {
+            margin: 20px 0;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .form-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .resumen-section {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .resumen-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .resumen-icon {
+            font-size: 32px;
+            color: #4CAF50;
+        }
+        .resumen-icon.warning {
+            color: #ff9800;
+        }
+        .resumen-label {
+            display: block;
+            color: #666;
+            font-size: 14px;
+        }
+        .resumen-valor {
+            display: block;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .lista-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .venta-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fafafa;
+        }
+        .venta-item:hover {
+            background: #f0f0f0;
+        }
+        .venta-info h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .venta-info p {
+            margin: 3px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .venta-total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .stock-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        /* Calendario */
+        .calendario-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .calendario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .calendario-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .calendario-mes {
+            font-size: 16px;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        .calendario-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .calendario-dia-header {
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+            padding: 10px 5px;
+            font-size: 12px;
+        }
+        .calendario-dia {
+            text-align: center;
+            padding: 10px 5px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: default;
+            position: relative;
+            min-height: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .calendario-dia.vacio {
+            background: transparent;
+        }
+        .calendario-dia.sin-venta {
+            background: #f5f5f5;
+            color: #999;
+        }
+        .calendario-dia.con-venta {
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .calendario-dia.con-venta:hover {
+            background: #c8e6c9;
+        }
+        .calendario-dia.hoy {
+            border: 2px solid #4CAF50;
+        }
+        .calendario-dia.hoy.con-venta {
+            background: #4CAF50;
+            color: white;
+        }
+        .venta-punto {
+            width: 6px;
+            height: 6px;
+            background: #4CAF50;
+            border-radius: 50%;
+            margin-top: 2px;
+        }
+        .calendario-dia.hoy .venta-punto {
+            background: white;
+        }
+        /* Tooltip */
+        .calendario-dia .tooltip {
+            visibility: hidden;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            position: absolute;
+            z-index: 100;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        .calendario-dia:hover .tooltip {
+            visibility: visible;
+        }
+        /* Estadísticas extendidas */
+        .estadisticas-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .estadisticas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .estadistica-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .estadistica-card.semana {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        .estadistica-card.mes {
+            background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+        }
+        .estadistica-card.top-cliente {
+            background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+        }
+        .estadistica-icon {
+            font-size: 40px;
+            opacity: 0.9;
+        }
+        .estadistica-info {
+            flex: 1;
+        }
+        .estadistica-label {
+            font-size: 14px;
+            opacity: 0.9;
+            display: block;
+        }
+        .estadistica-valor {
+            font-size: 28px;
+            font-weight: bold;
+            display: block;
+        }
+        .estadistica-detalle {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        /* Alertas */
+        .alertas-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .alertas-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .alerta-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .alerta-vencido {
+            background: #ffebee;
+            border-left-color: #f44336;
+            color: #c62828;
+        }
+        .alerta-urgente {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+            color: #ef6c00;
+        }
+        .alerta-icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        .alerta-content p {
+            margin: 0 0 5px 0;
+            font-weight: 500;
+        }
+        .alerta-content small {
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="page-header ventas-header">
+            <a href="{% url 'inicio' %}" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="header-info">
+                <h1><i class="fas fa-shopping-cart"></i> Venta Diaria</h1>
+                <p>Registro y control de ventas</p>
+            </div>
+        </header>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Alertas de Vencimiento -->
+        {% if alertas %}
+        <section class="alertas-section">
+            <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i> Alertas de Pago</h2>
+            <div class="alertas-container">
+                {% for alerta in alertas %}
+                <div class="alerta-item alerta-{{ alerta.tipo }}">
+                    <div class="alerta-icon">
+                        <i class="fas fa-{% if alerta.tipo == 'vencido' %}times-circle{% elif alerta.tipo == 'urgente' %}exclamation-circle{% endif %}"></i>
+                    </div>
+                    <div class="alerta-content">
+                        <p>{{ alerta.mensaje }}</p>
+                        <small>Venta #{{ alerta.venta.idVenta }} - {{ alerta.venta.fecha|date:'d/m/Y' }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Formulario de agregar -->
+        <section class="form-section">
+            <h2 class="section-title"><i class="fas fa-plus-circle"></i> Nueva Venta</h2>
+            <form method="post" class="form-agregar">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cliente">Cliente</label>
+                        <select name="cliente" id="cliente" required>
+                            <option value="">Selecciona un cliente</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.idCliente }}">{{ cliente.nombre }} {{ cliente.apellido }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto">Producto</label>
+                        <select name="producto" id="producto" required onchange="calcularTotal()">
+                            <option value="">Selecciona un producto</option>
+                            {% for producto in productos %}
+                                <option value="{{ producto.idProducto }}" data-precio="{{ producto.precio|floatformat:2 }}" data-stock="{{ producto.stock }}">{{ producto.nombre }} - ${{ producto.precio|floatformat:2 }} <span class="stock-badge">(Stock: {{ producto.stock }})</span></option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cantidad">Cantidad</label>
+                        <input type="number" name="cantidad" id="cantidad" min="1" required onchange="calcularTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label for="total">Total</label>
+                        <input type="text" id="total" readonly>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tipo_pago">Tipo de Pago</label>
+                        <select name="tipo_pago" id="tipo_pago" required onchange="togglePagoFields()">
+                            <option value="completo">Pago Completo</option>
+                            <option value="fiado">Pago a Crédito</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="monto_pagado_group" style="display: none;">
+                        <label for="monto_pagado">Monto Pagado</label>
+                        <input type="number" name="monto_pagado" id="monto_pagado" min="0" step="0.01" onchange="calcularTotal()">
+                    </div>
+                    <div class="form-group" id="dias_credito_group" style="display: none;">
+                        <label for="dias_credito">Días de Crédito</label>
+                        <input type="number" name="dias_credito" id="dias_credito" min="1" value="15">
+                    </div>
+                </div>
+                <button type="submit" class="btn-agregar ventas-btn">
+                    <i class="fas fa-plus"></i> Agregar Venta
+                </button>
+            </form>
+        </section>
+
+        <!-- Resumen del Día -->
+        <section class="resumen-section">
+            <div class="resumen-card ventas-card">
+                <div class="resumen-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Total Ventas del Día</span>
+                    <span class="resumen-valor" id="totalVentasDia">${{ total_ventas_dia }}</span>
+                </div>
+            </div>
+            <div class="resumen-card">
+                <div class="resumen-icon secondary">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Ventas Hoy</span>
+                    <span class="resumen-valor" id="cantidadVentasHoy">{{ cantidad_ventas_hoy }}</span>
+                </div>
+            </div>
+            <div class="resumen-card warning-card">
+                <div class="resumen-icon warning">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <div class="resumen-info">
+                    <span class="resumen-label">Total por Cobrar</span>
+                    <span class="resumen-valor" id="totalPorCobrar">${{ total_por_cobrar }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Estadísticas Extendidas -->
+        <section class="estadisticas-section">
+            <h2 class="section-title"><i class="fas fa-chart-line"></i> Estadísticas</h2>
+            <div class="estadisticas-grid">
+                <div class="estadistica-card semana">
+                    <div class="estadistica-icon">
+                        <i class="fas fa-calendar-week"></i>
+                    </div>
+                    <div class="estadistica-info">
+                        <span class="estadistica-label">Ventas de la Semana</span>
+                        <span class="estadistica-valor">${{ total_ventas_semana }}</span>
+                        <span class="estadistica-detalle">{{ cantidad_ventas_semana }} transacciones</span>
+                    </div>
+                </div>
+                <div class="estadistica-card mes">
+                    <div class="estadistica-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="estadistica-info">
+                        <span class="estadistica-label">Ventas del Mes ({{ nombre_mes }})</span>
+                        <span class="estadistica-valor">${{ total_ventas_mes }}</span>
+                        <span class="estadistica-detalle">{{ cantidad_ventas_mes }} transacciones</span>
+                    </div>
+                </div>
+                <div class="estadistica-card top-cliente">
+                    <div class="estadistica-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="estadistica-info">
+                        <span class="estadistica-label">Cliente Top del Mes</span>
+                        {% if top_cliente %}
+                        <span class="estadistica-valor">{{ top_cliente.cliente__nombre }} {{ top_cliente.cliente__apellido }}</span>
+                        <span class="estadistica-detalle">${{ top_cliente.total_compras }} en {{ top_cliente.cantidad_compras }} compras</span>
+                        {% else %}
+                        <span class="estadistica-valor">Sin datos</span>
+                        <span class="estadistica-detalle">No hay ventas este mes</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calendario de Ventas -->
+        <section class="calendario-section">
+            <div class="calendario-header">
+                <h2 class="calendario-title"><i class="fas fa-calendar"></i> Calendario de Ventas</h2>
+                <span class="calendario-mes">{{ nombre_mes }} {{ anio_actual }}</span>
+            </div>
+            <div class="calendario-grid">
+                <!-- Días de la semana -->
+                <div class="calendario-dia-header">Lun</div>
+                <div class="calendario-dia-header">Mar</div>
+                <div class="calendario-dia-header">Mié</div>
+                <div class="calendario-dia-header">Jue</div>
+                <div class="calendario-dia-header">Vie</div>
+                <div class="calendario-dia-header">Sáb</div>
+                <div class="calendario-dia-header">Dom</div>
+                <!-- Días del mes -->
+                {% for dia in dias_del_mes %}
+                    {% if dia == 0 %}
+                        <div class="calendario-dia vacio"></div>
+                    {% else %}
+                        <div class="calendario-dia {% if dia == dia_actual %}hoy{% endif %}" data-dia="{{ dia }}">
+                            {{ dia }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Buscador y Lista -->
+        <section class="lista-section">
+            <div class="lista-header">
+                <h2 class="section-title"><i class="fas fa-list"></i> Historial de Ventas</h2>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscarVentas" placeholder="Buscar venta..." onkeyup="buscar()">
+                </div>
+            </div>
+            <div class="lista-container" id="listaVentas">
+                {% for venta in ventas %}
+                <div class="venta-item">
+                    <div class="venta-info">
+                        <h4>{{ venta.producto.nombre }}</h4>
+                        <p><strong>Cliente:</strong> {{ venta.cliente.nombre }} {{ venta.cliente.apellido }}</p>
+                        <p><strong>Cantidad:</strong> {{ venta.cantidad }} | <strong>Fecha:</strong> {{ venta.fecha|date:'d/m/Y H:i' }}</p>
+                    </div>
+                    <div class="venta-total">
+                        ${{ venta.total }}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="empty-message">No hay ventas registradas</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <script src="{% static 'js/ventas.js' %}"></script>
+    <script>
+        function calcularTotal() {
+            const productoSelect = document.getElementById('producto');
+            const cantidadInput = document.getElementById('cantidad');
+            const totalInput = document.getElementById('total');
+            const tipoPagoSelect = document.getElementById('tipo_pago');
+            const montoPagadoInput = document.getElementById('monto_pagado');
+            
+            const selectedOption = productoSelect.options[productoSelect.selectedIndex];
+            const precio = parseFloat(selectedOption.getAttribute('data-precio'));
+            const cantidad = parseInt(cantidadInput.value);
+            
+            if (precio && cantidad) {
+                const total = Math.round((precio * cantidad) * 100) / 100; // Redondear a 2 decimales
+                totalInput.value = '$' + total.toFixed(2);
+                
+                // Si es pago completo, establecer monto pagado igual al total
+                if (tipoPagoSelect.value === 'completo') {
+                    montoPagadoInput.value = total.toFixed(2);
+                }
+            } else {
+                totalInput.value = '';
+            }
+        }
+        
+        function togglePagoFields() {
+            const tipoPagoSelect = document.getElementById('tipo_pago');
+            const montoPagadoGroup = document.getElementById('monto_pagado_group');
+            const diasCreditoGroup = document.getElementById('dias_credito_group');
+            const montoPagadoInput = document.getElementById('monto_pagado');
+            
+            if (tipoPagoSelect.value === 'fiado') {
+                montoPagadoGroup.style.display = 'block';
+                diasCreditoGroup.style.display = 'block';
+                montoPagadoInput.required = true;
+                // Calcular total para establecer valor inicial
+                calcularTotal();
+            } else {
+                montoPagadoGroup.style.display = 'none';
+                diasCreditoGroup.style.display = 'none';
+                montoPagadoInput.required = false;
+                montoPagadoInput.value = '';
+            }
+        }
+        
+        // Marcar días con ventas en el calendario
+        document.addEventListener('DOMContentLoaded', function() {
+            const diasVentas = {{ dias_ventas_json|safe }};
+            const diasCalendario = document.querySelectorAll('.calendario-dia[data-dia]');
+            
+            diasCalendario.forEach(function(diaElement) {
+                const dia = parseInt(diaElement.getAttribute('data-dia'));
+                
+                if (diasVentas[dia]) {
+                    diaElement.classList.add('con-venta');
+                    
+                    // Agregar punto indicador
+                    const punto = document.createElement('span');
+                    punto.className = 'venta-punto';
+                    diaElement.appendChild(punto);
+                    
+                    // Agregar tooltip con información
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'tooltip';
+                    tooltip.textContent = '$' + diasVentas[dia].total.toFixed(2) + ' (' + diasVentas[dia].cantidad + ' ventas)';
+                    diaElement.appendChild(tooltip);
+                } else {
+                    diaElement.classList.add('sin-venta');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

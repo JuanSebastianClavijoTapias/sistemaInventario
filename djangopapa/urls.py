@@ -22,10 +22,11 @@ from panelprincipal import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.saludo, name='inicio'),
-    path('ventas/', views.ventas, name='ventas'),
+    path('ventas/', include('apps.ventas.urls')),
+    path('productos/', include('apps.productos.urls')),
     path('clientes/', include('apps.clientes.urls')),
-    path('proveedores/', views.proveedores, name='proveedores'),
-    path('gastos/', views.gastos, name='gastos'),
+    path('proveedores/', include('apps.proveedores.urls')),
+    path('gastos/', include('apps.gastos.urls')),
 ]
 
 print("URLs loaded")  # Debug

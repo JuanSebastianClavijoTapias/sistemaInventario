@@ -4,38 +4,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eliminar Cliente - InventarioPiñeres</title>
+    <title>Eliminar Producto - InventarioPiñeres</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
     <style>
-        .delete-container {
+        .confirm-container {
             max-width: 500px;
             margin: 50px auto;
-            background: white;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-        .delete-icon {
-            font-size: 60px;
+        .confirm-icon {
+            font-size: 48px;
             color: #f44336;
             margin-bottom: 20px;
         }
-        .delete-title {
+        .confirm-title {
             font-size: 24px;
             color: #333;
             margin-bottom: 10px;
         }
-        .delete-message {
+        .confirm-message {
             color: #666;
             margin-bottom: 30px;
+            line-height: 1.5;
         }
-        .cliente-name {
-            font-weight: bold;
+        .producto-info {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        .producto-nombre {
+            font-weight: 600;
             color: #333;
         }
-        .btn-group {
+        .producto-detalle {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .btn-container {
             display: flex;
             gap: 15px;
             justify-content: center;
@@ -43,50 +56,57 @@
         .btn-eliminar {
             background: #f44336;
             color: white;
-            padding: 12px 30px;
+            padding: 12px 24px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             transition: background 0.3s;
         }
         .btn-eliminar:hover {
             background: #d32f2f;
         }
         .btn-cancelar {
-            background: #6c757d;
+            background: #2196F3;
             color: white;
-            padding: 12px 30px;
+            padding: 12px 24px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             text-decoration: none;
             transition: background 0.3s;
         }
         .btn-cancelar:hover {
-            background: #5a6268;
+            background: #1976D2;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="delete-container">
-            <div class="delete-icon">
+        <div class="confirm-container">
+            <div class="confirm-icon">
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
-            <h1 class="delete-title">¿Eliminar cliente?</h1>
-            <p class="delete-message">
-                Estás a punto de eliminar a <span class="cliente-name">{{ object.nombre }} {{ object.apellido }}</span>. 
-                Esta acción no se puede deshacer.
+            <h1 class="confirm-title">¿Eliminar Producto?</h1>
+            <p class="confirm-message">
+                Esta acción no se puede deshacer. El producto será eliminado permanentemente del sistema.
             </p>
+            
+            <div class="producto-info">
+                <div class="producto-nombre">{{ object.nombre }}</div>
+                <div class="producto-detalle">Precio: ${{ object.precio }}</div>
+                <div class="producto-detalle">Stock: {{ object.stock }}</div>
+                <div class="producto-detalle">Proveedor: {{ object.proveedor.nombre }}</div>
+            </div>
+            
             <form method="post">
                 {% csrf_token %}
-                <div class="btn-group">
+                <div class="btn-container">
                     <button type="submit" class="btn-eliminar">
-                        <i class="fas fa-trash"></i> Sí, eliminar
+                        <i class="fas fa-trash"></i> Sí, Eliminar
                     </button>
-                    <a href="{% url 'cliente_list' %}" class="btn-cancelar">
+                    <a href="{% url 'productos' %}" class="btn-cancelar">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
                 </div>
