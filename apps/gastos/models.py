@@ -6,12 +6,9 @@ from apps.proveedores.models import Proveedores
 # Create your models here.
 class Gastos(models.Model):
     CATEGORIA_CHOICES = [
-        ('operativo', 'Operativo'),
-        ('personal', 'Personal'),
-        ('insumos', 'Insumos'),
-        ('transporte', 'Transporte'),
-        ('servicios', 'Servicios'),
-        ('mantenimiento', 'Mantenimiento'),
+        ('administracion', 'Administración de la Empresa'),
+        ('trabajadores', 'Trabajadores'),
+        ('comercio_productos', 'Comercio y Productos'),
         ('otros', 'Otros'),
     ]
     
