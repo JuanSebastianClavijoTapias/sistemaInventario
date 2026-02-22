@@ -135,7 +135,7 @@ function capitalizar(str) {
 }
 
 function formatearMoneda(valor) {
-    return '$' + valor.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    return '$' + valor.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
 function formatearFecha(fecha) {

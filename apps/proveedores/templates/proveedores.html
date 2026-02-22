@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proveedores - InventarioPiñeres</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         .messages {
             margin: 20px 0;
@@ -235,7 +235,7 @@
                         <label>Saldo que Debo</label>
                         <div class="saldo-preview deuda">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <span id="saldoPendiente">$0.00</span>
+                            <span id="saldoPendiente">$0</span>
                         </div>
                     </div>
                 </div>
@@ -337,7 +337,7 @@
             const compra = parseFloat(document.getElementById('proveedorCompra').value) || 0;
             const inicial = parseFloat(document.getElementById('proveedorInicial').value) || 0;
             const saldo = compra - inicial;
-            document.getElementById('saldoPendiente').textContent = '$' + saldo.toFixed(2);
+            document.getElementById('saldoPendiente').textContent = '$' + Math.round(saldo).toLocaleString('es-CO');
         }
     </script>
 </body>

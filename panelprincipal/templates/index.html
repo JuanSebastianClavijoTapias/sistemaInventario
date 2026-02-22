@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InventarioPiñeres - Panel Principal</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -27,10 +28,10 @@
                 </div>
                 <div class="finance-info">
                     <h3>Total Finanzas</h3>
-                    <p class="finance-amount" id="totalFinanzas">${{ total_finanzas|floatformat:2 }}</p>
+                    <p class="finance-amount" id="totalFinanzas">${{ total_finanzas|floatformat:0 }}</p>
                     <div class="finance-details">
-                        <span class="income"><i class="fas fa-arrow-up"></i> Ingresos: <span id="totalIngresos">${{ total_ingresos|floatformat:2 }}</span></span>
-                        <span class="expense"><i class="fas fa-arrow-down"></i> Gastos: <span id="totalGastos">${{ total_gastos_finanzas|floatformat:2 }}</span></span>
+                        <span class="income"><i class="fas fa-arrow-up"></i> Ingresos: <span id="totalIngresos">${{ total_ingresos|floatformat:0 }}</span></span>
+                        <span class="expense"><i class="fas fa-arrow-down"></i> Gastos: <span id="totalGastos">${{ total_gastos_finanzas|floatformat:0 }}</span></span>
                     </div>
                 </div>
             </div>
@@ -112,7 +113,7 @@
                     </div>
                     <div class="deuda-info">
                         <span class="deuda-label">Por Cobrar (Clientes)</span>
-                        <span class="deuda-valor" id="totalPorCobrar">${{ total_por_cobrar|floatformat:2 }}</span>
+                        <span class="deuda-valor" id="totalPorCobrar">${{ total_por_cobrar|floatformat:0 }}</span>
                     </div>
                 </div>
                 <div class="deuda-card pagar">
@@ -121,7 +122,7 @@
                     </div>
                     <div class="deuda-info">
                         <span class="deuda-label">Por Pagar (Proveedores)</span>
-                        <span class="deuda-valor" id="totalPorPagar">${{ total_por_pagar|floatformat:2 }}</span>
+                        <span class="deuda-valor" id="totalPorPagar">${{ total_por_pagar|floatformat:0 }}</span>
                     </div>
                 </div>
             </div>
@@ -150,7 +151,7 @@
                                 {% endif %}
                             </div>
                             <div class="deuda-item-monto">
-                                ${{ venta.saldo_pendiente|floatformat:2 }}
+                                ${{ venta.saldo_pendiente|floatformat:0 }}
                             </div>
                         </div>
                         {% endfor %}
@@ -172,7 +173,7 @@
                                 <span class="deuda-item-detalle"><i class="fas fa-phone"></i> {{ proveedor.telefono }}</span>
                             </div>
                             <div class="deuda-item-monto pagar">
-                                ${{ proveedor.saldo|floatformat:2 }}
+                                ${{ proveedor.saldo|floatformat:0 }}
                             </div>
                         </div>
                         {% endfor %}

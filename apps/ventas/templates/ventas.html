@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Venta Diaria - InventarioPiñeres</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         .messages {
             margin: 20px 0;
@@ -393,7 +393,7 @@
                         <select name="producto" id="producto" required onchange="calcularTotal()">
                             <option value="">Selecciona un producto</option>
                             {% for producto in productos %}
-                                <option value="{{ producto.idProducto }}" data-precio="{{ producto.precio|floatformat:2 }}" data-stock="{{ producto.stock }}">{{ producto.nombre }} - ${{ producto.precio|floatformat:2 }} <span class="stock-badge">(Stock: {{ producto.stock }})</span></option>
+                                <option value="{{ producto.idProducto }}" data-precio="{{ producto.precio }}" data-stock="{{ producto.stock }}">{{ producto.nombre }} - ${{ producto.precio|floatformat:0 }} <span class="stock-badge">(Stock: {{ producto.stock }})</span></option>
                             {% endfor %}
                         </select>
                     </div>
@@ -574,12 +574,12 @@
             const cantidad = parseInt(cantidadInput.value);
             
             if (precio && cantidad) {
-                const total = Math.round((precio * cantidad) * 100) / 100; // Redondear a 2 decimales
-                totalInput.value = '$' + total.toFixed(2);
+                const total = Math.round(precio * cantidad);
+                totalInput.value = '$' + total.toLocaleString('es-CO');
                 
                 // Si es pago completo, establecer monto pagado igual al total
                 if (tipoPagoSelect.value === 'completo') {
-                    montoPagadoInput.value = total.toFixed(2);
+                    montoPagadoInput.value = total;
                 }
             } else {
                 totalInput.value = '';
@@ -625,7 +625,7 @@
                     // Agregar tooltip con información
                     const tooltip = document.createElement('span');
                     tooltip.className = 'tooltip';
-                    tooltip.textContent = '$' + diasVentas[dia].total.toFixed(2) + ' (' + diasVentas[dia].cantidad + ' ventas)';
+                    tooltip.textContent = '$' + Math.round(diasVentas[dia].total).toLocaleString('es-CO') + ' (' + diasVentas[dia].cantidad + ' ventas)';
                     diaElement.appendChild(tooltip);
                 } else {
                     diaElement.classList.add('sin-venta');
