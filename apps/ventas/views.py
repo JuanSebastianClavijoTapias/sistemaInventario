@@ -41,7 +41,11 @@ def ventas_form(request):
             messages.error(request, f'Stock insuficiente. Solo hay {producto.stock} unidades disponibles de {producto.nombre}.')
             return redirect('ventas')
         
-        total = Decimal(str(producto.precio)) * Decimal(str(cantidad))
+        # Calcular precios y ganancia
+        precio_compra = Decimal(str(producto.precio_compra))
+        precio_venta = Decimal(str(producto.precio_venta))
+        total = precio_venta * Decimal(str(cantidad))
+        ganancia = (precio_venta - precio_compra) * Decimal(str(cantidad))
         
         # Procesar pago
         try:
@@ -74,6 +78,9 @@ def ventas_form(request):
             producto=producto,
             cantidad=cantidad,
             total=total,
+            precio_compra=precio_compra,
+            precio_venta=precio_venta,
+            ganancia=ganancia,
             tipo_pago=tipo_pago,
             monto_pagado=monto_pagado,
             fecha_vencimiento=fecha_vencimiento,
@@ -85,10 +92,10 @@ def ventas_form(request):
         producto.save()
         
         if tipo_pago == 'completo':
-            messages.success(request, f'Venta registrada exitosamente. Stock actualizado: {producto.nombre} - {producto.stock} unidades restantes.')
+            messages.success(request, f'Venta registrada. Total: ${total}, Ganancia: ${ganancia}. Stock: {producto.nombre} - {producto.stock} unidades.')
         else:
             saldo = total - monto_pagado
-            messages.success(request, f'Venta a crédito registrada. Pagó: ${monto_pagado}, Debe: ${saldo}. Vence: {fecha_vencimiento}. Stock actualizado: {producto.nombre} - {producto.stock} unidades restantes.')
+            messages.success(request, f'Venta a crédito. Pagó: ${monto_pagado}, Debe: ${saldo}. Ganancia: ${ganancia}. Vence: {fecha_vencimiento}.')
         
         return redirect('ventas')
     
@@ -186,8 +193,25 @@ def ventas_form(request):
     ]
     nombre_mes = meses_espanol[mes_actual - 1]
     
-    # Historial de ventas recientes
-    ventas = Venta.objects.all().order_by('-fecha')[:20]
+    # Filtro de rango para historial
+    rango_filtro = request.GET.get('rango', 'todo')
+    
+    # Historial de ventas con filtro
+    ventas_query = Venta.objects.all().order_by('-fecha')
+    
+    if rango_filtro == 'hoy':
+        ventas_query = ventas_query.filter(fecha__date=hoy)
+    elif rango_filtro == 'semana':
+        inicio_semana_filtro = hoy - timedelta(days=7)
+        ventas_query = ventas_query.filter(fecha__date__gte=inicio_semana_filtro)
+    elif rango_filtro == 'quincena':
+        inicio_quincena = hoy - timedelta(days=15)
+        ventas_query = ventas_query.filter(fecha__date__gte=inicio_quincena)
+    elif rango_filtro == 'mes':
+        ventas_query = ventas_query.filter(fecha__date__gte=inicio_mes)
+    # 'todo' no filtra nada
+    
+    ventas = ventas_query[:50]  # Limitar a 50 resultados
     
     # Alertas de vencimiento
     alertas = []
@@ -234,6 +258,8 @@ def ventas_form(request):
         'dia_actual': hoy.day,
         # Alertas
         'alertas': alertas,
+        # Filtro de rango
+        'rango_filtro': rango_filtro,
     }
     
     return render(request, 'ventas.html', context)

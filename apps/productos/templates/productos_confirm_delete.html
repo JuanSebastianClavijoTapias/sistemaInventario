@@ -95,7 +95,7 @@
             
             <div class="producto-info">
                 <div class="producto-nombre">{{ object.nombre }}</div>
-                <div class="producto-detalle">Precio: ${{ object.precio }}</div>
+                <div class="producto-detalle">Precio Compra: ${{ object.precio_compra|floatformat:0 }} | Precio Venta: ${{ object.precio_venta|floatformat:0 }}</div>
                 <div class="producto-detalle">Stock: {{ object.stock }}</div>
                 <div class="producto-detalle">Proveedor: {{ object.proveedor.nombre }}</div>
             </div>

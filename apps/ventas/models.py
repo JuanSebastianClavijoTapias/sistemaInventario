@@ -33,6 +33,26 @@ class Venta(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     
+    # Campos de precios y ganancia
+    precio_compra = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2,
+        default=0,
+        verbose_name="Precio de Compra (unitario)"
+    )
+    precio_venta = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2,
+        default=0,
+        verbose_name="Precio de Venta (unitario)"
+    )
+    ganancia = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2,
+        default=0,
+        verbose_name="Ganancia Total"
+    )
+    
     # Nuevos campos para pagos a crédito
     tipo_pago = models.CharField(
         max_length=10,

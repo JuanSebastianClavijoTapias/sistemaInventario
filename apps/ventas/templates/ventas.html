@@ -120,10 +120,29 @@
             color: #666;
             font-size: 14px;
         }
+        .precio-detalle {
+            color: #888 !important;
+            font-size: 13px !important;
+        }
+        .precio-detalle i {
+            color: #ff9800;
+        }
+        .venta-totales {
+            text-align: right;
+        }
         .venta-total {
             font-size: 20px;
             font-weight: bold;
             color: #4CAF50;
+        }
+        .venta-ganancia {
+            font-size: 14px;
+            color: #2196F3;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        .venta-ganancia i {
+            margin-right: 3px;
         }
         .stock-badge {
             background: #e3f2fd;
@@ -330,6 +349,49 @@
             color: #666;
             font-size: 12px;
         }
+        /* Filtros del historial */
+        .filtros-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filtro-rango {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .filtro-rango label {
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .filtro-rango select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        .filtro-rango select:hover {
+            border-color: #4CAF50;
+        }
+        .filtro-rango select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        .lista-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
         /* Modal de Ventas del Día */
         .modal-overlay {
             display: none;
@@ -510,7 +572,7 @@
                         <select name="producto" id="producto" required onchange="calcularTotal()">
                             <option value="">Selecciona un producto</option>
                             {% for producto in productos %}
-                                <option value="{{ producto.idProducto }}" data-precio="{{ producto.precio }}" data-stock="{{ producto.stock }}">{{ producto.nombre }} - ${{ producto.precio|floatformat:0 }} <span class="stock-badge">(Stock: {{ producto.stock }})</span></option>
+                                <option value="{{ producto.idProducto }}" data-precio="{{ producto.precio_venta|stringformat:'f' }}" data-stock="{{ producto.stock }}">{{ producto.nombre }} - ${{ producto.precio_venta|floatformat:0 }} <span class="stock-badge">(Stock: {{ producto.stock }})</span></option>
                             {% endfor %}
                         </select>
                     </div>
@@ -653,9 +715,21 @@
         <section class="lista-section">
             <div class="lista-header">
                 <h2 class="section-title"><i class="fas fa-list"></i> Historial de Ventas</h2>
-                <div class="search-container">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="buscarVentas" placeholder="Buscar venta..." onkeyup="buscar()">
+                <div class="filtros-container">
+                    <div class="filtro-rango">
+                        <label for="rangoFiltro"><i class="fas fa-calendar-alt"></i> Rango:</label>
+                        <select id="rangoFiltro" onchange="filtrarPorRango()">
+                            <option value="todo" {% if rango_filtro == 'todo' %}selected{% endif %}>Todas</option>
+                            <option value="hoy" {% if rango_filtro == 'hoy' %}selected{% endif %}>Hoy</option>
+                            <option value="semana" {% if rango_filtro == 'semana' %}selected{% endif %}>Última semana</option>
+                            <option value="quincena" {% if rango_filtro == 'quincena' %}selected{% endif %}>Últimos 15 días</option>
+                            <option value="mes" {% if rango_filtro == 'mes' %}selected{% endif %}>Este mes</option>
+                        </select>
+                    </div>
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="buscarVentas" placeholder="Buscar venta..." onkeyup="buscar()">
+                    </div>
                 </div>
             </div>
             <div class="lista-container" id="listaVentas">
@@ -665,9 +739,11 @@
                         <h4>{{ venta.producto.nombre }}</h4>
                         <p><strong>Cliente:</strong> {{ venta.cliente.nombre }} {{ venta.cliente.apellido }}</p>
                         <p><strong>Cantidad:</strong> {{ venta.cantidad }} | <strong>Fecha:</strong> {{ venta.fecha|date:'d/m/Y H:i' }}</p>
+                        <p class="precio-detalle"><i class="fas fa-tags"></i> Compra: ${{ venta.precio_compra|floatformat:0 }} | Venta: ${{ venta.precio_venta|floatformat:0 }}</p>
                     </div>
-                    <div class="venta-total">
-                        ${{ venta.total }}
+                    <div class="venta-totales">
+                        <div class="venta-total">${{ venta.total|floatformat:0 }}</div>
+                        <div class="venta-ganancia"><i class="fas fa-chart-line"></i> +${{ venta.ganancia|floatformat:0 }}</div>
                     </div>
                 </div>
                 {% empty %}
@@ -839,6 +915,14 @@
                 cerrarModal();
             }
         });
+        
+        // Filtrar por rango de fechas
+        function filtrarPorRango() {
+            const rango = document.getElementById('rangoFiltro').value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('rango', rango);
+            window.location.href = url.toString();
+        }
     </script>
 </body>
 </html>

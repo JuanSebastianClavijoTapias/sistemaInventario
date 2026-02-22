@@ -209,11 +209,31 @@
                     </div>
                     <div class="form-group">
                         <label for="proveedorCantidad">Cantidad</label>
-                        <input type="number" id="proveedorCantidad" name="proveedorCantidad" placeholder="Cantidad comprada" min="1" required>
+                        <input type="number" id="proveedorCantidad" name="proveedorCantidad" placeholder="Cantidad comprada" min="1" required oninput="calcularPrecioUnitario()">
                     </div>
+                </div>
+                <div class="form-row">
                     <div class="form-group">
                         <label for="proveedorCompra">Monto Total de Compra</label>
-                        <input type="number" id="proveedorCompra" name="proveedorCompra" placeholder="0.00" step="0.01" min="0" required>
+                        <input type="number" id="proveedorCompra" name="proveedorCompra" placeholder="0.00" step="0.01" min="0" required oninput="calcularPrecioUnitario()">
+                    </div>
+                    <div class="form-group">
+                        <label for="precioUnitario">Precio Unitario (Compra)</label>
+                        <input type="text" id="precioUnitario" name="precioUnitario" placeholder="Se calcula automáticamente" readonly style="background: #f5f5f5;">
+                    </div>
+                    <div class="form-group">
+                        <label for="precioVenta">Precio de Venta</label>
+                        <input type="number" id="precioVenta" name="precioVenta" placeholder="Precio al que venderás" step="0.01" min="0" oninput="calcularGanancia()">
+                    </div>
+                </div>
+                <div class="form-row" id="rowGanancia" style="display: none;">
+                    <div class="form-group full-width">
+                        <label>Ganancia por Unidad</label>
+                        <div class="saldo-preview ganancia" style="background: #e8f5e9; color: #2e7d32;">
+                            <i class="fas fa-chart-line"></i>
+                            <span id="gananciaUnitaria">$0</span>
+                            <span id="margenGanancia" style="margin-left: 10px; font-size: 14px;">(0%)</span>
+                        </div>
                     </div>
                 </div>
                 <div class="form-row">
@@ -338,6 +358,55 @@
             const inicial = parseFloat(document.getElementById('proveedorInicial').value) || 0;
             const saldo = compra - inicial;
             document.getElementById('saldoPendiente').textContent = '$' + Math.round(saldo).toLocaleString('es-CO');
+        }
+        
+        // Calcular precio unitario automáticamente
+        function calcularPrecioUnitario() {
+            const compra = parseFloat(document.getElementById('proveedorCompra').value) || 0;
+            const cantidad = parseInt(document.getElementById('proveedorCantidad').value) || 0;
+            
+            if (cantidad > 0 && compra > 0) {
+                const precioUnit = compra / cantidad;
+                document.getElementById('precioUnitario').value = '$' + Math.round(precioUnit).toLocaleString('es-CO');
+                // Si no hay precio de venta, sugerir el mismo precio
+                const precioVentaInput = document.getElementById('precioVenta');
+                if (!precioVentaInput.value) {
+                    precioVentaInput.value = Math.round(precioUnit);
+                }
+                calcularGanancia();
+            } else {
+                document.getElementById('precioUnitario').value = '';
+            }
+        }
+        
+        // Calcular ganancia por unidad
+        function calcularGanancia() {
+            const compra = parseFloat(document.getElementById('proveedorCompra').value) || 0;
+            const cantidad = parseInt(document.getElementById('proveedorCantidad').value) || 0;
+            const precioVenta = parseFloat(document.getElementById('precioVenta').value) || 0;
+            const rowGanancia = document.getElementById('rowGanancia');
+            
+            if (cantidad > 0 && compra > 0 && precioVenta > 0) {
+                const precioUnit = compra / cantidad;
+                const ganancia = precioVenta - precioUnit;
+                const margen = (ganancia / precioUnit) * 100;
+                
+                document.getElementById('gananciaUnitaria').textContent = '$' + Math.round(ganancia).toLocaleString('es-CO');
+                document.getElementById('margenGanancia').textContent = '(' + margen.toFixed(1) + '%)';
+                rowGanancia.style.display = 'block';
+                
+                // Cambiar color según si hay ganancia o pérdida
+                const preview = rowGanancia.querySelector('.saldo-preview');
+                if (ganancia >= 0) {
+                    preview.style.background = '#e8f5e9';
+                    preview.style.color = '#2e7d32';
+                } else {
+                    preview.style.background = '#ffebee';
+                    preview.style.color = '#c62828';
+                }
+            } else {
+                rowGanancia.style.display = 'none';
+            }
         }
     </script>
 </body>

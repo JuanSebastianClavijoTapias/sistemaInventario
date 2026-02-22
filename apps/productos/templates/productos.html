@@ -182,35 +182,16 @@
         </div>
         {% endif %}
 
-        <!-- Formulario de agregar -->
-        <section class="form-section">
-            <h2 class="section-title"><i class="fas fa-plus-circle"></i> Nuevo Producto</h2>
-            <form method="post" class="form-agregar">
-                {% csrf_token %}
-                <div class="form-row">
-                    <div class="form-group">
-                        {{ form.nombre.label_tag }}
-                        {{ form.nombre }}
-                    </div>
-                    <div class="form-group">
-                        {{ form.precio.label_tag }}
-                        {{ form.precio }}
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        {{ form.stock.label_tag }}
-                        {{ form.stock }}
-                    </div>
-                    <div class="form-group">
-                        {{ form.proveedor.label_tag }}
-                        {{ form.proveedor }}
-                    </div>
-                </div>
-                <button type="submit" class="btn-agregar productos-btn">
-                    <i class="fas fa-plus"></i> Agregar Producto
-                </button>
-            </form>
+        <!-- Información -->
+        <section class="form-section" style="text-align: center; padding: 30px;">
+            <div style="font-size: 48px; color: #4CAF50; margin-bottom: 15px;">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <h3 style="color: #333; margin-bottom: 10px;">Los productos se agregan automáticamente</h3>
+            <p style="color: #666;">Cuando registras una compra a un proveedor, el producto se agrega al inventario automáticamente.</p>
+            <a href="{% url 'proveedores' %}" class="btn-agregar productos-btn" style="display: inline-block; margin-top: 20px; text-decoration: none;">
+                <i class="fas fa-truck"></i> Ir a Proveedores
+            </a>
         </section>
 
         <!-- Lista de productos -->
@@ -228,9 +209,9 @@
                         <div class="item-card">
                             <div class="item-info">
                                 <h3>{{ producto.nombre }}</h3>
-                                <p><strong>Precio:</strong> ${{ producto.precio }}</p>
-                                <p><strong>Stock:</strong> {{ producto.stock }}</p>
-                                <p><strong>Proveedor:</strong> {{ producto.proveedor.nombre }}</p>
+                                <p><strong>Precio Compra:</strong> ${{ producto.precio_compra|floatformat:0 }} | <strong>Precio Venta:</strong> ${{ producto.precio_venta|floatformat:0 }}</p>
+                                <p><strong>Ganancia:</strong> ${{ producto.ganancia_unitaria|floatformat:0 }} ({{ producto.margen_ganancia|floatformat:1 }}%)</p>
+                                <p><strong>Stock:</strong> {{ producto.stock }} | <strong>Proveedor:</strong> {{ producto.proveedor.nombre }}</p>
                             </div>
                             <div class="item-actions">
                                 <a href="{% url 'producto_update' producto.pk %}" class="btn-editar">

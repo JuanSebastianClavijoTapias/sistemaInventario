@@ -81,13 +81,21 @@ class ProveedorListView(ListView):
         # Actualizar inventario
         if descripcion and cantidad > 0:
             precio_unit = compra / cantidad if cantidad > 0 else 0
+            # Obtener precio de venta del formulario, si no se especifica usar el precio de compra
+            precio_venta = request.POST.get('precioVenta', '')
+            try:
+                precio_venta = float(precio_venta) if precio_venta else precio_unit
+            except (ValueError, TypeError):
+                precio_venta = precio_unit
+            
             producto, created = Productos.objects.get_or_create(
                 nombre=descripcion,
                 proveedor=proveedor,
-                defaults={'precio': precio_unit, 'stock': cantidad}
+                defaults={'precio_compra': precio_unit, 'precio_venta': precio_venta, 'stock': cantidad}
             )
             if not created:
                 producto.stock += cantidad
+                producto.precio_compra = precio_unit  # Actualizar precio de compra
                 producto.save()
         
         messages.success(request, 'Proveedor y compra registrados exitosamente.')
