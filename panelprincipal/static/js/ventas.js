@@ -114,7 +114,7 @@ function calcularTotalVenta() {
     const cantidad = parseInt(document.getElementById('ventaCantidad').value) || 0;
     const precio = parseFloat(document.getElementById('ventaPrecio').value) || 0;
     const total = cantidad * precio;
-    document.getElementById('ventaAbono').value = total.toFixed(2);
+    document.getElementById('ventaAbono').value = Math.round(total);
 }
 
 function calcularSaldoVenta() {
@@ -256,7 +256,7 @@ function cargarDatos() {
 
 // ==================== FUNCIONES AUXILIARES ====================
 function formatearMoneda(valor) {
-    return '$' + valor.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return '$' + valor.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
 function formatearFecha(fecha) {

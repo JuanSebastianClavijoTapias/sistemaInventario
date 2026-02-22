@@ -6,7 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clientes - InventarioPiñeres</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+<<<<<<< HEAD
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+=======
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+>>>>>>> b4369cd91635fe2add4c7eec4ade7424f9f52005
     <style>
         /* Estilos para el formulario */
         .form-row {
@@ -167,6 +171,67 @@
             font-weight: bold;
             color: #4CAF50;
         }
+        /* Estilos para búsqueda de clientes */
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+        .search-icon {
+            padding: 12px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .todos-clientes-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .cliente-all-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #2196F3;
+            transition: background 0.3s;
+        }
+        .cliente-all-item:hover {
+            background: #e3f2fd;
+        }
+        .cliente-all-item.hidden {
+            display: none;
+        }
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -236,6 +301,43 @@
                     <span class="resumen-valor">{{ clientes_pagados|length }}</span>
                 </div>
             </div>
+        </section>
+
+        <!-- Búsqueda de Todos los Clientes -->
+        <section class="search-section">
+            <div class="lista-header">
+                <h2 class="section-title"><i class="fas fa-search"></i> Buscar Clientes</h2>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, apellido o teléfono...">
+                <button class="search-icon">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="todos-clientes-list" id="todosClientesList">
+                {% for cliente in clientes %}
+                <div class="cliente-all-item" data-nombre="{{ cliente.nombre|lower }}" data-apellido="{{ cliente.apellido|lower }}" data-telefono="{{ cliente.telefono }}">
+                    <div class="cliente-info">
+                        <span class="cliente-nombre">{{ cliente.nombre }} {{ cliente.apellido }}</span>
+                        <span class="cliente-telefono"><i class="fas fa-phone"></i> {{ cliente.telefono }}</span>
+                    </div>
+                    <div class="cliente-acciones">
+                        <a href="{% url 'cliente_compras' cliente.pk %}" class="btn-compras">
+                            <i class="fas fa-shopping-bag"></i> Compras
+                        </a>
+                        <a href="{% url 'cliente_update' cliente.pk %}" class="btn-editar">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a href="{% url 'cliente_delete' cliente.pk %}" class="btn-eliminar">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="empty-message">No hay clientes registrados</p>
+                {% endfor %}
+            </div>
+            <p class="no-results" id="noResults">No se encontraron clientes</p>
         </section>
 
         <!-- Clientes con Deuda -->
@@ -308,5 +410,31 @@
             </div>
         </section>
     </div>
+
+    <script>
+        // Búsqueda de clientes
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const clienteItems = document.querySelectorAll('.cliente-all-item');
+            const noResults = document.getElementById('noResults');
+            let hasResults = false;
+
+            clienteItems.forEach(function(item) {
+                const nombre = item.getAttribute('data-nombre') || '';
+                const apellido = item.getAttribute('data-apellido') || '';
+                const telefono = item.getAttribute('data-telefono') || '';
+                const fullText = nombre + ' ' + apellido + ' ' + telefono;
+
+                if (fullText.includes(searchTerm) || searchTerm === '') {
+                    item.classList.remove('hidden');
+                    hasResults = true;
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+
+            noResults.style.display = hasResults ? 'none' : 'block';
+        });
+    </script>
 </body>
 </html>
