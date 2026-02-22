@@ -1,0 +1,1 @@
+Backup de la aplicación trabajadores antes de eliminarla.

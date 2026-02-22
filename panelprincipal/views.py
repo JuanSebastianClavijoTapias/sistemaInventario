@@ -5,7 +5,6 @@ from apps.proveedores.models import Proveedores
 from apps.productos.models import Productos
 from apps.ventas.models import Venta
 from apps.gastos.models import Gastos
-from apps.trabajadores.models import Trabajadores
 
 # Create your views here.
 def saludo(request):
@@ -36,7 +35,6 @@ def saludo(request):
         'total_productos': Productos.objects.count(),
         'total_ventas': Venta.objects.count(),
         'total_gastos': Gastos.objects.count(),
-        'total_trabajadores': Trabajadores.objects.count(),
         'total_ingresos': total_ingresos,
         'total_gastos_finanzas': total_gastos,  # Renombrado para evitar conflicto
         'total_finanzas': total_finanzas,
