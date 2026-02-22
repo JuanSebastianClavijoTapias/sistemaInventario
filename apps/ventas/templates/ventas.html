@@ -330,6 +330,123 @@
             color: #666;
             font-size: 12px;
         }
+        /* Modal de Ventas del Día */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+        .modal-close:hover {
+            opacity: 0.8;
+        }
+        .modal-body {
+            padding: 20px;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        .modal-ventas-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .modal-venta-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .modal-venta-info h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        .modal-venta-info p {
+            margin: 3px 0;
+            color: #666;
+            font-size: 13px;
+        }
+        .modal-venta-info i {
+            width: 16px;
+            color: #999;
+        }
+        .modal-venta-total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .modal-resumen {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-around;
+        }
+        .modal-resumen-item {
+            text-align: center;
+        }
+        .modal-resumen-item span {
+            display: block;
+            font-size: 13px;
+            color: #666;
+        }
+        .modal-resumen-item strong {
+            display: block;
+            font-size: 20px;
+            color: #2e7d32;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -560,6 +677,19 @@
         </section>
     </div>
 
+    <!-- Modal de Ventas del Día -->
+    <div id="modalVentasDia" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitulo"><i class="fas fa-calendar-day"></i> Ventas del día</h3>
+                <button class="modal-close" onclick="cerrarModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalContenido">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
     <script src="{% static 'js/ventas.js' %}"></script>
     <script>
         function calcularTotal() {
@@ -609,6 +739,7 @@
         // Marcar días con ventas en el calendario
         document.addEventListener('DOMContentLoaded', function() {
             const diasVentas = {{ dias_ventas_json|safe }};
+            const ventasDelMes = {{ ventas_mes_json|safe }};
             const diasCalendario = document.querySelectorAll('.calendario-dia[data-dia]');
             
             diasCalendario.forEach(function(diaElement) {
@@ -627,10 +758,86 @@
                     tooltip.className = 'tooltip';
                     tooltip.textContent = '$' + Math.round(diasVentas[dia].total).toLocaleString('es-CO') + ' (' + diasVentas[dia].cantidad + ' ventas)';
                     diaElement.appendChild(tooltip);
+                    
+                    // Agregar evento clic para abrir modal
+                    diaElement.addEventListener('click', function() {
+                        abrirModalVentasDia(dia, ventasDelMes);
+                    });
                 } else {
                     diaElement.classList.add('sin-venta');
                 }
             });
+        });
+        
+        function abrirModalVentasDia(dia, ventasDelMes) {
+            const modal = document.getElementById('modalVentasDia');
+            const titulo = document.getElementById('modalTitulo');
+            const contenido = document.getElementById('modalContenido');
+            
+            // Filtrar ventas del día seleccionado
+            const ventasDelDia = ventasDelMes.filter(v => v.dia === dia);
+            
+            titulo.innerHTML = '<i class="fas fa-calendar-day"></i> Ventas del ' + dia + ' de {{ nombre_mes }} {{ anio_actual }}';
+            
+            if (ventasDelDia.length === 0) {
+                contenido.innerHTML = '<p class="empty-message">No hay ventas registradas este día</p>';
+            } else {
+                let totalDia = 0;
+                let html = '<div class="modal-ventas-lista">';
+                
+                ventasDelDia.forEach(function(venta) {
+                    totalDia += venta.total;
+                    html += `
+                        <div class="modal-venta-item">
+                            <div class="modal-venta-info">
+                                <h4>${venta.producto}</h4>
+                                <p><i class="fas fa-user"></i> ${venta.cliente}</p>
+                                <p><i class="fas fa-boxes"></i> Cantidad: ${venta.cantidad}</p>
+                                <p><i class="fas fa-clock"></i> ${venta.hora}</p>
+                            </div>
+                            <div class="modal-venta-total">
+                                $${venta.total.toLocaleString('es-CO')}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                html += `
+                    <div class="modal-resumen">
+                        <div class="modal-resumen-item">
+                            <span>Total de ventas:</span>
+                            <strong>${ventasDelDia.length}</strong>
+                        </div>
+                        <div class="modal-resumen-item">
+                            <span>Total del día:</span>
+                            <strong>$${totalDia.toLocaleString('es-CO')}</strong>
+                        </div>
+                    </div>
+                `;
+                
+                contenido.innerHTML = html;
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        function cerrarModal() {
+            document.getElementById('modalVentasDia').style.display = 'none';
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modalVentasDia').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+        
+        // Cerrar modal con tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                cerrarModal();
+            }
         });
     </script>
 </body>

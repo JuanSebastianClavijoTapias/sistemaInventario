@@ -155,6 +155,24 @@ def ventas_form(request):
         for item in dias_con_ventas
     }
     
+    # Lista detallada de ventas del mes para el modal
+    ventas_mes = Venta.objects.filter(
+        fecha__year=hoy.year,
+        fecha__month=hoy.month
+    ).select_related('cliente', 'producto').order_by('-fecha')
+    
+    ventas_mes_lista = [
+        {
+            'dia': venta.fecha.day,
+            'producto': venta.producto.nombre,
+            'cliente': f"{venta.cliente.nombre} {venta.cliente.apellido}",
+            'cantidad': venta.cantidad,
+            'total': float(venta.total),
+            'hora': venta.fecha.strftime('%H:%M')
+        }
+        for venta in ventas_mes
+    ]
+    
     # Información del calendario
     cal = calendar.Calendar(firstweekday=0)  # Lunes como primer día
     mes_actual = hoy.month
@@ -209,6 +227,7 @@ def ventas_form(request):
         'top_cliente': top_cliente,
         # Calendario
         'dias_ventas_json': json.dumps(dias_ventas_dict),
+        'ventas_mes_json': json.dumps(ventas_mes_lista),
         'dias_del_mes': dias_del_mes,
         'nombre_mes': nombre_mes,
         'anio_actual': anio_actual,
