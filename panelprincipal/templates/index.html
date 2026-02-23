@@ -26,11 +26,179 @@
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div class="finance-info">
-                    <h3>Total Finanzas</h3>
+                    <h3>Total Finanzas - Semana Actual</h3>
                     <p class="finance-amount" id="totalFinanzas">${{ total_finanzas|floatformat:0 }}</p>
                     <div class="finance-details">
                         <span class="income"><i class="fas fa-arrow-up"></i> Ingresos: <span id="totalIngresos">${{ total_ingresos|floatformat:0 }}</span></span>
                         <span class="expense"><i class="fas fa-arrow-down"></i> Gastos: <span id="totalGastos">${{ total_gastos_finanzas|floatformat:0 }}</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Info de la Semana -->
+            <div class="semana-info-card">
+                <div class="semana-fechas">
+                    <span class="semana-label">Período:</span>
+                    <span class="semana-fecha-valor">{{ fecha_inicio_semana|date:"d/m/Y" }} - {{ fecha_fin_semana|date:"d/m/Y" }}</span>
+                </div>
+                <div class="semana-dias">
+                    <span class="dias-restantes">{{ dias_restantes }} días restantes</span>
+                </div>
+                <div class="semana-acciones">
+                    <a href="{% url 'liquidar_semana' %}" class="btn-liquidar">
+                        <i class="fas fa-calculator"></i> Liquidar Semana
+                    </a>
+                    <a href="{% url 'historial_semanas' %}" class="btn-historial">
+                        <i class="fas fa-history"></i> Historial
+                    </a>
+                </div>
+            </div>
+        </section>
+        
+        <style>
+            .finance-panel {
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+            }
+            .finance-card {
+                flex: 2;
+                min-width: 300px;
+            }
+            .semana-info-card {
+                flex: 1;
+                min-width: 250px;
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border-radius: 15px;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            .semana-fechas {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .semana-label {
+                font-size: 0.85rem;
+                color: #666;
+                font-weight: 600;
+            }
+            .semana-fecha-valor {
+                font-size: 1.1rem;
+                color: #333;
+                font-weight: bold;
+            }
+            .semana-dias {
+                text-align: center;
+            }
+            .dias-restantes {
+                display: inline-block;
+                background: #007bff;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-weight: bold;
+            }
+            .semana-acciones {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .btn-liquidar {
+                flex: 1;
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 8px;
+                text-decoration: none;
+                text-align: center;
+                font-weight: 600;
+                transition: transform 0.3s;
+            }
+            .btn-liquidar:hover {
+                transform: scale(1.05);
+            }
+            .btn-historial {
+                flex: 1;
+                background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 8px;
+                text-decoration: none;
+                text-align: center;
+                font-weight: 600;
+                transition: transform 0.3s;
+            }
+            .btn-historial:hover {
+                transform: scale(1.05);
+            }
+        </style>
+
+        <!-- Panel de Ventas Detallado -->
+        <section class="ventas-detalle-panel">
+            <h2 class="section-title">Resumen de Ventas</h2>
+            <div class="ventas-detalle-grid">
+                <!-- Total Recaudado -->
+                <div class="ventas-detalle-card recaudado">
+                    <div class="ventas-detalle-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="ventas-detalle-content">
+                        <span class="ventas-detalle-label">Total Recaudado</span>
+                        <span class="ventas-detalle-valor">${{ total_recaudado|floatformat:0 }}</span>
+                        <span class="ventas-detalle-subtitulo">Dinero cobrado efectivamente</span>
+                    </div>
+                </div>
+                
+                <!-- Ventas Pago Completo -->
+                <div class="ventas-detalle-card completo">
+                    <div class="ventas-detalle-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="ventas-detalle-content">
+                        <span class="ventas-detalle-label">Ventas Pago Completo</span>
+                        <span class="ventas-detalle-valor">${{ total_ventas_completo|floatformat:0 }}</span>
+                        <span class="ventas-detalle-subtitulo">{{ cantidad_ventas_completo }} ventas al contado</span>
+                    </div>
+                </div>
+                
+                <!-- Ventas a Crédito -->
+                <div class="ventas-detalle-card credito">
+                    <div class="ventas-detalle-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="ventas-detalle-content">
+                        <span class="ventas-detalle-label">Dado a Crédito</span>
+                        <span class="ventas-detalle-valor">${{ total_ventas_credito|floatformat:0 }}</span>
+                        <span class="ventas-detalle-subtitulo">{{ cantidad_ventas_credito }} ventas fiadas</span>
+                    </div>
+                </div>
+                
+                <!-- Cobrado de Créditos -->
+                <div class="ventas-detalle-card cobrado-credito">
+                    <div class="ventas-detalle-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <div class="ventas-detalle-content">
+                        <span class="ventas-detalle-label">Cobrado de Créditos</span>
+                        <span class="ventas-detalle-valor">${{ cobrado_de_creditos|floatformat:0 }}</span>
+                        <span class="ventas-detalle-subtitulo">Pendiente: ${{ pendiente_creditos|floatformat:0 }}</span>
+                    </div>
+                </div>
+                
+                <!-- Ganancia Total -->
+                <div class="ventas-detalle-card ganancia">
+                    <div class="ventas-detalle-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="ventas-detalle-content">
+                        <span class="ventas-detalle-label">Ganancia Total</span>
+                        <span class="ventas-detalle-valor">${{ total_ganancia|floatformat:0 }}</span>
+                        <span class="ventas-detalle-subtitulo">Utilidad neta de ventas</span>
                     </div>
                 </div>
             </div>

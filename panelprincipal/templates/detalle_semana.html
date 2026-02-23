@@ -1,0 +1,262 @@
+{% load static %}
+{% load currency_filters %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle Semana {{ liquidacion.numero_semana }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        .detalle-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .detalle-header {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .detalle-header h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: white;
+        }
+        .numero-semana {
+            font-size: 4rem;
+            font-weight: bold;
+            opacity: 0.3;
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+        }
+        .periodo-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-top: 15px;
+            color: white;
+        }
+        .btn-volver {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            font-weight: 600;
+        }
+        .btn-volver:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            color: white;
+        }
+        .balance-destacado {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 25px;
+        }
+        .balance-destacado h2 {
+            margin: 0 0 10px;
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
+        }
+        .balance-monto {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+        .balance-monto.positivo {
+            color: #00f5a0;
+        }
+        .balance-monto.negativo {
+            color: #ff6b6b;
+        }
+        .datos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .dato-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .dato-card h3 {
+            margin: 0 0 15px;
+            font-size: 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .dato-card h3 i {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .dato-card.ingresos h3 i { background: linear-gradient(135deg, #00d9a5, #00f5a0); }
+        .dato-card.gastos h3 i { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+        .dato-card.creditos h3 i { background: linear-gradient(135deg, #f7971e, #ffd200); }
+        .dato-card.ventas h3 i { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .dato-card.ganancia h3 i { background: linear-gradient(135deg, #00d9a5, #00f5a0); }
+        .dato-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .dato-item:last-child {
+            border-bottom: none;
+        }
+        .dato-item .label {
+            color: rgba(255,255,255,0.6);
+        }
+        .dato-item .valor {
+            font-weight: 600;
+            color: white;
+        }
+        .dato-item .valor.positivo {
+            color: #00f5a0;
+        }
+        .dato-item .valor.negativo {
+            color: #ff6b6b;
+        }
+        .fecha-liquidacion {
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="detalle-container">
+        <div class="detalle-header" style="position: relative; overflow: hidden;">
+            <span class="numero-semana">{{ liquidacion.numero_semana }}</span>
+            <h1><i class="fas fa-calendar-week"></i> Semana {{ liquidacion.numero_semana }}</h1>
+            <div class="periodo-badge">
+                {{ liquidacion.fecha_inicio|date:"d/m/Y" }} - {{ liquidacion.fecha_fin|date:"d/m/Y" }}
+            </div>
+            <div>
+                <a href="{% url 'historial_semanas' %}" class="btn-volver">
+                    <i class="fas fa-arrow-left"></i> Volver al Historial
+                </a>
+            </div>
+        </div>
+
+            <div class="balance-destacado">
+                <h2>Balance Final de la Semana</h2>
+                <div class="balance-monto {% if liquidacion.balance_final >= 0 %}positivo{% else %}negativo{% endif %}">
+                    ${{ liquidacion.balance_final|floatformat:0 }}
+                </div>
+            </div>
+
+            <div class="datos-grid">
+                <!-- Ingresos -->
+                <div class="dato-card ingresos">
+                    <h3><i class="fas fa-arrow-up"></i> Ingresos</h3>
+                    <div class="dato-item">
+                        <span class="label">Total Ingresos</span>
+                        <span class="valor positivo">${{ liquidacion.total_ingresos|floatformat:0 }}</span>
+                    </div>
+                    <div class="dato-item">
+                        <span class="label">Total Recaudado</span>
+                        <span class="valor">${{ liquidacion.total_recaudado|floatformat:0 }}</span>
+                    </div>
+                </div>
+
+                <!-- Gastos -->
+                <div class="dato-card gastos">
+                    <h3><i class="fas fa-arrow-down"></i> Gastos</h3>
+                    <div class="dato-item">
+                        <span class="label">Total Gastos</span>
+                        <span class="valor negativo">${{ liquidacion.total_gastos|floatformat:0 }}</span>
+                    </div>
+                </div>
+
+                <!-- Ventas -->
+                <div class="dato-card ventas">
+                    <h3><i class="fas fa-shopping-cart"></i> Ventas</h3>
+                    <div class="dato-item">
+                        <span class="label">Cantidad de Ventas</span>
+                        <span class="valor">{{ liquidacion.cantidad_ventas }}</span>
+                    </div>
+                    <div class="dato-item">
+                        <span class="label">Ventas al Contado</span>
+                        <span class="valor">{{ liquidacion.cantidad_ventas_completo }}</span>
+                    </div>
+                    <div class="dato-item">
+                        <span class="label">Monto Contado</span>
+                        <span class="valor">${{ liquidacion.total_ventas_completo|floatformat:0 }}</span>
+                    </div>
+                </div>
+
+                <!-- Créditos -->
+                <div class="dato-card creditos">
+                    <h3><i class="fas fa-clock"></i> Créditos</h3>
+                    <div class="dato-item">
+                        <span class="label">Ventas a Crédito</span>
+                        <span class="valor">{{ liquidacion.cantidad_ventas_credito }}</span>
+                    </div>
+                    <div class="dato-item">
+                        <span class="label">Monto Créditos</span>
+                        <span class="valor">${{ liquidacion.total_ventas_credito|floatformat:0 }}</span>
+                    </div>
+                    <div class="dato-item">
+                        <span class="label">Cobrado de Créditos</span>
+                        <span class="valor positivo">${{ liquidacion.cobrado_de_creditos|floatformat:0 }}</span>
+                    </div>
+                </div>
+
+                <!-- Ganancia -->
+                <div class="dato-card ganancia">
+                    <h3><i class="fas fa-chart-line"></i> Ganancia</h3>
+                    <div class="dato-item">
+                        <span class="label">Ganancia Total</span>
+                        <span class="valor positivo">${{ liquidacion.total_ganancia|floatformat:0 }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="fecha-liquidacion">
+                <i class="fas fa-clock"></i> Liquidación realizada el {{ liquidacion.fecha_liquidacion|date:"d/m/Y H:i" }}
+            </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,219 @@
+{% load static %}
+{% load currency_filters %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquidar Semana</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .liquidar-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .liquidar-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .liquidar-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .liquidar-header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        .periodo-info {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .resumen-liquidacion {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .resumen-titulo {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .resumen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .resumen-item {
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        .resumen-item.positivo {
+            border-left: 4px solid #28a745;
+        }
+        .resumen-item.negativo {
+            border-left: 4px solid #dc3545;
+        }
+        .resumen-item.neutro {
+            border-left: 4px solid #007bff;
+        }
+        .resumen-item .label {
+            display: block;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .resumen-item .valor {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .balance-final {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .balance-final h2 {
+            margin: 0 0 10px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .balance-final .monto {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .acciones-form {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-confirmar {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .btn-confirmar:hover {
+            transform: scale(1.05);
+        }
+        .btn-cancelar {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .btn-cancelar:hover {
+            transform: scale(1.05);
+        }
+        .advertencia {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 20px;
+        }
+        .advertencia i {
+            color: #ffc107;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="liquidar-container">
+            <div class="liquidar-header">
+                <h1><i class="fas fa-calculator"></i> Liquidar Semana</h1>
+                <p>Resumen del período a liquidar</p>
+                <div class="periodo-info">
+                    <strong>Período:</strong> {{ fecha_inicio|date:"d/m/Y" }} - {{ fecha_fin|date:"d/m/Y" }}
+                </div>
+            </div>
+
+            <div class="advertencia">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Atención:</strong> Al liquidar se guardará el resumen de esta semana y se iniciará un nuevo período.
+            </div>
+
+            <div class="resumen-liquidacion">
+                <h3 class="resumen-titulo"><i class="fas fa-chart-bar"></i> Resumen de la Semana</h3>
+                <div class="resumen-grid">
+                    <div class="resumen-item positivo">
+                        <span class="label">Total Ingresos</span>
+                        <span class="valor">${{ datos.total_ingresos|floatformat:0 }}</span>
+                    </div>
+                    <div class="resumen-item negativo">
+                        <span class="label">Total Gastos</span>
+                        <span class="valor">${{ datos.total_gastos|floatformat:0 }}</span>
+                    </div>
+                    <div class="resumen-item neutro">
+                        <span class="label">Total Recaudado</span>
+                        <span class="valor">${{ datos.total_recaudado|floatformat:0 }}</span>
+                    </div>
+                    <div class="resumen-item positivo">
+                        <span class="label">Ventas Contado</span>
+                        <span class="valor">${{ datos.total_ventas_completo|floatformat:0 }}</span>
+                    </div>
+                    <div class="resumen-item neutro">
+                        <span class="label">Ventas a Crédito</span>
+                        <span class="valor">${{ datos.total_ventas_credito|floatformat:0 }}</span>
+                    </div>
+                    <div class="resumen-item positivo">
+                        <span class="label">Cobrado de Créditos</span>
+                        <span class="valor">${{ datos.cobrado_de_creditos|floatformat:0 }}</span>
+                    </div>
+                    <div class="resumen-item positivo">
+                        <span class="label">Ganancia</span>
+                        <span class="valor">${{ datos.total_ganancia|floatformat:0 }}</span>
+                    </div>
+                    <div class="resumen-item neutro">
+                        <span class="label">Cantidad Ventas</span>
+                        <span class="valor">{{ datos.cantidad_ventas }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="balance-final">
+                <h2>Balance Final de la Semana</h2>
+                <div class="monto">${{ datos.total_finanzas|floatformat:0 }}</div>
+            </div>
+
+            <form method="post" class="acciones-form">
+                {% csrf_token %}
+                <button type="submit" class="btn-confirmar">
+                    <i class="fas fa-check"></i> Confirmar Liquidación
+                </button>
+                <a href="{% url 'inicio' %}" class="btn-cancelar">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

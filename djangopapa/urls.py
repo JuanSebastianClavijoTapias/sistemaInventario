@@ -22,6 +22,9 @@ from panelprincipal import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.saludo, name='inicio'),
+    path('liquidar/', views.liquidar_semana, name='liquidar_semana'),
+    path('historial-semanas/', views.historial_semanas, name='historial_semanas'),
+    path('historial-semanas/<int:pk>/', views.detalle_semana, name='detalle_semana'),
     path('ventas/', include('apps.ventas.urls')),
     path('productos/', include('apps.productos.urls')),
     path('clientes/', include('apps.clientes.urls')),

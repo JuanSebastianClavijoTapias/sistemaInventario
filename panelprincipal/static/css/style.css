@@ -137,6 +137,164 @@ body {
     color: #ff8a80;
 }
 
+/* Panel de Ventas Detallado */
+.ventas-detalle-panel {
+    margin-bottom: 35px;
+}
+
+.ventas-detalle-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+}
+
+@media (max-width: 1400px) {
+    .ventas-detalle-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .ventas-detalle-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .ventas-detalle-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ventas-detalle-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 22px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    border-top: 4px solid;
+    min-height: 160px;
+}
+
+.ventas-detalle-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.ventas-detalle-card.recaudado {
+    border-top-color: #4CAF50;
+}
+
+.ventas-detalle-card.completo {
+    border-top-color: #2196F3;
+}
+
+.ventas-detalle-card.credito {
+    border-top-color: #FF9800;
+}
+
+.ventas-detalle-card.cobrado-credito {
+    border-top-color: #00BCD4;
+}
+
+.ventas-detalle-card.ganancia {
+    border-top-color: #9C27B0;
+}
+
+.ventas-detalle-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ventas-detalle-card.recaudado .ventas-detalle-icon {
+    background: linear-gradient(135deg, #4CAF50, #81C784);
+    color: white;
+}
+
+.ventas-detalle-card.completo .ventas-detalle-icon {
+    background: linear-gradient(135deg, #2196F3, #64B5F6);
+    color: white;
+}
+
+.ventas-detalle-card.credito .ventas-detalle-icon {
+    background: linear-gradient(135deg, #FF9800, #FFB74D);
+    color: white;
+}
+
+.ventas-detalle-card.cobrado-credito .ventas-detalle-icon {
+    background: linear-gradient(135deg, #00BCD4, #4DD0E1);
+    color: white;
+}
+
+.ventas-detalle-card.ganancia .ventas-detalle-icon {
+    background: linear-gradient(135deg, #9C27B0, #BA68C8);
+    color: white;
+}
+
+.ventas-detalle-icon i {
+    font-size: 1.4rem;
+}
+
+.ventas-detalle-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.ventas-detalle-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.ventas-detalle-valor {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.ventas-detalle-card.recaudado .ventas-detalle-valor {
+    color: #2e7d32;
+}
+
+.ventas-detalle-card.completo .ventas-detalle-valor {
+    color: #1565c0;
+}
+
+.ventas-detalle-card.credito .ventas-detalle-valor {
+    color: #ef6c00;
+}
+
+.ventas-detalle-card.cobrado-credito .ventas-detalle-valor {
+    color: #00838f;
+}
+
+.ventas-detalle-card.ganancia .ventas-detalle-valor {
+    color: #7b1fa2;
+}
+
+.ventas-detalle-subtitulo {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
 /* Section Title */
 .section-title {
     font-size: 1.5rem;

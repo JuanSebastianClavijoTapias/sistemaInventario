@@ -69,7 +69,7 @@ def ventas_form(request):
             except ValueError:
                 dias_credito = 15
             
-            fecha_vencimiento = timezone.now().date() + timedelta(days=dias_credito)
+            fecha_vencimiento = timezone.localdate() + timedelta(days=dias_credito)
             estado_pago = 'pendiente' if monto_pagado < total else 'pagado'
         
         # Crear la venta
@@ -102,8 +102,8 @@ def ventas_form(request):
     clientes = Clientes.objects.all()
     productos = Productos.objects.all()
     
-    # Fecha actual
-    hoy = timezone.now().date()
+    # Fecha actual (usa zona horaria local)
+    hoy = timezone.localdate()
     
     # Actualizar estados de pago vencidos
     ventas_pendientes = Venta.objects.filter(estado_pago='pendiente')
