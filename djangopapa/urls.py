@@ -16,11 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
 from panelprincipal import views
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('cuenta-suspendida/', views.cuenta_suspendida, name='cuenta_suspendida'),
     path('', views.saludo, name='inicio'),
     path('liquidar/', views.liquidar_semana, name='liquidar_semana'),
     path('historial-semanas/', views.historial_semanas, name='historial_semanas'),

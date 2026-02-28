@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.db.models import Sum, F, Count
 from django.contrib import messages
+from django.contrib.auth.decorators import login_not_required
 from django.utils import timezone
 from datetime import timedelta
 from apps.clientes.models import Clientes
@@ -64,11 +65,15 @@ def calcular_datos_semana(fecha_inicio, fecha_fin):
     # Ganancia
     total_ganancia = ventas_semana.aggregate(total=Sum('ganancia'))['total'] or 0
     
+    # Balance real = solo dinero efectivamente cobrado - gastos
+    balance_real = total_recaudado - total_gastos
+    
     return {
         'total_ingresos': total_ingresos,
         'total_gastos': total_gastos,
         'total_finanzas': total_finanzas,
         'total_recaudado': total_recaudado,
+        'balance_real': balance_real,
         'total_ventas_credito': total_ventas_credito,
         'cantidad_ventas_credito': cantidad_ventas_credito,
         'cobrado_de_creditos': cobrado_de_creditos,
@@ -175,7 +180,7 @@ def liquidar_semana(request):
             cobrado_de_creditos=datos['cobrado_de_creditos'],
             total_gastos=datos['total_gastos'],
             total_ganancia=datos['total_ganancia'],
-            balance_final=datos['total_finanzas'],
+            balance_final=datos['balance_real'],
             cantidad_ventas=datos['cantidad_ventas'],
             cantidad_ventas_completo=datos['cantidad_ventas_completo'],
             cantidad_ventas_credito=datos['cantidad_ventas_credito'],
@@ -203,12 +208,14 @@ def historial_semanas(request):
     """Vista para ver el historial de liquidaciones"""
     liquidaciones = LiquidacionSemanal.objects.all()
     
-    # Totales históricos
+    # Totales históricos - usar total_recaudado en vez de total_ingresos
+    # porque las deudas de clientes no son plata que haya entrado
     totales = liquidaciones.aggregate(
-        total_ingresos=Sum('total_ingresos'),
+        total_recaudado=Sum('total_recaudado'),
         total_gastos=Sum('total_gastos'),
         total_ganancia=Sum('total_ganancia'),
         total_balance=Sum('balance_final'),
+        total_pendiente=Sum(F('total_ventas_credito') - F('cobrado_de_creditos')),
     )
     
     context = {
@@ -236,3 +243,9 @@ def clientes(request):
 
 def proveedores(request):
     return render(request, 'proveedores.html')
+
+
+@login_not_required
+def cuenta_suspendida(request):
+    """Vista que se muestra cuando la suscripción está vencida o suspendida"""
+    return render(request, 'cuenta_suspendida.html')

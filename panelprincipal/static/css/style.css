@@ -144,7 +144,7 @@ body {
 
 .ventas-detalle-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 18px;
 }
 
@@ -286,6 +286,19 @@ body {
 
 .ventas-detalle-card.ganancia .ventas-detalle-valor {
     color: #7b1fa2;
+}
+
+.ventas-detalle-card.por-cobrar {
+    border-top-color: #e53935;
+}
+
+.ventas-detalle-card.por-cobrar .ventas-detalle-icon {
+    background: linear-gradient(135deg, #e53935, #ef5350);
+    color: white;
+}
+
+.ventas-detalle-card.por-cobrar .ventas-detalle-valor {
+    color: #c62828;
 }
 
 .ventas-detalle-subtitulo {

@@ -16,8 +16,43 @@
                 <i class="fas fa-leaf"></i>
                 <h1>PAPA</h1>
             </div>
-
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-logout-header" title="Cerrar Sesión">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </form>
         </header>
+        
+        <style>
+            .header {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+            }
+            .btn-logout-header {
+                position: absolute;
+                right: 20px;
+                background: rgba(255,255,255,0.2);
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                text-decoration: none;
+                transition: background 0.3s;
+                font-size: 1.1rem;
+                cursor: pointer;
+                padding: 0;
+            }
+            .btn-logout-header:hover {
+                background: rgba(255,255,255,0.35);
+            }
+        </style>
 
         <!-- Panel de Finanzas -->
         <section class="finance-panel">
@@ -199,6 +234,18 @@
                         <span class="ventas-detalle-label">Ganancia Total</span>
                         <span class="ventas-detalle-valor">${{ total_ganancia|floatformat:0 }}</span>
                         <span class="ventas-detalle-subtitulo">Utilidad neta de ventas</span>
+                    </div>
+                </div>
+                
+                <!-- Saldo Por Cobrar Global -->
+                <div class="ventas-detalle-card por-cobrar">
+                    <div class="ventas-detalle-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="ventas-detalle-content">
+                        <span class="ventas-detalle-label">Saldo Por Cobrar</span>
+                        <span class="ventas-detalle-valor">${{ total_por_cobrar|floatformat:0 }}</span>
+                        <span class="ventas-detalle-subtitulo">Deuda total de clientes</span>
                     </div>
                 </div>
             </div>

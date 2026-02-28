@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuenta Suspendida - PAPA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .suspended-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+            overflow: hidden;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+        }
+        .suspended-header {
+            background: linear-gradient(135deg, #e53935, #c62828);
+            padding: 40px 30px;
+            color: white;
+        }
+        .suspended-header .icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+        }
+        .suspended-header .icon i {
+            font-size: 2.5rem;
+        }
+        .suspended-header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+        }
+        .suspended-header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        .suspended-body {
+            padding: 35px 30px;
+        }
+        .info-card {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .info-card i {
+            color: #f9a825;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        .info-card p {
+            color: #5d4037;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .info-card strong {
+            color: #e65100;
+        }
+        .contact-info {
+            margin-bottom: 25px;
+        }
+        .contact-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .contact-info a {
+            color: #2e7d32;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .btn-logout {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 30px;
+            background: #e0e0e0;
+            color: #555;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-logout:hover {
+            background: #bdbdbd;
+        }
+    </style>
+</head>
+<body>
+    <div class="suspended-container">
+        <div class="suspended-header">
+            <div class="icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h1>Cuenta Suspendida</h1>
+            <p>Tu acceso al sistema ha sido temporalmente deshabilitado</p>
+        </div>
+        <div class="suspended-body">
+            <div class="info-card">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Tu suscripción ha <strong>vencido o fue suspendida</strong>. Para reactivar tu acceso, comunícate con el administrador y realiza el pago correspondiente.</p>
+            </div>
+            <div class="contact-info">
+                <p><i class="fas fa-phone"></i> Contacto: <a href="tel:+57XXXXXXXXXX">+57 XXX XXX XXXX</a></p>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:soporte@papa.com">soporte@papa.com</a></p>
+            </div>
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

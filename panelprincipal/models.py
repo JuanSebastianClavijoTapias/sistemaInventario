@@ -1,7 +1,40 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 # Create your models here.
+
+class Suscripcion(models.Model):
+    """Controla la suscripción mensual del cliente"""
+    ESTADO_CHOICES = [
+        ('activa', 'Activa'),
+        ('suspendida', 'Suspendida'),
+    ]
+    
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='suscripcion')
+    estado = models.CharField(max_length=12, choices=ESTADO_CHOICES, default='activa')
+    fecha_vencimiento = models.DateField(verbose_name="Fecha de Vencimiento")
+    fecha_ultimo_pago = models.DateField(null=True, blank=True, verbose_name="Último Pago")
+    notas = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        verbose_name = "Suscripción"
+        verbose_name_plural = "Suscripciones"
+    
+    def __str__(self):
+        return f"{self.usuario.username} - {self.estado} (vence {self.fecha_vencimiento})"
+    
+    @property
+    def esta_activa(self):
+        """Verifica que la suscripción esté activa y no haya vencido"""
+        if self.estado == 'suspendida':
+            return False
+        return self.fecha_vencimiento >= timezone.localdate()
+    
+    @property
+    def dias_restantes(self):
+        dias = (self.fecha_vencimiento - timezone.localdate()).days
+        return max(0, dias)
 
 class LiquidacionSemanal(models.Model):
     """Modelo para guardar el historial de liquidaciones semanales"""
