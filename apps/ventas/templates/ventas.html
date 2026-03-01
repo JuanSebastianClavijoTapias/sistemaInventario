@@ -92,6 +92,30 @@
             font-weight: bold;
             color: #333;
         }
+        /* Vista previa del monto */
+        .monto-preview {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        .monto-preview .preview-label {
+            font-size: 0.7rem;
+            color: #2e7d32;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .monto-preview .preview-valor {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1b5e20;
+            font-family: 'Segoe UI', monospace;
+        }
         .lista-section {
             background: white;
             padding: 20px;
@@ -602,7 +626,11 @@
                     </div>
                     <div class="form-group" id="monto_pagado_group" style="display: none;">
                         <label for="monto_pagado">Monto Pagado</label>
-                        <input type="number" name="monto_pagado" id="monto_pagado" min="0" step="0.01" onchange="calcularTotal()">
+                        <input type="number" name="monto_pagado" id="monto_pagado" min="0" step="1" onchange="calcularTotal()" oninput="mostrarPreviewMonto(this.value)">
+                        <div class="monto-preview" id="previewMontoPagado">
+                            <div class="preview-label">Estás ingresando</div>
+                            <div class="preview-valor">$0</div>
+                        </div>
                     </div>
                     <div class="form-group" id="dias_credito_group" style="display: none;">
                         <label for="dias_credito">Días de Crédito</label>
@@ -779,6 +807,23 @@
     <script>
         const CAL_NOMBRE_MES = '{{ nombre_mes }}';
         const CAL_ANIO = '{% localize off %}{{ anio_actual }}{% endlocalize %}';
+
+        // Función para mostrar preview de montos formateados
+        function formatoPesos(valor) {
+            return '$' + Number(valor).toLocaleString('es-CO');
+        }
+
+        function mostrarPreviewMonto(valor) {
+            const preview = document.getElementById('previewMontoPagado');
+            
+            if (valor && valor > 0) {
+                preview.style.display = 'block';
+                preview.querySelector('.preview-valor').textContent = formatoPesos(valor);
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
         function calcularTotal() {
             const productoSelect = document.getElementById('producto');
             const cantidadInput = document.getElementById('cantidad');

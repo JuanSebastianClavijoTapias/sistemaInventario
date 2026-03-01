@@ -1,0 +1,756 @@
+{% load static %}
+{% load currency_filters %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes Por Cobrar</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Resumen superior */
+        .resumen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .resumen-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid;
+        }
+        .resumen-card.total-deuda { border-left-color: #ef5350; }
+        .resumen-card.total-clientes { border-left-color: #FF9800; }
+        .resumen-card .resumen-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .resumen-card .resumen-icon i { font-size: 1.3rem; color: white; }
+        .resumen-card.total-deuda .resumen-icon { background: linear-gradient(135deg, #ef5350, #e57373); }
+        .resumen-card.total-clientes .resumen-icon { background: linear-gradient(135deg, #FF9800, #FFB74D); }
+        .resumen-card .resumen-content { flex: 1; }
+        .resumen-card .resumen-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .resumen-card .resumen-valor {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+        .resumen-card.total-deuda .resumen-valor { color: #c62828; }
+        .resumen-card.total-clientes .resumen-valor { color: #ef6c00; }
+
+        /* Sección de clientes */
+        .clientes-section {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .clientes-section-header {
+            padding: 20px 25px;
+            border-bottom: 2px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .clientes-section-header h2 {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .clientes-section-header h2 i { color: var(--primary-color); }
+        .badge-count {
+            background: linear-gradient(135deg, #ef5350, #e57373);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Cards de clientes */
+        .clientes-list { padding: 15px; display: grid; gap: 16px; }
+
+        .cliente-card {
+            background: #f8f9fa;
+            border-radius: 14px;
+            border: 1px solid #e9ecef;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .cliente-card:hover {
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow);
+        }
+
+        .cliente-header {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
+            gap: 16px;
+        }
+        .cliente-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .cliente-info { flex: 1; min-width: 0; }
+        .cliente-nombre {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .cliente-contacto {
+            display: flex;
+            gap: 14px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+        .cliente-contacto span {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .cliente-contacto span i { font-size: 0.7rem; color: var(--primary-color); }
+        .cliente-monto-total {
+            text-align: right;
+            min-width: 110px;
+            padding: 8px 12px;
+            background: #ffebee;
+            border-radius: 10px;
+        }
+        .cliente-monto-total .monto-label {
+            font-size: 0.65rem;
+            color: #c62828;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .cliente-monto-total .monto-valor {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #c62828;
+        }
+        .toggle-icon {
+            color: var(--text-secondary);
+            transition: transform 0.3s ease;
+            font-size: 1rem;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #e9ecef;
+        }
+        .toggle-icon.open { transform: rotate(180deg); background: var(--primary-light); color: white; }
+
+        /* Detalle de ventas dentro de cada cliente */
+        .cliente-ventas {
+            display: none;
+            border-top: 1px solid #e9ecef;
+            background: #fff;
+            padding: 16px 20px;
+        }
+        .cliente-ventas.visible { display: block; }
+
+        .venta-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 16px;
+            align-items: center;
+            padding: 14px 16px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #e9ecef;
+        }
+        .venta-item:last-child { margin-bottom: 0; }
+
+        .venta-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .venta-id {
+            background: #e8f5e9;
+            color: var(--primary-color);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .venta-id.vencida {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .estado-tag {
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .estado-tag.vencido { background: #c62828; color: white; }
+        .estado-tag.pendiente { background: #FF9800; color: white; }
+
+        .venta-info { min-width: 0; }
+        .venta-producto {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+        .venta-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .venta-meta span {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .venta-meta span i { font-size: 0.7rem; color: #999; }
+
+        .venta-montos {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .monto-box {
+            text-align: center;
+            padding: 8px 14px;
+            border-radius: 10px;
+            min-width: 80px;
+        }
+        .monto-box.total-venta {
+            background: #e3f2fd;
+        }
+        .monto-box.pagado {
+            background: #e8f5e9;
+        }
+        .monto-box.pendiente {
+            background: #ffebee;
+        }
+        .monto-box .box-label {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-weight: 600;
+        }
+        .monto-box .box-valor {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        .monto-box.total-venta .box-valor { color: #1565c0; }
+        .monto-box.pagado .box-valor { color: #2e7d32; }
+        .monto-box.pendiente .box-valor { color: #c62828; }
+
+        .venta-acciones {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .btn-saldar {
+            background: linear-gradient(135deg, #4CAF50, #2e7d32);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .btn-saldar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+        }
+        .btn-saldar i { font-size: 0.75rem; }
+
+        .btn-pago-parcial {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .btn-pago-parcial:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255,152,0,0.3);
+        }
+
+        /* Modal para pago parcial */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .modal-body .form-group {
+            margin-bottom: 16px;
+        }
+        .modal-body label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .modal-body input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .modal-body input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        .modal-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
+        }
+        .modal-info strong { color: var(--text-primary); }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .btn-modal-cancel {
+            background: #e9ecef;
+            color: var(--text-secondary);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-modal-confirm {
+            background: linear-gradient(135deg, #4CAF50, #2e7d32);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Vista previa del monto */
+        .monto-preview {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        .monto-preview.visible {
+            display: block;
+        }
+        .monto-preview .preview-label {
+            font-size: 0.7rem;
+            color: #2e7d32;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .monto-preview .preview-valor {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1b5e20;
+            font-family: 'Segoe UI', monospace;
+        }
+
+        /* Sin clientes */
+        .sin-clientes {
+            padding: 60px 30px;
+            text-align: center;
+        }
+        .sin-clientes .icon-container {
+            width: 100px;
+            height: 100px;
+            background: #e8f5e9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .sin-clientes .icon-container i { font-size: 2.5rem; color: #a5d6a7; }
+        .sin-clientes h3 { color: var(--text-primary); font-size: 1.3rem; margin-bottom: 8px; }
+        .sin-clientes p { color: var(--text-secondary); font-size: 0.95rem; }
+
+        /* Mensajes */
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .messages li {
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .messages .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .messages .error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        @media (max-width: 800px) {
+            .cliente-header {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 12px;
+            }
+            .cliente-avatar { margin: 0 auto; }
+            .cliente-monto-total { margin: 0 auto; }
+            .venta-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 12px;
+            }
+            .venta-montos { justify-content: center; flex-wrap: wrap; }
+            .venta-acciones { flex-direction: row; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <a href="{% url 'inicio' %}" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="header-info">
+                <h1><i class="fas fa-file-invoice-dollar"></i> Clientes Por Cobrar</h1>
+                <p>Gestiona y cobra las cuentas pendientes de tus clientes</p>
+            </div>
+        </div>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if clientes_con_ventas %}
+        <!-- Resumen -->
+        <div class="resumen-grid">
+            <div class="resumen-card total-deuda">
+                <div class="resumen-icon"><i class="fas fa-coins"></i></div>
+                <div class="resumen-content">
+                    <div class="resumen-label">Total Por Cobrar</div>
+                    <div class="resumen-valor">{{ total_por_cobrar|formato_pesos }}</div>
+                </div>
+            </div>
+            <div class="resumen-card total-clientes">
+                <div class="resumen-icon"><i class="fas fa-users"></i></div>
+                <div class="resumen-content">
+                    <div class="resumen-label">Clientes con Deuda</div>
+                    <div class="resumen-valor">{{ total_clientes_deudores }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Clientes -->
+        <div class="clientes-section">
+            <div class="clientes-section-header">
+                <h2><i class="fas fa-users"></i> Clientes Deudores</h2>
+                <span class="badge-count">{{ total_clientes_deudores }} cliente{{ total_clientes_deudores|pluralize:"s" }}</span>
+            </div>
+
+            <div class="clientes-list">
+                {% for item in clientes_con_ventas %}
+                <div class="cliente-card">
+                    <div class="cliente-header" onclick="toggleVentas(this)">
+                        <div class="cliente-avatar">
+                            {{ item.cliente.nombre|first|upper }}{{ item.cliente.apellido|first|upper }}
+                        </div>
+                        <div class="cliente-info">
+                            <div class="cliente-nombre">{{ item.cliente.nombre }} {{ item.cliente.apellido }}</div>
+                            <div class="cliente-contacto">
+                                <span><i class="fas fa-phone"></i> {{ item.cliente.telefono }}</span>
+                                <span><i class="fas fa-shopping-bag"></i> {{ item.cantidad_ventas }} venta{{ item.cantidad_ventas|pluralize:"s" }} pendiente{{ item.cantidad_ventas|pluralize:"s" }}</span>
+                            </div>
+                        </div>
+                        <div class="cliente-monto-total">
+                            <div class="monto-label">Deuda Total</div>
+                            <div class="monto-valor">{{ item.total_deuda|formato_pesos }}</div>
+                        </div>
+                        <div class="toggle-icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+
+                    <div class="cliente-ventas">
+                        {% for venta in item.ventas %}
+                        <div class="venta-item">
+                            <div class="venta-badge">
+                                <span class="venta-id {% if venta.estado_pago == 'vencido' %}vencida{% endif %}">
+                                    #{{ venta.idVenta }}
+                                </span>
+                                {% if venta.estado_pago == 'vencido' %}
+                                <span class="estado-tag vencido">Vencido</span>
+                                {% else %}
+                                <span class="estado-tag pendiente">Pendiente</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="venta-info">
+                                <div class="venta-producto">{{ venta.producto.nombre }}</div>
+                                <div class="venta-meta">
+                                    <span><i class="fas fa-cubes"></i> {{ venta.cantidad }} unid.</span>
+                                    <span><i class="fas fa-calendar"></i> {{ venta.fecha|date:"d/m/Y" }}</span>
+                                    {% if venta.fecha_vencimiento %}
+                                    <span><i class="fas fa-clock"></i> Vence: {{ venta.fecha_vencimiento|date:"d/m/Y" }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="venta-montos">
+                                <div class="monto-box total-venta">
+                                    <div class="box-label">Total</div>
+                                    <div class="box-valor">{{ venta.total|formato_pesos }}</div>
+                                </div>
+                                <div class="monto-box pagado">
+                                    <div class="box-label">Pagado</div>
+                                    <div class="box-valor">{{ venta.monto_pagado|formato_pesos }}</div>
+                                </div>
+                                <div class="monto-box pendiente">
+                                    <div class="box-label">Pendiente</div>
+                                    <div class="box-valor">{{ venta.saldo_pendiente|formato_pesos }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="venta-acciones">
+                                <form method="post" action="{% url 'saldar_venta' venta.idVenta %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-saldar" onclick="return confirm('¿Saldar completamente esta venta de {{ venta.saldo_pendiente|formato_pesos }}?')">
+                                        <i class="fas fa-check-circle"></i> Saldar
+                                    </button>
+                                </form>
+                                <button type="button" class="btn-pago-parcial" 
+                                    data-venta-id="{{ venta.idVenta }}" 
+                                    data-producto="{{ venta.producto.nombre|escapejs }}" 
+                                    data-saldo="{{ venta.saldo_pendiente|numero_limpio }}"
+                                    onclick="abrirModalPago(this)">
+                                    <i class="fas fa-hand-holding-usd"></i> Abono
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% else %}
+        <div class="clientes-section">
+            <div class="sin-clientes">
+                <div class="icon-container">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>No hay cuentas por cobrar</h3>
+                <p>Todos los clientes están al día con sus pagos</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal Pago Parcial -->
+    <div class="modal-overlay" id="modalPago">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-hand-holding-usd"></i> Registrar Abono</h3>
+                <button type="button" class="modal-close" onclick="cerrarModal()">&times;</button>
+            </div>
+            <form method="post" action="{% url 'pago_parcial_cobrar' %}" id="formPagoParcial">
+                {% csrf_token %}
+                <input type="hidden" name="venta_id" id="modalVentaId">
+                <div class="modal-body">
+                    <div class="modal-info">
+                        <strong>Producto:</strong> <span id="modalProducto"></span><br>
+                        <strong>Saldo Pendiente:</strong> <span id="modalSaldo"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="montoPago">Monto a Abonar</label>
+                        <input type="number" id="montoPago" name="monto_pago" step="1" min="1" required placeholder="Ingrese el monto" oninput="actualizarPreview(this.value)">
+                        <div class="monto-preview" id="montoPreview">
+                            <div class="preview-label">Estás ingresando</div>
+                            <div class="preview-valor" id="previewValor">$0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-modal-cancel" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn-modal-confirm">Registrar Abono</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function formatoPesos(valor) {
+            // Formato con separador de miles (punto) para pesos colombianos
+            return '$' + Number(valor).toLocaleString('es-CO');
+        }
+
+        function toggleVentas(header) {
+            const card = header.closest('.cliente-card');
+            const ventas = card.querySelector('.cliente-ventas');
+            const icon = header.querySelector('.toggle-icon');
+            ventas.classList.toggle('visible');
+            icon.classList.toggle('open');
+        }
+
+        function abrirModalPago(btn) {
+            const ventaId = btn.getAttribute('data-venta-id');
+            const producto = btn.getAttribute('data-producto');
+            // Obtener el valor limpio (sin puntos ni formato) y convertir a número
+            const saldoStr = btn.getAttribute('data-saldo').toString().replace(/\./g, '').replace(/,/g, '');
+            const saldoPendiente = Number(saldoStr);
+            
+            document.getElementById('modalVentaId').value = ventaId;
+            document.getElementById('modalProducto').textContent = producto;
+            document.getElementById('modalSaldo').textContent = formatoPesos(saldoPendiente);
+            document.getElementById('montoPago').max = saldoPendiente;
+            document.getElementById('montoPago').value = '';
+            document.getElementById('modalPago').classList.add('active');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalPago').classList.remove('active');
+            document.getElementById('formPagoParcial').reset();
+            document.getElementById('montoPreview').classList.remove('visible');
+        }
+
+        function actualizarPreview(valor) {
+            const preview = document.getElementById('montoPreview');
+            const previewValor = document.getElementById('previewValor');
+            
+            if (valor && valor > 0) {
+                preview.classList.add('visible');
+                previewValor.textContent = formatoPesos(valor);
+            } else {
+                preview.classList.remove('visible');
+            }
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modalPago').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+
+        // Cerrar modal con tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                cerrarModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -3,6 +3,9 @@ from . import views
 
 urlpatterns = [
     path('', views.ClienteListView.as_view(), name='cliente_list'),
+    path('por-cobrar/', views.clientes_por_cobrar, name='clientes_por_cobrar'),
+    path('saldar-venta/<int:pk>/', views.saldar_venta, name='saldar_venta'),
+    path('pago-parcial/', views.pago_parcial_cobrar, name='pago_parcial_cobrar'),
     path('<int:pk>/update/', views.ClienteUpdateView.as_view(), name='cliente_update'),
     path('<int:pk>/delete/', views.ClienteDeleteView.as_view(), name='cliente_delete'),
     path('<int:pk>/compras/', views.cliente_compras, name='cliente_compras'),
