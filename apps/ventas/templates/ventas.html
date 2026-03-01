@@ -1,4 +1,4 @@
-{% load static %}
+{% load static l10n %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -91,6 +91,30 @@
             font-size: 24px;
             font-weight: bold;
             color: #333;
+        }
+        /* Vista previa del monto */
+        .monto-preview {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        .monto-preview .preview-label {
+            font-size: 0.7rem;
+            color: #2e7d32;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .monto-preview .preview-valor {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1b5e20;
+            font-family: 'Segoe UI', monospace;
         }
         .lista-section {
             background: white;
@@ -216,6 +240,11 @@
         }
         .calendario-dia.con-venta:hover {
             background: #c8e6c9;
+        }
+        .calendario-dia.selected {
+            box-shadow: 0 6px 18px rgba(46,125,50,0.12);
+            transform: translateY(-4px);
+            border-radius: 8px;
         }
         .calendario-dia.hoy {
             border: 2px solid #4CAF50;
@@ -597,7 +626,11 @@
                     </div>
                     <div class="form-group" id="monto_pagado_group" style="display: none;">
                         <label for="monto_pagado">Monto Pagado</label>
-                        <input type="number" name="monto_pagado" id="monto_pagado" min="0" step="0.01" onchange="calcularTotal()">
+                        <input type="number" name="monto_pagado" id="monto_pagado" min="0" step="1" onchange="calcularTotal()" oninput="mostrarPreviewMonto(this.value)">
+                        <div class="monto-preview" id="previewMontoPagado">
+                            <div class="preview-label">Estás ingresando</div>
+                            <div class="preview-valor">$0</div>
+                        </div>
                     </div>
                     <div class="form-group" id="dias_credito_group" style="display: none;">
                         <label for="dias_credito">Días de Crédito</label>
@@ -687,7 +720,7 @@
         <section class="calendario-section">
             <div class="calendario-header">
                 <h2 class="calendario-title"><i class="fas fa-calendar"></i> Calendario de Ventas</h2>
-                <span class="calendario-mes">{{ nombre_mes }} {{ anio_actual }}</span>
+                <span class="calendario-mes">{% localize off %}{{ nombre_mes }} {{ anio_actual }}{% endlocalize %}</span>
             </div>
             <div class="calendario-grid">
                 <!-- Días de la semana -->
@@ -708,7 +741,11 @@
                         </div>
                     {% endif %}
                 {% endfor %}
-            </div>
+                </div>
+                <div style="margin-top:10px; text-align:right;">
+                    <button id="verVentasSeleccionadas" style="display:none; padding:8px 12px; border-radius:8px; background:var(--primary-color); color:white; border:none; cursor:pointer;">Ver ventas seleccionadas</button>
+                </div>
+            
         </section>
 
         <!-- Buscador y Lista -->
@@ -768,6 +805,25 @@
 
     <script src="{% static 'js/ventas.js' %}"></script>
     <script>
+        const CAL_NOMBRE_MES = '{{ nombre_mes }}';
+        const CAL_ANIO = '{% localize off %}{{ anio_actual }}{% endlocalize %}';
+
+        // Función para mostrar preview de montos formateados
+        function formatoPesos(valor) {
+            return '$' + Number(valor).toLocaleString('es-CO');
+        }
+
+        function mostrarPreviewMonto(valor) {
+            const preview = document.getElementById('previewMontoPagado');
+            
+            if (valor && valor > 0) {
+                preview.style.display = 'block';
+                preview.querySelector('.preview-valor').textContent = formatoPesos(valor);
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
         function calcularTotal() {
             const productoSelect = document.getElementById('producto');
             const cantidadInput = document.getElementById('cantidad');
@@ -817,31 +873,56 @@
             const diasVentas = {{ dias_ventas_json|safe }};
             const ventasDelMes = {{ ventas_mes_json|safe }};
             const diasCalendario = document.querySelectorAll('.calendario-dia[data-dia]');
-            
+            const verBtn = document.getElementById('verVentasSeleccionadas');
+            const selectedDays = new Set();
+
             diasCalendario.forEach(function(diaElement) {
                 const dia = parseInt(diaElement.getAttribute('data-dia'));
-                
+
                 if (diasVentas[dia]) {
                     diaElement.classList.add('con-venta');
-                    
+
                     // Agregar punto indicador
                     const punto = document.createElement('span');
                     punto.className = 'venta-punto';
                     diaElement.appendChild(punto);
-                    
+
                     // Agregar tooltip con información
                     const tooltip = document.createElement('span');
                     tooltip.className = 'tooltip';
                     tooltip.textContent = '$' + Math.round(diasVentas[dia].total).toLocaleString('es-CO') + ' (' + diasVentas[dia].cantidad + ' ventas)';
                     diaElement.appendChild(tooltip);
-                    
-                    // Agregar evento clic para abrir modal
-                    diaElement.addEventListener('click', function() {
-                        abrirModalVentasDia(dia, ventasDelMes);
+
+                    // Click handler: normal click opens modal; Ctrl/Shift/Meta toggles multi-select
+                    diaElement.addEventListener('click', function(e) {
+                        if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                            // Toggle selection
+                            if (selectedDays.has(dia)) {
+                                selectedDays.delete(dia);
+                                diaElement.classList.remove('selected');
+                            } else {
+                                selectedDays.add(dia);
+                                diaElement.classList.add('selected');
+                            }
+                            // Toggle button visibility
+                            if (selectedDays.size > 0) {
+                                verBtn.style.display = 'inline-block';
+                                verBtn.textContent = 'Ver ventas seleccionadas (' + Array.from(selectedDays).sort().join(',') + ')';
+                            } else {
+                                verBtn.style.display = 'none';
+                            }
+                        } else {
+                            abrirModalVentasDia(dia, ventasDelMes);
+                        }
                     });
                 } else {
                     diaElement.classList.add('sin-venta');
                 }
+            });
+
+            verBtn.addEventListener('click', function() {
+                if (selectedDays.size === 0) return;
+                abrirModalVentasMultiple(Array.from(selectedDays).sort(), ventasDelMes);
             });
         });
         
@@ -853,7 +934,7 @@
             // Filtrar ventas del día seleccionado
             const ventasDelDia = ventasDelMes.filter(v => v.dia === dia);
             
-            titulo.innerHTML = '<i class="fas fa-calendar-day"></i> Ventas del ' + dia + ' de {{ nombre_mes }} {{ anio_actual }}';
+            titulo.innerHTML = '<i class="fas fa-calendar-day"></i> Ventas del ' + dia + ' de ' + CAL_NOMBRE_MES + ' ' + CAL_ANIO;
             
             if (ventasDelDia.length === 0) {
                 contenido.innerHTML = '<p class="empty-message">No hay ventas registradas este día</p>';
@@ -895,6 +976,59 @@
                 contenido.innerHTML = html;
             }
             
+            modal.style.display = 'flex';
+        }
+
+        function abrirModalVentasMultiple(diasArray, ventasDelMes) {
+            const modal = document.getElementById('modalVentasDia');
+            const titulo = document.getElementById('modalTitulo');
+            const contenido = document.getElementById('modalContenido');
+
+            // Filtrar ventas para los días seleccionados
+            const ventasFiltradas = ventasDelMes.filter(v => diasArray.includes(v.dia));
+
+            titulo.innerHTML = '<i class="fas fa-calendar-day"></i> Ventas de ' + diasArray.join(', ') + ' de ' + CAL_NOMBRE_MES + ' ' + CAL_ANIO;
+
+            if (ventasFiltradas.length === 0) {
+                contenido.innerHTML = '<p class="empty-message">No hay ventas registradas en los días seleccionados</p>';
+            } else {
+                let totalDias = 0;
+                let html = '<div class="modal-ventas-lista">';
+
+                ventasFiltradas.forEach(function(venta) {
+                    totalDias += venta.total;
+                    html += `
+                        <div class="modal-venta-item">
+                            <div class="modal-venta-info">
+                                <h4>${venta.producto} <small style="font-size:12px; color:#666;">(día ${venta.dia})</small></h4>
+                                <p><i class="fas fa-user"></i> ${venta.cliente}</p>
+                                <p><i class="fas fa-boxes"></i> Cantidad: ${venta.cantidad}</p>
+                                <p><i class="fas fa-clock"></i> ${venta.hora}</p>
+                            </div>
+                            <div class="modal-venta-total">
+                                $${venta.total.toLocaleString('es-CO')}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+                html += `
+                    <div class="modal-resumen">
+                        <div class="modal-resumen-item">
+                            <span>Total de ventas:</span>
+                            <strong>${ventasFiltradas.length}</strong>
+                        </div>
+                        <div class="modal-resumen-item">
+                            <span>Total combinado:</span>
+                            <strong>$${totalDias.toLocaleString('es-CO')}</strong>
+                        </div>
+                    </div>
+                `;
+
+                contenido.innerHTML = html;
+            }
+
             modal.style.display = 'flex';
         }
         

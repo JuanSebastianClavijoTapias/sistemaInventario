@@ -164,6 +164,30 @@
             font-style: italic;
             padding: 40px;
         }
+        /* Vista previa del monto */
+        .monto-preview {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        .monto-preview .preview-label {
+            font-size: 0.7rem;
+            color: #2e7d32;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .monto-preview .preview-valor {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1b5e20;
+            font-family: 'Segoe UI', monospace;
+        }
     </style>
 </head>
 <body>
@@ -215,7 +239,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="proveedorCompra">Monto Total de Compra</label>
-                        <input type="number" id="proveedorCompra" name="proveedorCompra" placeholder="0.00" step="0.01" min="0" required oninput="calcularPrecioUnitario()">
+                        <input type="number" id="proveedorCompra" name="proveedorCompra" placeholder="0" step="1" min="0" required oninput="calcularPrecioUnitario(); calcularSaldo(); mostrarPreview(this, 'previewCompra')">
+                        <div class="monto-preview" id="previewCompra">
+                            <div class="preview-label">Estás ingresando</div>
+                            <div class="preview-valor">$0</div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="precioUnitario">Precio Unitario (Compra)</label>
@@ -223,7 +251,11 @@
                     </div>
                     <div class="form-group">
                         <label for="precioVenta">Precio de Venta</label>
-                        <input type="number" id="precioVenta" name="precioVenta" placeholder="Precio al que venderás" step="0.01" min="0" oninput="calcularGanancia()">
+                        <input type="number" id="precioVenta" name="precioVenta" placeholder="Precio al que venderás" step="1" min="0" oninput="calcularGanancia(); mostrarPreview(this, 'previewVenta')">
+                        <div class="monto-preview" id="previewVenta">
+                            <div class="preview-label">Estás ingresando</div>
+                            <div class="preview-valor">$0</div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-row" id="rowGanancia" style="display: none;">
@@ -239,7 +271,11 @@
                 <div class="form-row">
                     <div class="form-group" id="initialGroup">
                         <label for="proveedorInicial">Pago Inicial (Abono)</label>
-                        <input type="number" id="proveedorInicial" name="proveedorInicial" placeholder="0.00" step="0.01" min="0">
+                        <input type="number" id="proveedorInicial" name="proveedorInicial" placeholder="0" step="1" min="0" oninput="calcularSaldo(); mostrarPreview(this, 'previewInicial')">
+                        <div class="monto-preview" id="previewInicial">
+                            <div class="preview-label">Estás ingresando</div>
+                            <div class="preview-valor">$0</div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="proveedorTipo">Tipo de Compra</label>
@@ -327,6 +363,23 @@
     </div>
 
     <script>
+        // Función para mostrar preview de montos formateados
+        function formatoPesos(valor) {
+            return '$' + Number(valor).toLocaleString('es-CO');
+        }
+
+        function mostrarPreview(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const valor = input.value;
+            
+            if (valor && valor > 0) {
+                preview.style.display = 'block';
+                preview.querySelector('.preview-valor').textContent = formatoPesos(valor);
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
         function toggleFields() {
             const tipo = document.getElementById('proveedorTipo').value;
             const initialGroup = document.getElementById('initialGroup');
@@ -348,10 +401,6 @@
                 initialInput.required = false;
             }
         }
-
-        // Calcular saldo
-        document.getElementById('proveedorCompra').addEventListener('input', calcularSaldo);
-        document.getElementById('proveedorInicial').addEventListener('input', calcularSaldo);
 
         function calcularSaldo() {
             const compra = parseFloat(document.getElementById('proveedorCompra').value) || 0;

@@ -34,6 +34,8 @@
             .btn-logout-header {
                 position: absolute;
                 right: 20px;
+                top: 50%;
+                transform: translateY(-50%);
                 background: rgba(255,255,255,0.2);
                 border: none;
                 width: 40px;
@@ -238,16 +240,16 @@
                 </div>
                 
                 <!-- Saldo Por Cobrar Global -->
-                <div class="ventas-detalle-card por-cobrar">
+                <a href="{% url 'clientes_por_cobrar' %}" class="ventas-detalle-card por-cobrar" style="text-decoration:none; color:inherit; cursor:pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;">
                     <div class="ventas-detalle-icon">
                         <i class="fas fa-file-invoice-dollar"></i>
                     </div>
                     <div class="ventas-detalle-content">
                         <span class="ventas-detalle-label">Saldo Por Cobrar</span>
                         <span class="ventas-detalle-valor">${{ total_por_cobrar|floatformat:0 }}</span>
-                        <span class="ventas-detalle-subtitulo">Deuda total de clientes</span>
+                        <span class="ventas-detalle-subtitulo">Deuda total de clientes <i class="fas fa-arrow-right" style="margin-left:4px;"></i></span>
                     </div>
-                </div>
+                </a>
             </div>
         </section>
 

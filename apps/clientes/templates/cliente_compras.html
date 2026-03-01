@@ -153,6 +153,34 @@
             border-radius: 4px;
             width: 100px;
         }
+        .pago-form-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .monto-preview {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 8px 12px;
+            text-align: center;
+            display: none;
+        }
+        .monto-preview.visible {
+            display: block;
+        }
+        .monto-preview .preview-label {
+            font-size: 0.65rem;
+            color: #2e7d32;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .monto-preview .preview-valor {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1b5e20;
+        }
         .btn-pagar {
             background: #4CAF50;
             color: white;
@@ -238,11 +266,17 @@
                         {% endif %}
                     </div>
                     <div class="pago-form">
-                        <form method="post" action="{% url 'registrar_pago' cliente.pk %}">
+                        <form method="post" action="{% url 'registrar_pago' cliente.pk %}" class="pago-form-wrapper">
                             {% csrf_token %}
                             <input type="hidden" name="venta_id" value="{{ compra.idVenta }}">
-                            <input type="number" name="monto_pago" class="pago-input" placeholder="Monto" min="1" max="{{ compra.saldo_pendiente }}" step="1" required>
-                            <button type="submit" class="btn-pagar">Pagar</button>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="number" name="monto_pago" class="pago-input" placeholder="Monto" min="1" max="{{ compra.saldo_pendiente }}" step="1" required oninput="mostrarPreview(this)">
+                                <button type="submit" class="btn-pagar">Pagar</button>
+                            </div>
+                            <div class="monto-preview">
+                                <span class="preview-label">Estás ingresando</span>
+                                <span class="preview-valor">$0</span>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -287,5 +321,24 @@
             </div>
         </section>
     </div>
+
+    <script>
+        function formatoPesos(valor) {
+            return '$' + Number(valor).toLocaleString('es-CO');
+        }
+
+        function mostrarPreview(input) {
+            const form = input.closest('form');
+            const preview = form.querySelector('.monto-preview');
+            const valor = input.value;
+            
+            if (valor && valor > 0) {
+                preview.classList.add('visible');
+                preview.querySelector('.preview-valor').textContent = formatoPesos(valor);
+            } else {
+                preview.classList.remove('visible');
+            }
+        }
+    </script>
 </body>
 </html>
