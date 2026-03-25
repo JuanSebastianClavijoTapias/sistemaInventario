@@ -7,6 +7,11 @@ from apps.productos.models import Productos
 
 # Create your models here.
 
+METODO_PAGO_CHOICES = [
+    ('efectivo', 'Efectivo'),
+    ('tarjeta', 'Tarjeta'),
+]
+
 class Venta(models.Model):
     TIPO_PAGO_CHOICES = [
         ('completo', 'Pago Completo'),
@@ -27,7 +32,9 @@ class Venta(models.Model):
     )
     producto = models.ForeignKey(
         Productos,
-        on_delete= models.CASCADE
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
     )
     cantidad = models.IntegerField()
     fecha = models.DateTimeField(auto_now_add=True)
@@ -73,6 +80,24 @@ class Venta(models.Model):
         choices=ESTADO_PAGO_CHOICES,
         default='pagado'
     )
+    metodo_pago = models.CharField(
+        max_length=10,
+        choices=METODO_PAGO_CHOICES,
+        default='efectivo',
+        verbose_name="Método de Pago"
+    )
+    
+    @property
+    def descripcion(self):
+        """Returns product description for display"""
+        if self.pk:
+            detalles = list(self.detalles.all())
+            if detalles:
+                items = [f"{d.cantidad} {d.producto.nombre}" for d in detalles]
+                return ", ".join(items)
+        if self.producto:
+            return self.producto.nombre
+        return "Sin producto"
     
     @property
     def saldo_pendiente(self):
@@ -88,26 +113,50 @@ class Venta(models.Model):
     
     @property
     def esta_vencido(self):
-        """Verifica si la venta está vencida"""
-        return self.estado_pago == 'vencido' or (
+        """Verifica si la fecha de pago sugerida ya pasó"""
+        return (
             self.fecha_vencimiento and 
             self.fecha_vencimiento < timezone.now().date() and 
             self.estado_pago == 'pendiente'
         )
     
     def actualizar_estado_pago(self):
-        """Actualiza el estado de pago basado en la fecha actual"""
+        """Actualiza el estado de pago"""
         if self.tipo_pago == 'completo':
             self.estado_pago = 'pagado'
         elif self.monto_pagado >= self.total:
             self.estado_pago = 'pagado'
-        elif self.fecha_vencimiento and self.fecha_vencimiento < timezone.now().date():
-            self.estado_pago = 'vencido'
         else:
             self.estado_pago = 'pendiente'
         self.save()
     
     def __str__(self):
         return f"Venta: {self.idVenta} - Cliente: {self.cliente.nombre}"
-    
+
+
+class Cobro(models.Model):
+    """Registra cada pago/cobro realizado sobre una venta a crédito"""
+    venta = models.ForeignKey(Venta, on_delete=models.CASCADE, related_name='cobros')
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f"Cobro ${self.monto} - Venta #{self.venta.idVenta}"
+
+
+class DetalleVenta(models.Model):
+    """Detalle de cada producto en una venta"""
+    venta = models.ForeignKey(Venta, on_delete=models.CASCADE, related_name='detalles')
+    producto = models.ForeignKey(Productos, on_delete=models.CASCADE)
+    cantidad = models.IntegerField()
+    precio_compra = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    precio_venta = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    ganancia = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    def __str__(self):
+        return f"{self.producto.nombre} x{self.cantidad} - Venta #{self.venta.idVenta}"
 

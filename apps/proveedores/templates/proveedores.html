@@ -226,57 +226,58 @@
                         <input type="tel" id="proveedorTelefono" name="proveedorTelefono" placeholder="Número de contacto">
                     </div>
                 </div>
+
+                <!-- Compra general -->
+                <h3 style="margin: 15px 0 10px; color: #333;"><i class="fas fa-shopping-cart"></i> Datos de la Compra</h3>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="proveedorDescripcion">¿Qué Compraste?</label>
-                        <input type="text" id="proveedorDescripcion" name="proveedorDescripcion" placeholder="Descripción de la compra">
+                        <label for="totalBultos">Bultos Totales del Viaje</label>
+                        <input type="number" id="totalBultos" name="totalBultos" placeholder="Ej: 150" min="1" required oninput="calcularTotalCompra()">
                     </div>
                     <div class="form-group">
-                        <label for="proveedorCantidad">Cantidad</label>
-                        <input type="number" id="proveedorCantidad" name="proveedorCantidad" placeholder="Cantidad comprada" min="1" required oninput="calcularPrecioUnitario()">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="proveedorCompra">Monto Total de Compra</label>
-                        <input type="number" id="proveedorCompra" name="proveedorCompra" placeholder="0" step="1" min="0" required oninput="calcularPrecioUnitario(); calcularSaldo(); mostrarPreview(this, 'previewCompra')">
-                        <div class="monto-preview" id="previewCompra">
-                            <div class="preview-label">Estás ingresando</div>
-                            <div class="preview-valor">$0</div>
-                        </div>
+                        <label for="precioUnitario">Precio Unitario (por bulto)</label>
+                        <input type="number" id="precioUnitario" name="precioUnitario" placeholder="Precio de compra por bulto" min="0" step="1" required oninput="calcularTotalCompra()">
                     </div>
                     <div class="form-group">
-                        <label for="precioUnitario">Precio Unitario (Compra)</label>
-                        <input type="text" id="precioUnitario" name="precioUnitario" placeholder="Se calcula automáticamente" readonly style="background: #f5f5f5;">
-                    </div>
-                    <div class="form-group">
-                        <label for="precioVenta">Precio de Venta</label>
-                        <input type="number" id="precioVenta" name="precioVenta" placeholder="Precio al que venderás" step="1" min="0" oninput="calcularGanancia(); mostrarPreview(this, 'previewVenta')">
-                        <div class="monto-preview" id="previewVenta">
-                            <div class="preview-label">Estás ingresando</div>
-                            <div class="preview-valor">$0</div>
+                        <label>Total de Compra</label>
+                        <div class="monto-preview" id="previewTotalCompra" style="display:block;">
+                            <div class="preview-label">Monto total calculado</div>
+                            <div class="preview-valor" id="totalCompraValor">$0</div>
                         </div>
                     </div>
                 </div>
-                <div class="form-row" id="rowGanancia" style="display: none;">
-                    <div class="form-group full-width">
-                        <label>Ganancia por Unidad</label>
-                        <div class="saldo-preview ganancia" style="background: #e8f5e9; color: #2e7d32;">
-                            <i class="fas fa-chart-line"></i>
-                            <span id="gananciaUnitaria">$0</span>
-                            <span id="margenGanancia" style="margin-left: 10px; font-size: 14px;">(0%)</span>
+
+                <!-- Clasificación de bultos -->
+                <h3 style="margin: 15px 0 10px; color: #333;"><i class="fas fa-boxes"></i> Clasificación de Bultos</h3>
+                <div style="background: #e3f2fd; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; color: #1565c0;">
+                    <i class="fas fa-info-circle"></i> Clasifica los bultos por calidad. Bultos clasificados: <strong id="bultosClasificados">0</strong> de <strong id="bultosTotal">0</strong>
+                    <span id="bultosFaltantes" style="color: #f44336; display: none;"> — Faltan <strong id="bultosFaltantesNum">0</strong></span>
+                </div>
+                <div id="categorias-container">
+                    <div class="categoria-row" data-index="0">
+                        <div class="form-row" style="align-items: flex-end;">
+                            <div class="form-group">
+                                <label>Categoría</label>
+                                <select name="categoria[]" required>
+                                    <option value="">Seleccionar...</option>
+                                    {% for value, label in categoria_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Bultos</label>
+                                <input type="number" name="cantidad[]" min="1" required oninput="actualizarClasificacion()">
+                            </div>
+                            <button type="button" class="btn-remove-cat" onclick="removeCategoria(this)" style="display:none; background:#f44336; color:white; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:16px; margin-bottom:5px;">&times;</button>
                         </div>
                     </div>
                 </div>
+                <button type="button" onclick="addCategoria()" style="background:#2196F3; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin: 10px 0;">
+                    <i class="fas fa-plus"></i> Agregar Categoría
+                </button>
+
                 <div class="form-row">
-                    <div class="form-group" id="initialGroup">
-                        <label for="proveedorInicial">Pago Inicial (Abono)</label>
-                        <input type="number" id="proveedorInicial" name="proveedorInicial" placeholder="0" step="1" min="0" oninput="calcularSaldo(); mostrarPreview(this, 'previewInicial')">
-                        <div class="monto-preview" id="previewInicial">
-                            <div class="preview-label">Estás ingresando</div>
-                            <div class="preview-valor">$0</div>
-                        </div>
-                    </div>
                     <div class="form-group">
                         <label for="proveedorTipo">Tipo de Compra</label>
                         <select id="proveedorTipo" name="proveedorTipo" required onchange="toggleFields()">
@@ -284,6 +285,14 @@
                             <option value="completa">Pago Completo (al contado)</option>
                             <option value="fiada">Compra Fiada (a crédito)</option>
                         </select>
+                    </div>
+                    <div class="form-group" id="initialGroup" style="display:none;">
+                        <label for="proveedorInicial">Pago Inicial (Abono)</label>
+                        <input type="number" id="proveedorInicial" name="proveedorInicial" placeholder="0" step="1" min="0" oninput="calcularSaldo(); mostrarPreview(this, 'previewInicial')">
+                        <div class="monto-preview" id="previewInicial">
+                            <div class="preview-label">Estás ingresando</div>
+                            <div class="preview-valor">$0</div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-row" id="rowSaldo" style="display: none;">
@@ -363,7 +372,8 @@
     </div>
 
     <script>
-        // Función para mostrar preview de montos formateados
+        let categoriaIndex = 1;
+
         function formatoPesos(valor) {
             return '$' + Number(valor).toLocaleString('es-CO');
         }
@@ -371,7 +381,6 @@
         function mostrarPreview(input, previewId) {
             const preview = document.getElementById(previewId);
             const valor = input.value;
-            
             if (valor && valor > 0) {
                 preview.style.display = 'block';
                 preview.querySelector('.preview-valor').textContent = formatoPesos(valor);
@@ -380,12 +389,79 @@
             }
         }
 
+        function addCategoria() {
+            const container = document.getElementById('categorias-container');
+            const categoriaChoicesHTML = container.querySelector('select[name="categoria[]"]').innerHTML;
+            const row = document.createElement('div');
+            row.className = 'categoria-row';
+            row.setAttribute('data-index', categoriaIndex);
+            row.innerHTML = `
+                <div class="form-row" style="align-items: flex-end;">
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select name="categoria[]" required>${categoriaChoicesHTML}</select>
+                    </div>
+                    <div class="form-group">
+                        <label>Bultos</label>
+                        <input type="number" name="cantidad[]" min="1" required oninput="actualizarClasificacion()">
+                    </div>
+                    <button type="button" class="btn-remove-cat" onclick="removeCategoria(this)" style="background:#f44336; color:white; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:16px; margin-bottom:5px;">&times;</button>
+                </div>
+            `;
+            container.appendChild(row);
+            categoriaIndex++;
+            updateRemoveButtons();
+        }
+
+        function removeCategoria(btn) {
+            const row = btn.closest('.categoria-row');
+            row.remove();
+            actualizarClasificacion();
+            updateRemoveButtons();
+        }
+
+        function updateRemoveButtons() {
+            const rows = document.querySelectorAll('.categoria-row');
+            rows.forEach((row, i) => {
+                const btn = row.querySelector('.btn-remove-cat');
+                if (btn) btn.style.display = rows.length > 1 ? 'block' : 'none';
+            });
+        }
+
+        function calcularTotalCompra() {
+            const bultos = parseFloat(document.getElementById('totalBultos').value) || 0;
+            const precio = parseFloat(document.getElementById('precioUnitario').value) || 0;
+            const total = bultos * precio;
+            document.getElementById('totalCompraValor').textContent = formatoPesos(total);
+            document.getElementById('bultosTotal').textContent = bultos;
+            actualizarClasificacion();
+            calcularSaldo();
+        }
+
+        function actualizarClasificacion() {
+            const totalBultos = parseFloat(document.getElementById('totalBultos').value) || 0;
+            let clasificados = 0;
+            document.querySelectorAll('input[name="cantidad[]"]').forEach(input => {
+                clasificados += parseFloat(input.value) || 0;
+            });
+            document.getElementById('bultosClasificados').textContent = clasificados;
+            document.getElementById('bultosTotal').textContent = totalBultos;
+            const faltantes = totalBultos - clasificados;
+            const spanFaltantes = document.getElementById('bultosFaltantes');
+            if (faltantes > 0 && clasificados > 0) {
+                spanFaltantes.style.display = 'inline';
+                document.getElementById('bultosFaltantesNum').textContent = faltantes;
+            } else {
+                spanFaltantes.style.display = 'none';
+            }
+        }
+
         function toggleFields() {
             const tipo = document.getElementById('proveedorTipo').value;
             const initialGroup = document.getElementById('initialGroup');
             const saldoRow = document.getElementById('rowSaldo');
             const initialInput = document.getElementById('proveedorInicial');
-            
+
             if (tipo === 'completa') {
                 initialGroup.style.display = 'none';
                 saldoRow.style.display = 'none';
@@ -403,59 +479,12 @@
         }
 
         function calcularSaldo() {
-            const compra = parseFloat(document.getElementById('proveedorCompra').value) || 0;
+            const bultos = parseFloat(document.getElementById('totalBultos').value) || 0;
+            const precio = parseFloat(document.getElementById('precioUnitario').value) || 0;
+            const totalCompra = bultos * precio;
             const inicial = parseFloat(document.getElementById('proveedorInicial').value) || 0;
-            const saldo = compra - inicial;
-            document.getElementById('saldoPendiente').textContent = '$' + Math.round(saldo).toLocaleString('es-CO');
-        }
-        
-        // Calcular precio unitario automáticamente
-        function calcularPrecioUnitario() {
-            const compra = parseFloat(document.getElementById('proveedorCompra').value) || 0;
-            const cantidad = parseInt(document.getElementById('proveedorCantidad').value) || 0;
-            
-            if (cantidad > 0 && compra > 0) {
-                const precioUnit = compra / cantidad;
-                document.getElementById('precioUnitario').value = '$' + Math.round(precioUnit).toLocaleString('es-CO');
-                // Si no hay precio de venta, sugerir el mismo precio
-                const precioVentaInput = document.getElementById('precioVenta');
-                if (!precioVentaInput.value) {
-                    precioVentaInput.value = Math.round(precioUnit);
-                }
-                calcularGanancia();
-            } else {
-                document.getElementById('precioUnitario').value = '';
-            }
-        }
-        
-        // Calcular ganancia por unidad
-        function calcularGanancia() {
-            const compra = parseFloat(document.getElementById('proveedorCompra').value) || 0;
-            const cantidad = parseInt(document.getElementById('proveedorCantidad').value) || 0;
-            const precioVenta = parseFloat(document.getElementById('precioVenta').value) || 0;
-            const rowGanancia = document.getElementById('rowGanancia');
-            
-            if (cantidad > 0 && compra > 0 && precioVenta > 0) {
-                const precioUnit = compra / cantidad;
-                const ganancia = precioVenta - precioUnit;
-                const margen = (ganancia / precioUnit) * 100;
-                
-                document.getElementById('gananciaUnitaria').textContent = '$' + Math.round(ganancia).toLocaleString('es-CO');
-                document.getElementById('margenGanancia').textContent = '(' + margen.toFixed(1) + '%)';
-                rowGanancia.style.display = 'block';
-                
-                // Cambiar color según si hay ganancia o pérdida
-                const preview = rowGanancia.querySelector('.saldo-preview');
-                if (ganancia >= 0) {
-                    preview.style.background = '#e8f5e9';
-                    preview.style.color = '#2e7d32';
-                } else {
-                    preview.style.background = '#ffebee';
-                    preview.style.color = '#c62828';
-                }
-            } else {
-                rowGanancia.style.display = 'none';
-            }
+            const saldo = totalCompra - inicial;
+            document.getElementById('saldoPendiente').textContent = formatoPesos(Math.max(0, saldo));
         }
     </script>
 </body>

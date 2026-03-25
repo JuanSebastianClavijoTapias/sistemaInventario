@@ -8,6 +8,7 @@ from apps.clientes.models import Clientes
 from apps.proveedores.models import Proveedores
 from apps.productos.models import Productos
 from apps.ventas.models import Venta
+from apps.ventas.models import Cobro
 from apps.gastos.models import Gastos
 from .models import LiquidacionSemanal, ConfiguracionSemana
 
@@ -65,8 +66,18 @@ def calcular_datos_semana(fecha_inicio, fecha_fin):
     # Ganancia
     total_ganancia = ventas_semana.aggregate(total=Sum('ganancia'))['total'] or 0
     
-    # Balance real = solo dinero efectivamente cobrado - gastos
-    balance_real = total_recaudado - total_gastos
+    # Cobros realizados en esta semana (pagos recibidos de créditos de semanas anteriores)
+    cobros_semana = Cobro.objects.filter(
+        fecha__date__gte=fecha_inicio,
+        fecha__date__lte=fecha_fin
+    ).exclude(
+        venta__fecha__date__gte=fecha_inicio,
+        venta__fecha__date__lte=fecha_fin
+    )
+    total_cobros_semana = cobros_semana.aggregate(total=Sum('monto'))['total'] or 0
+    
+    # Balance real = dinero cobrado de ventas de esta semana + cobros de créditos anteriores - gastos
+    balance_real = total_recaudado + total_cobros_semana - total_gastos
     
     return {
         'total_ingresos': total_ingresos,
@@ -82,6 +93,7 @@ def calcular_datos_semana(fecha_inicio, fecha_fin):
         'cantidad_ventas_completo': cantidad_ventas_completo,
         'total_ganancia': total_ganancia,
         'cantidad_ventas': ventas_semana.count(),
+        'total_cobros_semana': total_cobros_semana,
     }
 
 
@@ -139,6 +151,7 @@ def saludo(request):
         'total_ventas_completo': datos_semana['total_ventas_completo'],
         'cantidad_ventas_completo': datos_semana['cantidad_ventas_completo'],
         'total_ganancia': datos_semana['total_ganancia'],
+        'total_cobros_semana': datos_semana['total_cobros_semana'],
         # Info de la semana
         'fecha_inicio_semana': fecha_inicio,
         'fecha_fin_semana': fecha_fin,
@@ -227,7 +240,8 @@ def historial_semanas(request):
 
 def detalle_semana(request, pk):
     """Vista para ver el detalle de una liquidación específica"""
-    liquidacion = LiquidacionSemanal.objects.get(pk=pk)
+    from django.shortcuts import get_object_or_404
+    liquidacion = get_object_or_404(LiquidacionSemanal, pk=pk)
     
     context = {
         'liquidacion': liquidacion,

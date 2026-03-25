@@ -54,7 +54,83 @@
             .btn-logout-header:hover {
                 background: rgba(255,255,255,0.35);
             }
+            
+            /* Alertas de mensajes */
+            .alert-message {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 15px 20px;
+                border-radius: 12px;
+                margin-bottom: 15px;
+                animation: slideDown 0.4s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-15px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .alert-message .alert-content {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-weight: 600;
+            }
+            .alert-message .alert-content i {
+                font-size: 1.3rem;
+            }
+            .alert-message .alert-close {
+                background: none;
+                border: none;
+                font-size: 1.4rem;
+                cursor: pointer;
+                opacity: 0.7;
+                transition: opacity 0.2s;
+                color: inherit;
+            }
+            .alert-message .alert-close:hover { opacity: 1; }
+            .alert-success {
+                background: linear-gradient(135deg, #d4edda, #c3e6cb);
+                color: #155724;
+                border-left: 5px solid #28a745;
+            }
+            .alert-warning {
+                background: linear-gradient(135deg, #fff3cd, #ffeeba);
+                color: #856404;
+                border-left: 5px solid #ffc107;
+            }
+            .alert-error {
+                background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+                color: #721c24;
+                border-left: 5px solid #dc3545;
+            }
+            .alert-info {
+                background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+                color: #0c5460;
+                border-left: 5px solid #17a2b8;
+            }
         </style>
+
+        <!-- Mensajes -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert-message alert-{{ message.tags }}" id="alertMsg">
+            <div class="alert-content">
+                {% if message.tags == 'success' %}
+                <i class="fas fa-check-circle"></i>
+                {% elif message.tags == 'warning' %}
+                <i class="fas fa-exclamation-triangle"></i>
+                {% elif message.tags == 'error' %}
+                <i class="fas fa-times-circle"></i>
+                {% else %}
+                <i class="fas fa-info-circle"></i>
+                {% endif %}
+                <span>{{ message }}</span>
+            </div>
+            <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+        {% endfor %}
+        {% endif %}
 
         <!-- Panel de Finanzas -->
         <section class="finance-panel">
@@ -224,6 +300,18 @@
                         <span class="ventas-detalle-label">Cobrado de Créditos</span>
                         <span class="ventas-detalle-valor">${{ cobrado_de_creditos|floatformat:0 }}</span>
                         <span class="ventas-detalle-subtitulo">Pendiente: ${{ pendiente_creditos|floatformat:0 }}</span>
+                    </div>
+                </div>
+                
+                <!-- Cobros Recibidos esta Semana -->
+                <div class="ventas-detalle-card cobros-semana">
+                    <div class="ventas-detalle-icon">
+                        <i class="fas fa-cash-register"></i>
+                    </div>
+                    <div class="ventas-detalle-content">
+                        <span class="ventas-detalle-label">Cobros Recibidos</span>
+                        <span class="ventas-detalle-valor">${{ total_cobros_semana|floatformat:0 }}</span>
+                        <span class="ventas-detalle-subtitulo">Créditos cobrados esta semana</span>
                     </div>
                 </div>
                 
@@ -505,6 +593,16 @@
        
     </div>
 
-   
+    <script>
+        // Auto-cerrar alertas después de 5 segundos
+        document.querySelectorAll('.alert-message').forEach(function(alert) {
+            setTimeout(function() {
+                alert.style.transition = 'opacity 0.5s, transform 0.5s';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-15px)';
+                setTimeout(function() { alert.remove(); }, 500);
+            }, 5000);
+        });
+    </script>
 </body>
 </html>

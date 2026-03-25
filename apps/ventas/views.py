@@ -6,97 +6,136 @@ from datetime import timedelta
 import calendar
 import json
 from decimal import Decimal
-from .models import Venta
+from .models import Venta, DetalleVenta
 from apps.clientes.models import Clientes
 from apps.productos.models import Productos
 
 def ventas_form(request):
     if request.method == 'POST':
         cliente_id = request.POST.get('cliente')
-        producto_id = request.POST.get('producto')
-        cantidad = request.POST.get('cantidad')
         tipo_pago = request.POST.get('tipo_pago', 'completo')
+        metodo_pago = request.POST.get('metodo_pago', 'efectivo')
         monto_pagado = request.POST.get('monto_pagado', '0')
         dias_credito = request.POST.get('dias_credito', '15')
-        
-        if not cliente_id or not producto_id or not cantidad:
-            messages.error(request, 'Todos los campos son obligatorios.')
+
+        # Multi-item data
+        productos_ids = request.POST.getlist('producto[]')
+        cantidades = request.POST.getlist('cantidad[]')
+        precios_venta = request.POST.getlist('precio_venta[]')
+
+        if not cliente_id or not productos_ids or not any(productos_ids):
+            messages.error(request, 'Debe seleccionar un cliente y al menos un producto.')
             return redirect('ventas')
-        
-        try:
-            cantidad = int(cantidad)
-        except ValueError:
-            messages.error(request, 'La cantidad debe ser un número válido.')
-            return redirect('ventas')
-        
+
         try:
             cliente = Clientes.objects.get(idCliente=cliente_id)
-            producto = Productos.objects.get(idProducto=producto_id)
-        except (Clientes.DoesNotExist, Productos.DoesNotExist):
-            messages.error(request, 'Cliente o producto no encontrado.')
+        except Clientes.DoesNotExist:
+            messages.error(request, 'Cliente no encontrado.')
             return redirect('ventas')
-        
-        # Verificar stock disponible
-        if producto.stock < cantidad:
-            messages.error(request, f'Stock insuficiente. Solo hay {producto.stock} unidades disponibles de {producto.nombre}.')
+
+        # Process items
+        items = []
+        for i in range(len(productos_ids)):
+            if not productos_ids[i] or not cantidades[i]:
+                continue
+            try:
+                producto = Productos.objects.get(idProducto=int(productos_ids[i]))
+                cantidad = int(cantidades[i])
+                precio_venta_input = Decimal(precios_venta[i]) if i < len(precios_venta) and precios_venta[i] else Decimal('0')
+            except (Productos.DoesNotExist, ValueError):
+                messages.error(request, 'Producto o cantidad inválida.')
+                return redirect('ventas')
+
+            if cantidad <= 0 or precio_venta_input <= 0:
+                continue
+
+            if producto.stock < cantidad:
+                messages.error(request, f'Stock insuficiente para {producto.nombre}. Disponible: {producto.stock}')
+                return redirect('ventas')
+
+            precio_compra = Decimal(str(producto.precio_compra))
+            precio_venta = precio_venta_input
+            subtotal = precio_venta * Decimal(str(cantidad))
+            ganancia = (precio_venta - precio_compra) * Decimal(str(cantidad))
+
+            items.append({
+                'producto': producto,
+                'cantidad': cantidad,
+                'precio_compra': precio_compra,
+                'precio_venta': precio_venta,
+                'subtotal': subtotal,
+                'ganancia': ganancia,
+            })
+
+        if not items:
+            messages.error(request, 'Debe agregar al menos un producto válido.')
             return redirect('ventas')
-        
-        # Calcular precios y ganancia
-        precio_compra = Decimal(str(producto.precio_compra))
-        precio_venta = Decimal(str(producto.precio_venta))
-        total = precio_venta * Decimal(str(cantidad))
-        ganancia = (precio_venta - precio_compra) * Decimal(str(cantidad))
-        
-        # Procesar pago
+
+        # Calculate totals
+        total = sum(item['subtotal'] for item in items)
+        total_ganancia = sum(item['ganancia'] for item in items)
+        total_cantidad = sum(item['cantidad'] for item in items)
+
+        # Process payment
         try:
-            monto_pagado = Decimal(monto_pagado) if monto_pagado else Decimal('0')
+            monto_pagado_val = Decimal(monto_pagado) if monto_pagado else Decimal('0')
         except (ValueError, TypeError):
             messages.error(request, 'El monto pagado debe ser un número válido.')
             return redirect('ventas')
-        
+
         if tipo_pago == 'completo':
-            monto_pagado = total
+            monto_pagado_val = total
             fecha_vencimiento = None
             estado_pago = 'pagado'
         else:
-            # Pago a crédito
-            if monto_pagado > total:
+            if monto_pagado_val > total:
                 messages.error(request, 'El monto pagado no puede ser mayor al total de la venta.')
                 return redirect('ventas')
-            
             try:
                 dias_credito = int(dias_credito)
             except ValueError:
                 dias_credito = 15
-            
             fecha_vencimiento = timezone.localdate() + timedelta(days=dias_credito)
-            estado_pago = 'pendiente' if monto_pagado < total else 'pagado'
-        
-        # Crear la venta
-        Venta.objects.create(
+            estado_pago = 'pendiente' if monto_pagado_val < total else 'pagado'
+
+        is_single = len(items) == 1
+
+        # Create the sale
+        venta = Venta.objects.create(
             cliente=cliente,
-            producto=producto,
-            cantidad=cantidad,
+            producto=items[0]['producto'] if is_single else None,
+            cantidad=total_cantidad,
             total=total,
-            precio_compra=precio_compra,
-            precio_venta=precio_venta,
-            ganancia=ganancia,
+            precio_compra=items[0]['precio_compra'] if is_single else Decimal('0'),
+            precio_venta=items[0]['precio_venta'] if is_single else Decimal('0'),
+            ganancia=total_ganancia,
             tipo_pago=tipo_pago,
-            monto_pagado=monto_pagado,
+            metodo_pago=metodo_pago,
+            monto_pagado=monto_pagado_val,
             fecha_vencimiento=fecha_vencimiento,
             estado_pago=estado_pago
         )
-        
-        # Descontar del stock
-        producto.stock -= cantidad
-        producto.save()
-        
+
+        # Create detail records and update stock
+        for item in items:
+            DetalleVenta.objects.create(
+                venta=venta,
+                producto=item['producto'],
+                cantidad=item['cantidad'],
+                precio_compra=item['precio_compra'],
+                precio_venta=item['precio_venta'],
+                subtotal=item['subtotal'],
+                ganancia=item['ganancia'],
+            )
+            item['producto'].stock -= item['cantidad']
+            item['producto'].save()
+
         if tipo_pago == 'completo':
-            messages.success(request, f'Venta registrada. Total: ${total}, Ganancia: ${ganancia}. Stock: {producto.nombre} - {producto.stock} unidades.')
+            messages.success(request, f'Venta registrada. Total: ${total:,.0f}, Ganancia: ${total_ganancia:,.0f}')
         else:
-            saldo = total - monto_pagado
-            messages.success(request, f'Venta a crédito. Pagó: ${monto_pagado}, Debe: ${saldo}. Ganancia: ${ganancia}. Vence: {fecha_vencimiento}.')
-        
+            saldo = total - monto_pagado_val
+            messages.success(request, f'Venta a crédito. Pagó: ${monto_pagado_val:,.0f}, Debe: ${saldo:,.0f}. Vence: {fecha_vencimiento}.')
+
         return redirect('ventas')
     
     clientes = Clientes.objects.all()
@@ -166,16 +205,17 @@ def ventas_form(request):
     ventas_mes = Venta.objects.filter(
         fecha__year=hoy.year,
         fecha__month=hoy.month
-    ).select_related('cliente', 'producto').order_by('-fecha')
+    ).select_related('cliente', 'producto').prefetch_related('detalles', 'detalles__producto').order_by('-fecha')
     
     ventas_mes_lista = [
         {
             'dia': venta.fecha.day,
-            'producto': venta.producto.nombre,
+            'producto': venta.descripcion,
             'cliente': f"{venta.cliente.nombre} {venta.cliente.apellido}",
             'cantidad': venta.cantidad,
             'total': float(venta.total),
-            'hora': venta.fecha.strftime('%H:%M')
+            'hora': venta.fecha.strftime('%H:%M'),
+            'metodo_pago': venta.get_metodo_pago_display(),
         }
         for venta in ventas_mes
     ]
@@ -197,7 +237,7 @@ def ventas_form(request):
     rango_filtro = request.GET.get('rango', 'todo')
     
     # Historial de ventas con filtro
-    ventas_query = Venta.objects.all().order_by('-fecha')
+    ventas_query = Venta.objects.all().select_related('cliente', 'producto').prefetch_related('detalles', 'detalles__producto').order_by('-fecha')
     
     if rango_filtro == 'hoy':
         ventas_query = ventas_query.filter(fecha__date=hoy)

@@ -202,6 +202,10 @@ body {
     border-top-color: #00BCD4;
 }
 
+.ventas-detalle-card.cobros-semana, .ventas-detalles-card.cobros-semana {
+    border-top-color: #8BC34A;
+}
+
 .ventas-detalle-card.ganancia, .ventas-detalles-card.ganancia {
     border-top-color: #9C27B0;
 }
@@ -233,6 +237,11 @@ body {
 
 .ventas-detalle-card.cobrado-credito .ventas-detalle-icon, .ventas-detalles-card.cobrado-credito .ventas-detalle-icon {
     background: linear-gradient(135deg, #00BCD4, #4DD0E1);
+    color: white;
+}
+
+.ventas-detalle-card.cobros-semana .ventas-detalle-icon, .ventas-detalles-card.cobros-semana .ventas-detalle-icon {
+    background: linear-gradient(135deg, #8BC34A, #AED581);
     color: white;
 }
 
@@ -282,6 +291,10 @@ body {
 
 .ventas-detalle-card.cobrado-credito .ventas-detalle-valor, .ventas-detalles-card.cobrado-credito .ventas-detalle-valor {
     color: #00838f;
+}
+
+.ventas-detalle-card.cobros-semana .ventas-detalle-valor, .ventas-detalles-card.cobros-semana .ventas-detalle-valor {
+    color: #558b2f;
 }
 
 .ventas-detalle-card.ganancia .ventas-detalle-valor, .ventas-detalles-card.ganancia .ventas-detalle-valor {

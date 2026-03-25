@@ -597,23 +597,52 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="producto">Producto</label>
-                        <select name="producto" id="producto" required onchange="calcularTotal()">
-                            <option value="">Selecciona un producto</option>
-                            {% for producto in productos %}
-                                <option value="{{ producto.idProducto }}" data-precio="{{ producto.precio_venta|stringformat:'f' }}" data-stock="{{ producto.stock }}">{{ producto.nombre }} - ${{ producto.precio_venta|floatformat:0 }} <span class="stock-badge">(Stock: {{ producto.stock }})</span></option>
-                            {% endfor %}
+                        <label for="metodo_pago">Método de Pago</label>
+                        <select name="metodo_pago" id="metodo_pago">
+                            <option value="efectivo">💵 Efectivo</option>
+                            <option value="tarjeta">💳 Tarjeta</option>
                         </select>
                     </div>
                 </div>
+
+                <!-- Multi-item section -->
+                <h3 style="margin: 15px 0 10px; color: #333;"><i class="fas fa-boxes"></i> Productos</h3>
+                <div id="items-container">
+                    <div class="item-row" data-index="0">
+                        <div class="form-row" style="align-items: flex-end;">
+                            <div class="form-group">
+                                <label>Producto</label>
+                                <select name="producto[]" required onchange="calcularTotalVenta()">
+                                    <option value="">Selecciona un producto</option>
+                                    {% for producto in productos %}
+                                        <option value="{{ producto.idProducto }}" data-stock="{{ producto.stock }}">{{ producto.nombre }} (Stock: {{ producto.stock }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex: 0.6;">
+                                <label>Precio Venta</label>
+                                <input type="number" name="precio_venta[]" min="1" step="1" required placeholder="Precio por bulto" oninput="calcularTotalVenta()">
+                            </div>
+                            <div class="form-group" style="flex: 0.5;">
+                                <label>Cantidad</label>
+                                <input type="number" name="cantidad[]" min="1" required oninput="calcularTotalVenta()">
+                            </div>
+                            <div class="form-group" style="flex: 0.5;">
+                                <label>Subtotal</label>
+                                <input type="text" class="subtotal-item" readonly style="background: #f5f5f5; font-weight: bold;">
+                            </div>
+                            <button type="button" class="btn-remove-item" onclick="removeItem(this)" style="display:none; background:#f44336; color:white; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:16px; margin-bottom:5px;">&times;</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="addItem()" style="background:#2196F3; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin: 10px 0;">
+                    <i class="fas fa-plus"></i> Agregar Producto
+                </button>
+
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="cantidad">Cantidad</label>
-                        <input type="number" name="cantidad" id="cantidad" min="1" required onchange="calcularTotal()">
-                    </div>
-                    <div class="form-group">
-                        <label for="total">Total</label>
-                        <input type="text" id="total" readonly>
+                        <label>Total de la Venta</label>
+                        <input type="text" id="total" readonly style="font-size: 18px; font-weight: bold; color: #4CAF50;">
                     </div>
                 </div>
                 <div class="form-row">
@@ -626,7 +655,7 @@
                     </div>
                     <div class="form-group" id="monto_pagado_group" style="display: none;">
                         <label for="monto_pagado">Monto Pagado</label>
-                        <input type="number" name="monto_pagado" id="monto_pagado" min="0" step="1" onchange="calcularTotal()" oninput="mostrarPreviewMonto(this.value)">
+                        <input type="number" name="monto_pagado" id="monto_pagado" min="0" step="1" onchange="calcularTotalVenta()" oninput="mostrarPreviewMonto(this.value)">
                         <div class="monto-preview" id="previewMontoPagado">
                             <div class="preview-label">Estás ingresando</div>
                             <div class="preview-valor">$0</div>
@@ -773,10 +802,25 @@
                 {% for venta in ventas %}
                 <div class="venta-item">
                     <div class="venta-info">
-                        <h4>{{ venta.producto.nombre }}</h4>
+                        <h4>{{ venta.descripcion }}</h4>
                         <p><strong>Cliente:</strong> {{ venta.cliente.nombre }} {{ venta.cliente.apellido }}</p>
                         <p><strong>Cantidad:</strong> {{ venta.cantidad }} | <strong>Fecha:</strong> {{ venta.fecha|date:'d/m/Y H:i' }}</p>
-                        <p class="precio-detalle"><i class="fas fa-tags"></i> Compra: ${{ venta.precio_compra|floatformat:0 }} | Venta: ${{ venta.precio_venta|floatformat:0 }}</p>
+                        {% with detalles=venta.detalles.all %}
+                        {% if detalles %}
+                            {% for detalle in detalles %}
+                            <p class="precio-detalle"><i class="fas fa-tags"></i> {{ detalle.producto.nombre }}: {{ detalle.cantidad }} x ${{ detalle.precio_venta|floatformat:0 }} = ${{ detalle.subtotal|floatformat:0 }}</p>
+                            {% endfor %}
+                        {% else %}
+                            <p class="precio-detalle"><i class="fas fa-tags"></i> Compra: ${{ venta.precio_compra|floatformat:0 }} | Venta: ${{ venta.precio_venta|floatformat:0 }}</p>
+                        {% endif %}
+                        {% endwith %}
+                        <p style="margin-top: 4px;">
+                            {% if venta.metodo_pago == 'tarjeta' %}
+                            <span style="background:#e3f2fd; color:#1565c0; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-credit-card"></i> Tarjeta</span>
+                            {% else %}
+                            <span style="background:#e8f5e9; color:#2e7d32; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-money-bill-wave"></i> Efectivo</span>
+                            {% endif %}
+                        </p>
                     </div>
                     <div class="venta-totales">
                         <div class="venta-total">${{ venta.total|floatformat:0 }}</div>
@@ -824,27 +868,77 @@
             }
         }
 
-        function calcularTotal() {
-            const productoSelect = document.getElementById('producto');
-            const cantidadInput = document.getElementById('cantidad');
+        let itemIndex = 1;
+
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const optionsHTML = container.querySelector('select[name="producto[]"]').innerHTML;
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.setAttribute('data-index', itemIndex);
+            row.innerHTML = `
+                <div class="form-row" style="align-items: flex-end;">
+                    <div class="form-group">
+                        <label>Producto</label>
+                        <select name="producto[]" required onchange="calcularTotalVenta()">${optionsHTML}</select>
+                    </div>
+                    <div class="form-group" style="flex: 0.6;">
+                        <label>Precio Venta</label>
+                        <input type="number" name="precio_venta[]" min="1" step="1" required placeholder="Precio por bulto" oninput="calcularTotalVenta()">
+                    </div>
+                    <div class="form-group" style="flex: 0.5;">
+                        <label>Cantidad</label>
+                        <input type="number" name="cantidad[]" min="1" required oninput="calcularTotalVenta()">
+                    </div>
+                    <div class="form-group" style="flex: 0.5;">
+                        <label>Subtotal</label>
+                        <input type="text" class="subtotal-item" readonly style="background: #f5f5f5; font-weight: bold;">
+                    </div>
+                    <button type="button" class="btn-remove-item" onclick="removeItem(this)" style="background:#f44336; color:white; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:16px; margin-bottom:5px;">&times;</button>
+                </div>
+            `;
+            container.appendChild(row);
+            itemIndex++;
+            updateRemoveItemButtons();
+        }
+
+        function removeItem(btn) {
+            const row = btn.closest('.item-row');
+            row.remove();
+            calcularTotalVenta();
+            updateRemoveItemButtons();
+        }
+
+        function updateRemoveItemButtons() {
+            const rows = document.querySelectorAll('.item-row');
+            rows.forEach(row => {
+                const btn = row.querySelector('.btn-remove-item');
+                if (btn) btn.style.display = rows.length > 1 ? 'block' : 'none';
+            });
+        }
+
+        function calcularTotalVenta() {
+            const rows = document.querySelectorAll('.item-row');
+            let grandTotal = 0;
+
+            rows.forEach(row => {
+                const precioInput = row.querySelector('input[name="precio_venta[]"]');
+                const cantidadInput = row.querySelector('input[name="cantidad[]"]');
+                const subtotalDisplay = row.querySelector('.subtotal-item');
+                const precio = parseFloat(precioInput.value) || 0;
+                const cantidad = parseInt(cantidadInput.value) || 0;
+                const subtotal = Math.round(precio * cantidad);
+
+                subtotalDisplay.value = subtotal > 0 ? formatoPesos(subtotal) : '';
+                grandTotal += subtotal;
+            });
+
             const totalInput = document.getElementById('total');
-            const tipoPagoSelect = document.getElementById('tipo_pago');
-            const montoPagadoInput = document.getElementById('monto_pagado');
-            
-            const selectedOption = productoSelect.options[productoSelect.selectedIndex];
-            const precio = parseFloat(selectedOption.getAttribute('data-precio'));
-            const cantidad = parseInt(cantidadInput.value);
-            
-            if (precio && cantidad) {
-                const total = Math.round(precio * cantidad);
-                totalInput.value = '$' + total.toLocaleString('es-CO');
-                
-                // Si es pago completo, establecer monto pagado igual al total
-                if (tipoPagoSelect.value === 'completo') {
-                    montoPagadoInput.value = total;
-                }
-            } else {
-                totalInput.value = '';
+            totalInput.value = grandTotal > 0 ? formatoPesos(grandTotal) : '';
+
+            const tipoPago = document.getElementById('tipo_pago').value;
+            if (tipoPago === 'completo') {
+                document.getElementById('monto_pagado').value = grandTotal;
             }
         }
         
@@ -858,8 +952,7 @@
                 montoPagadoGroup.style.display = 'block';
                 diasCreditoGroup.style.display = 'block';
                 montoPagadoInput.required = true;
-                // Calcular total para establecer valor inicial
-                calcularTotal();
+                calcularTotalVenta();
             } else {
                 montoPagadoGroup.style.display = 'none';
                 diasCreditoGroup.style.display = 'none';

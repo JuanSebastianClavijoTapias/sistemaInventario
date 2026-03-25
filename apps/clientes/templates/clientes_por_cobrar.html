@@ -587,18 +587,18 @@
                         {% for venta in item.ventas %}
                         <div class="venta-item">
                             <div class="venta-badge">
-                                <span class="venta-id {% if venta.estado_pago == 'vencido' %}vencida{% endif %}">
+                                <span class="venta-id {% if venta.esta_vencido %}vencida{% endif %}">
                                     #{{ venta.idVenta }}
                                 </span>
-                                {% if venta.estado_pago == 'vencido' %}
-                                <span class="estado-tag vencido">Vencido</span>
+                                {% if venta.esta_vencido %}
+                                <span class="estado-tag vencido">Atrasado</span>
                                 {% else %}
                                 <span class="estado-tag pendiente">Pendiente</span>
                                 {% endif %}
                             </div>
                             
                             <div class="venta-info">
-                                <div class="venta-producto">{{ venta.producto.nombre }}</div>
+                                <div class="venta-producto">{{ venta.descripcion }}</div>
                                 <div class="venta-meta">
                                     <span><i class="fas fa-cubes"></i> {{ venta.cantidad }} unid.</span>
                                     <span><i class="fas fa-calendar"></i> {{ venta.fecha|date:"d/m/Y" }}</span>
@@ -632,7 +632,7 @@
                                 </form>
                                 <button type="button" class="btn-pago-parcial" 
                                     data-venta-id="{{ venta.idVenta }}" 
-                                    data-producto="{{ venta.producto.nombre|escapejs }}" 
+                                    data-producto="{{ venta.descripcion|escapejs }}" 
                                     data-saldo="{{ venta.saldo_pendiente|numero_limpio }}"
                                     onclick="abrirModalPago(this)">
                                     <i class="fas fa-hand-holding-usd"></i> Abono

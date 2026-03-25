@@ -245,7 +245,7 @@
                 {% endif %}
                 <div class="compra-pendiente {% if compra.esta_vencido %}vencido{% elif compra.dias_para_vencimiento and compra.dias_para_vencimiento <= 1 %}urgente{% endif %}">
                     <div class="pendiente-info">
-                        <h4>{{ compra.producto.nombre }}</h4>
+                        <h4>{{ compra.descripcion }}</h4>
                         <p><strong>Cantidad:</strong> {{ compra.cantidad }}</p>
                         <p><strong>Fecha:</strong> {{ compra.fecha|date:'d/m/Y H:i' }}</p>
                         <p><strong>Pagado:</strong> ${{ compra.monto_pagado }} | <strong>Debe:</strong> ${{ compra.saldo_pendiente }}</p>
@@ -294,7 +294,7 @@
                 {% for compra in compras %}
                 <div class="compra-item">
                     <div class="compra-info">
-                        <h4>{{ compra.producto.nombre }}</h4>
+                        <h4>{{ compra.descripcion }}</h4>
                         <p><strong>Cantidad:</strong> {{ compra.cantidad }}</p>
                         <p><strong>Fecha:</strong> {{ compra.fecha|date:'d/m/Y H:i' }}</p>
                         {% if compra.tipo_pago == 'fiado' %}

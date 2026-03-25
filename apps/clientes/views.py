@@ -11,7 +11,7 @@ from django.db.models import Sum, F, Count, Q
 from decimal import Decimal
 from .models import Clientes
 from .forms import ClienteForm
-from apps.ventas.models import Venta
+from apps.ventas.models import Venta, Cobro
 
 
 class ClienteListView(FormMixin, ListView):
@@ -108,7 +108,7 @@ class ClienteDeleteView(DeleteView):
 
 def cliente_compras(request, pk):
     cliente = get_object_or_404(Clientes, idCliente=pk)
-    compras = Venta.objects.filter(cliente=cliente).order_by('-fecha')
+    compras = Venta.objects.filter(cliente=cliente).select_related('producto').prefetch_related('detalles', 'detalles__producto').order_by('-fecha')
     total_compras = sum(venta.total for venta in compras)
     
     context = {
@@ -121,7 +121,7 @@ def cliente_compras(request, pk):
 
 def cliente_compras_json(request, pk):
     cliente = get_object_or_404(Clientes, idCliente=pk)
-    compras = Venta.objects.filter(cliente=cliente).order_by('-fecha')
+    compras = Venta.objects.filter(cliente=cliente).select_related('producto').prefetch_related('detalles', 'detalles__producto').order_by('-fecha')
     
     data = {
         'cliente': {
@@ -130,7 +130,7 @@ def cliente_compras_json(request, pk):
         },
         'compras': [
             {
-                'producto': venta.producto.nombre,
+                'producto': venta.descripcion,
                 'cantidad': venta.cantidad,
                 'total': float(venta.total),
                 'fecha': venta.fecha.strftime('%d/%m/%Y %H:%M'),
@@ -175,7 +175,7 @@ def clientes_por_cobrar(request):
         ventas_pendientes = Venta.objects.filter(
             cliente=cliente,
             estado_pago__in=['pendiente', 'vencido']
-        ).select_related('producto').order_by('fecha_vencimiento')
+        ).select_related('producto').prefetch_related('detalles', 'detalles__producto').order_by('fecha_vencimiento')
         clientes_con_ventas.append({
             'cliente': cliente,
             'ventas': ventas_pendientes,
@@ -199,6 +199,9 @@ def saldar_venta(request, pk):
         if venta.estado_pago == 'pagado':
             messages.warning(request, 'Esta venta ya está completamente pagada.')
         else:
+            # Registrar el cobro por el saldo pendiente
+            monto_cobrado = venta.saldo_pendiente
+            Cobro.objects.create(venta=venta, monto=monto_cobrado)
             # Saldar completamente
             venta.monto_pagado = venta.total
             venta.estado_pago = 'pagado'
@@ -242,6 +245,8 @@ def pago_parcial_cobrar(request):
             messages.error(request, 'El monto debe ser mayor a cero.')
             return redirect('clientes_por_cobrar')
         
+        # Registrar el cobro
+        Cobro.objects.create(venta=venta, monto=monto_pago)
         # Actualizar el monto pagado
         venta.monto_pagado += monto_pago
         venta.actualizar_estado_pago()
@@ -283,6 +288,8 @@ def registrar_pago(request, pk):
             messages.error(request, f'El monto no puede ser mayor al saldo pendiente (${venta.saldo_pendiente}).')
             return redirect('cliente_compras', pk=cliente.pk)
         
+        # Registrar el cobro
+        Cobro.objects.create(venta=venta, monto=monto_pago)
         # Actualizar el monto pagado
         venta.monto_pagado += monto_pago
         venta.actualizar_estado_pago()
