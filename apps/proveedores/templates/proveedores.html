@@ -158,6 +158,107 @@
         .btn-eliminar:hover {
             background: #d32f2f;
         }
+        .btn-pagar {
+            background: #FF9800;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .btn-pagar:hover {
+            background: #F57C00;
+        }
+        .btn-saldar {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .btn-saldar:hover {
+            background: #388E3C;
+        }
+        /* Modal de pago */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 {
+            margin: 0 0 5px;
+            color: #333;
+        }
+        .modal-content .modal-subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .modal-content .modal-saldo {
+            background: #fff3e0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+            color: #e65100;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        .modal-content input:focus {
+            outline: none;
+            border-color: #FF9800;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .modal-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-modal-cancelar {
+            background: #eee;
+            color: #333;
+        }
+        .btn-modal-pagar {
+            background: #FF9800;
+            color: white;
+        }
+        .btn-modal-pagar:hover {
+            background: #F57C00;
+        }
         .empty-message {
             text-align: center;
             color: #999;
@@ -356,6 +457,18 @@
                         <div class="proveedor-saldo">Saldo: ${{ proveedor.saldo }}</div>
                     </div>
                     <div class="proveedor-acciones">
+                        {% if proveedor.saldo > 0 %}
+                        <button type="button" class="btn-pagar" onclick="abrirModalPago({{ proveedor.pk }}, '{{ proveedor.nombre }}', {{ proveedor.saldo }})">
+                            <i class="fas fa-money-bill-wave"></i> Abonar
+                        </button>
+                        <form method="post" action="{% url 'proveedor_pagar' proveedor.pk %}" style="display:inline;" onsubmit="return confirm('¿Saldar completamente a {{ proveedor.nombre }}? (${{ proveedor.saldo }})')">
+                            {% csrf_token %}
+                            <input type="hidden" name="saldar" value="1">
+                            <button type="submit" class="btn-saldar">
+                                <i class="fas fa-check-double"></i> Saldar
+                            </button>
+                        </form>
+                        {% endif %}
                         <a href="{% url 'proveedor_update' proveedor.pk %}" class="btn-editar">
                             <i class="fas fa-edit"></i> Editar
                         </a>
@@ -486,6 +599,46 @@
             const saldo = totalCompra - inicial;
             document.getElementById('saldoPendiente').textContent = formatoPesos(Math.max(0, saldo));
         }
+
+        // Modal de pago a proveedor
+        function abrirModalPago(pk, nombre, saldo) {
+            document.getElementById('modalPagoNombre').textContent = nombre;
+            document.getElementById('modalPagoSaldo').textContent = formatoPesos(saldo);
+            document.getElementById('modalPagoMonto').value = '';
+            document.getElementById('modalPagoMonto').max = saldo;
+            document.getElementById('modalPagoForm').action = '/proveedores/' + pk + '/pagar/';
+            document.getElementById('modalPago').classList.add('active');
+            document.getElementById('modalPagoMonto').focus();
+        }
+
+        function cerrarModalPago() {
+            document.getElementById('modalPago').classList.remove('active');
+        }
+
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') cerrarModalPago();
+        });
     </script>
+
+    <!-- Modal de Pago -->
+    <div class="modal-overlay" id="modalPago" onclick="if(event.target===this)cerrarModalPago()">
+        <div class="modal-content">
+            <h3><i class="fas fa-money-bill-wave" style="color:#FF9800;"></i> Abonar a Proveedor</h3>
+            <p class="modal-subtitle">Proveedor: <strong id="modalPagoNombre"></strong></p>
+            <div class="modal-saldo">
+                Saldo pendiente: <span id="modalPagoSaldo"></span>
+            </div>
+            <form method="post" id="modalPagoForm">
+                {% csrf_token %}
+                <label style="font-weight:600; margin-bottom:5px; display:block;">Monto a pagar</label>
+                <input type="number" name="monto_pago" id="modalPagoMonto" placeholder="Ingresa el monto" min="1" step="1" required>
+                <div class="modal-actions">
+                    <button type="button" class="btn-modal-cancelar" onclick="cerrarModalPago()">Cancelar</button>
+                    <button type="submit" class="btn-modal-pagar"><i class="fas fa-check"></i> Registrar Pago</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

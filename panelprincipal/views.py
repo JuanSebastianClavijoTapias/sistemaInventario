@@ -79,6 +79,18 @@ def calcular_datos_semana(fecha_inicio, fecha_fin):
     # Balance real = dinero cobrado de ventas de esta semana + cobros de créditos anteriores - gastos
     balance_real = total_recaudado + total_cobros_semana - total_gastos
     
+    # Gastos por categoría
+    gastos_por_categoria = {}
+    for key, nombre in Gastos.CATEGORIA_CHOICES:
+        total_cat = gastos_semana.filter(categoria=key).aggregate(total=Sum('monto'))['total'] or 0
+        cantidad_cat = gastos_semana.filter(categoria=key).count()
+        gastos_por_categoria[key] = {
+            'nombre': nombre,
+            'total': total_cat,
+            'cantidad': cantidad_cat,
+        }
+    cantidad_gastos = gastos_semana.count()
+    
     return {
         'total_ingresos': total_ingresos,
         'total_gastos': total_gastos,
@@ -94,6 +106,8 @@ def calcular_datos_semana(fecha_inicio, fecha_fin):
         'total_ganancia': total_ganancia,
         'cantidad_ventas': ventas_semana.count(),
         'total_cobros_semana': total_cobros_semana,
+        'gastos_por_categoria': gastos_por_categoria,
+        'cantidad_gastos': cantidad_gastos,
     }
 
 
@@ -143,6 +157,7 @@ def saludo(request):
         'total_ingresos': datos_semana['total_ingresos'],
         'total_gastos_finanzas': datos_semana['total_gastos'],
         'total_finanzas': datos_semana['total_finanzas'],
+        'balance_real': datos_semana['balance_real'],
         'total_recaudado': datos_semana['total_recaudado'],
         'total_ventas_credito': datos_semana['total_ventas_credito'],
         'cantidad_ventas_credito': datos_semana['cantidad_ventas_credito'],
@@ -152,6 +167,8 @@ def saludo(request):
         'cantidad_ventas_completo': datos_semana['cantidad_ventas_completo'],
         'total_ganancia': datos_semana['total_ganancia'],
         'total_cobros_semana': datos_semana['total_cobros_semana'],
+        'gastos_por_categoria': datos_semana['gastos_por_categoria'],
+        'cantidad_gastos_semana': datos_semana['cantidad_gastos'],
         # Info de la semana
         'fecha_inicio_semana': fecha_inicio,
         'fecha_fin_semana': fecha_fin,

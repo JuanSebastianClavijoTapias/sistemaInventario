@@ -5,4 +5,5 @@ urlpatterns = [
     path('', views.ProveedorListView.as_view(), name='proveedores'),
     path('<int:pk>/update/', views.ProveedorUpdateView.as_view(), name='proveedor_update'),
     path('<int:pk>/delete/', views.ProveedorDeleteView.as_view(), name='proveedor_delete'),
+    path('<int:pk>/pagar/', views.pagar_proveedor, name='proveedor_pagar'),
 ]

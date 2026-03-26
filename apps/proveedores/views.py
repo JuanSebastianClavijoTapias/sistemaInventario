@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from decimal import Decimal
 
 # Create your views here.
 
@@ -8,6 +9,7 @@ from django.views.generic import ListView, UpdateView, DeleteView
 from django.db.models import Sum
 from .models import Proveedores
 from apps.productos.models import Productos, CATEGORIA_CHOICES
+from apps.gastos.models import Gastos
 
 
 class ProveedorListView(ListView):
@@ -111,6 +113,15 @@ class ProveedorListView(ListView):
             saldo=saldo
         )
 
+        # Registrar el pago inicial como gasto
+        if inicial_val > 0:
+            Gastos.objects.create(
+                descripcion=f'Compra a proveedor: {nombre}',
+                monto=inicial_val,
+                categoria='comercio_productos',
+                proveedor=proveedor
+            )
+
         # Create products for each classification (precio_venta=0, se define en la venta)
         for item in items:
             producto, created = Productos.objects.get_or_create(
@@ -142,7 +153,70 @@ class ProveedorUpdateView(UpdateView):
     template_name = 'proveedores_form.html'
     success_url = reverse_lazy('proveedores')
 
+    def form_valid(self, form):
+        proveedor_anterior = Proveedores.objects.get(pk=self.object.pk)
+        saldo_anterior = proveedor_anterior.saldo
+        saldo_nuevo = form.cleaned_data['saldo']
+        
+        # Si el saldo disminuyó, se hizo un pago → registrar como gasto
+        if saldo_nuevo < saldo_anterior:
+            monto_pagado = saldo_anterior - saldo_nuevo
+            Gastos.objects.create(
+                descripcion=f'Pago a proveedor: {self.object.nombre}',
+                monto=monto_pagado,
+                categoria='comercio_productos',
+                proveedor=self.object
+            )
+        
+        return super().form_valid(form)
+
 class ProveedorDeleteView(DeleteView):
     model = Proveedores
     template_name = 'proveedores_confirm_delete.html'
     success_url = reverse_lazy('proveedores')
+
+
+def pagar_proveedor(request, pk):
+    """Registra un pago (abono o saldar) a un proveedor"""
+    proveedor = get_object_or_404(Proveedores, pk=pk)
+    
+    if request.method == 'POST':
+        monto_str = request.POST.get('monto_pago', '')
+        saldar = request.POST.get('saldar') == '1'
+        
+        if saldar:
+            monto = proveedor.saldo
+        else:
+            try:
+                monto = Decimal(monto_str)
+            except Exception:
+                messages.error(request, 'El monto debe ser un número válido.')
+                return redirect('proveedores')
+        
+        if monto <= 0:
+            messages.error(request, 'El monto debe ser mayor a cero.')
+            return redirect('proveedores')
+        
+        if monto > proveedor.saldo:
+            messages.error(request, f'El monto no puede ser mayor al saldo pendiente (${proveedor.saldo}).')
+            return redirect('proveedores')
+        
+        # Reducir saldo del proveedor
+        proveedor.saldo -= monto
+        proveedor.inicial += monto
+        proveedor.save()
+        
+        # Registrar como gasto
+        Gastos.objects.create(
+            descripcion=f'Pago a proveedor: {proveedor.nombre}',
+            monto=monto,
+            categoria='comercio_productos',
+            proveedor=proveedor
+        )
+        
+        if proveedor.saldo == 0:
+            messages.success(request, f'Proveedor {proveedor.nombre} saldado completamente.')
+        else:
+            messages.success(request, f'Abono de ${monto} registrado. Saldo pendiente: ${proveedor.saldo}')
+    
+    return redirect('proveedores')

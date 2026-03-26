@@ -314,6 +314,72 @@ body {
     color: #c62828;
 }
 
+/* Gastos Cards */
+.ventas-detalle-card.gastos-total {
+    border-top-color: #d32f2f;
+}
+
+.ventas-detalle-card.gastos-total .ventas-detalle-icon {
+    background: linear-gradient(135deg, #d32f2f, #ef5350);
+    color: white;
+}
+
+.ventas-detalle-card.gastos-total .ventas-detalle-valor {
+    color: #c62828;
+}
+
+.ventas-detalle-card.gastos-admin {
+    border-top-color: #FF5722;
+}
+
+.ventas-detalle-card.gastos-admin .ventas-detalle-icon {
+    background: linear-gradient(135deg, #FF5722, #FF8A65);
+    color: white;
+}
+
+.ventas-detalle-card.gastos-admin .ventas-detalle-valor {
+    color: #d84315;
+}
+
+.ventas-detalle-card.gastos-trabajadores {
+    border-top-color: #FF7043;
+}
+
+.ventas-detalle-card.gastos-trabajadores .ventas-detalle-icon {
+    background: linear-gradient(135deg, #FF7043, #FFAB91);
+    color: white;
+}
+
+.ventas-detalle-card.gastos-trabajadores .ventas-detalle-valor {
+    color: #e64a19;
+}
+
+.ventas-detalle-card.gastos-comercio {
+    border-top-color: #EF6C00;
+}
+
+.ventas-detalle-card.gastos-comercio .ventas-detalle-icon {
+    background: linear-gradient(135deg, #EF6C00, #FFB74D);
+    color: white;
+}
+
+.ventas-detalle-card.gastos-comercio .ventas-detalle-valor {
+    color: #e65100;
+}
+
+.ventas-detalle-card.gastos-otros {
+    border-top-color: #795548;
+}
+
+.ventas-detalle-card.gastos-otros .ventas-detalle-icon {
+    background: linear-gradient(135deg, #795548, #a1887f);
+    color: white;
+}
+
+.ventas-detalle-card.gastos-otros .ventas-detalle-valor {
+    color: #4e342e;
+}
+
 .ventas-detalle-subtitulo {
     font-size: 0.75rem;
     color: var(--text-secondary);

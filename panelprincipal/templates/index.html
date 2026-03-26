@@ -139,10 +139,10 @@
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div class="finance-info">
-                    <h3>Total Finanzas - Semana Actual</h3>
-                    <p class="finance-amount" id="totalFinanzas">${{ total_finanzas|floatformat:0 }}</p>
+                    <h3>Balance Real - Semana Actual</h3>
+                    <p class="finance-amount" id="totalFinanzas">${{ balance_real|floatformat:0 }}</p>
                     <div class="finance-details">
-                        <span class="income"><i class="fas fa-arrow-up"></i> Ingresos: <span id="totalIngresos">${{ total_ingresos|floatformat:0 }}</span></span>
+                        <span class="income"><i class="fas fa-arrow-up"></i> Recaudado + Cobros: <span id="totalIngresos">${{ total_recaudado|floatformat:0 }} + ${{ total_cobros_semana|floatformat:0 }}</span></span>
                         <span class="expense"><i class="fas fa-arrow-down"></i> Gastos: <span id="totalGastos">${{ total_gastos_finanzas|floatformat:0 }}</span></span>
                     </div>
                 </div>
@@ -253,7 +253,7 @@
 
         <!-- Panel de Ventas Detallado -->
         <section class="ventas-detalle-panel">
-            <h2 class="section-title">Resumen de Ventas</h2>
+            <h2 class="section-title">Resumen Semanal</h2>
             <div class="ventas-detalle-grid">
                 <!-- Total Recaudado -->
                 <div class="ventas-detalle-card recaudado">
@@ -336,6 +336,18 @@
                         <span class="ventas-detalle-label">Saldo Por Cobrar</span>
                         <span class="ventas-detalle-valor">${{ total_por_cobrar|floatformat:0 }}</span>
                         <span class="ventas-detalle-subtitulo">Deuda total de clientes <i class="fas fa-arrow-right" style="margin-left:4px;"></i></span>
+                    </div>
+                </a>
+                
+                <!-- Total Gastos -->
+                <a href="{% url 'gastos' %}" class="ventas-detalle-card gastos-total" style="text-decoration:none; color:inherit; cursor:pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                    <div class="ventas-detalle-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="ventas-detalle-content">
+                        <span class="ventas-detalle-label">Total Gastos</span>
+                        <span class="ventas-detalle-valor">${{ total_gastos_finanzas|floatformat:0 }}</span>
+                        <span class="ventas-detalle-subtitulo">{{ cantidad_gastos_semana }} registros esta semana <i class="fas fa-arrow-right" style="margin-left:4px;"></i></span>
                     </div>
                 </a>
             </div>
