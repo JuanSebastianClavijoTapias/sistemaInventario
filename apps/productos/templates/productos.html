@@ -209,8 +209,7 @@
                         <div class="item-card">
                             <div class="item-info">
                                 <h3>{{ producto.nombre }}</h3>
-                                <p><strong>Precio Compra:</strong> ${{ producto.precio_compra|floatformat:0 }} | <strong>Precio Venta:</strong> ${{ producto.precio_venta|floatformat:0 }}</p>
-                                <p><strong>Ganancia:</strong> ${{ producto.ganancia_unitaria|floatformat:0 }} ({{ producto.margen_ganancia|floatformat:1 }}%)</p>
+                                <p><strong>Precio Compra:</strong> ${{ producto.precio_compra|floatformat:0 }} 
                                 <p><strong>Stock:</strong> {{ producto.stock }} | <strong>Proveedor:</strong> {{ producto.proveedor.nombre }}</p>
                             </div>
                             <div class="item-actions">

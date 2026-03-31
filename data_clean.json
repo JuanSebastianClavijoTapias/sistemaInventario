@@ -1,0 +1,450 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$9poUgpvGrEtaPp5qxjlhC8$yVO31s9j1Ub4AAKSOr+bGxyIFTvyL5XI4LFXIqx/n7w=",
+      "last_login": "2026-02-28T23:43:47.998Z",
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "email": "admin@papa.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-02-25T15:07:33.239Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$fhT8JEqNMnMwsutZMMW93m$tdHMWZxHP7nGLyBE8oxm/d31Vpu/gmegKqMFhC8SXCA=",
+      "last_login": "2026-03-30T21:56:33.277Z",
+      "is_superuser": false,
+      "username": "julian",
+      "first_name": "",
+      "last_name": "",
+      "email": "julian@gmail.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-02-25T20:46:07.067Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "panelprincipal.configuracionsemana",
+    "pk": 1,
+    "fields": {
+      "fecha_inicio_semana_actual": "2026-02-22",
+      "dias_por_semana": 8
+    }
+  },
+  {
+    "model": "clientes.clientes",
+    "pk": 1,
+    "fields": {
+      "nombre": "Samuel",
+      "apellido": "Pi±eres",
+      "telefono": "92397932",
+      "inicial": "0.00",
+      "saldo": "0.00"
+    }
+  },
+  {
+    "model": "clientes.clientes",
+    "pk": 3,
+    "fields": {
+      "nombre": "Juan Sebastian",
+      "apellido": "Clavijo",
+      "telefono": "3232323232",
+      "inicial": "0.00",
+      "saldo": "0.00"
+    }
+  },
+  {
+    "model": "clientes.clientes",
+    "pk": 4,
+    "fields": {
+      "nombre": "Valentina",
+      "apellido": "Clavijo",
+      "telefono": "3232323232",
+      "inicial": "0.00",
+      "saldo": "0.00"
+    }
+  },
+  {
+    "model": "clientes.clientes",
+    "pk": 5,
+    "fields": {
+      "nombre": "Mateo",
+      "apellido": "Arrubla",
+      "telefono": "323223",
+      "inicial": "0.00",
+      "saldo": "0.00"
+    }
+  },
+  {
+    "model": "clientes.clientes",
+    "pk": 7,
+    "fields": {
+      "nombre": "consumidor",
+      "apellido": "final",
+      "telefono": "000000000",
+      "inicial": "0.00",
+      "saldo": "0.00"
+    }
+  },
+  {
+    "model": "proveedores.proveedores",
+    "pk": 18,
+    "fields": {
+      "nombre": "rh",
+      "telefono": "3200230",
+      "inicial": "0.00",
+      "saldo": "0.00"
+    }
+  },
+  {
+    "model": "proveedores.proveedores",
+    "pk": 19,
+    "fields": {
+      "nombre": "rh",
+      "telefono": "3200230",
+      "inicial": "2000000.00",
+      "saldo": "5000000.00"
+    }
+  },
+  {
+    "model": "proveedores.proveedores",
+    "pk": 20,
+    "fields": {
+      "nombre": "rh",
+      "telefono": "3200230",
+      "inicial": "18750000.00",
+      "saldo": "0.00"
+    }
+  },
+  {
+    "model": "proveedores.proveedores",
+    "pk": 21,
+    "fields": {
+      "nombre": "CityPapa",
+      "telefono": "3004211908",
+      "inicial": "15000000.00",
+      "saldo": "0.00"
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 19,
+    "fields": {
+      "nombre": "Pelona",
+      "categoria": "pelona",
+      "precio_compra": "60000.00",
+      "precio_venta": "0.00",
+      "stock": 0,
+      "proveedor": 18
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 20,
+    "fields": {
+      "nombre": "Rechazo Medio",
+      "categoria": "rechazo_medio",
+      "precio_compra": "60000.00",
+      "precio_venta": "0.00",
+      "stock": 0,
+      "proveedor": 18
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 21,
+    "fields": {
+      "nombre": "Tercera",
+      "categoria": "tercera",
+      "precio_compra": "60000.00",
+      "precio_venta": "0.00",
+      "stock": 0,
+      "proveedor": 18
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 22,
+    "fields": {
+      "nombre": "Otros",
+      "categoria": "otros",
+      "precio_compra": "60000.00",
+      "precio_venta": "0.00",
+      "stock": 0,
+      "proveedor": 18
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 23,
+    "fields": {
+      "nombre": "Papa Primera",
+      "categoria": "papa_primera",
+      "precio_compra": "70000.00",
+      "precio_venta": "0.00",
+      "stock": 5,
+      "proveedor": 19
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 24,
+    "fields": {
+      "nombre": "Tronco",
+      "categoria": "tronco",
+      "precio_compra": "70000.00",
+      "precio_venta": "0.00",
+      "stock": 39,
+      "proveedor": 19
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 25,
+    "fields": {
+      "nombre": "Rechazo Medio",
+      "categoria": "rechazo_medio",
+      "precio_compra": "70000.00",
+      "precio_venta": "0.00",
+      "stock": 19,
+      "proveedor": 19
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 26,
+    "fields": {
+      "nombre": "Otros",
+      "categoria": "otros",
+      "precio_compra": "70000.00",
+      "precio_venta": "0.00",
+      "stock": 14,
+      "proveedor": 19
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 27,
+    "fields": {
+      "nombre": "Papa Primera",
+      "categoria": "papa_primera",
+      "precio_compra": "62500.00",
+      "precio_venta": "0.00",
+      "stock": 12,
+      "proveedor": 20
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 28,
+    "fields": {
+      "nombre": "Rechazo Grueso",
+      "categoria": "rechazo_grueso",
+      "precio_compra": "62500.00",
+      "precio_venta": "0.00",
+      "stock": 160,
+      "proveedor": 20
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 29,
+    "fields": {
+      "nombre": "Sobrante",
+      "categoria": "sobrante",
+      "precio_compra": "62500.00",
+      "precio_venta": "0.00",
+      "stock": 88,
+      "proveedor": 20
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 30,
+    "fields": {
+      "nombre": "Medio Pollo",
+      "categoria": "medio_pollo",
+      "precio_compra": "100000.00",
+      "precio_venta": "0.00",
+      "stock": 70,
+      "proveedor": 21
+    }
+  },
+  {
+    "model": "productos.productos",
+    "pk": 31,
+    "fields": {
+      "nombre": "Tercera",
+      "categoria": "tercera",
+      "precio_compra": "100000.00",
+      "precio_venta": "0.00",
+      "stock": 80,
+      "proveedor": 21
+    }
+  },
+  {
+    "model": "gastos.gastos",
+    "pk": 6,
+    "fields": {
+      "descripcion": "Compra a proveedor: rh",
+      "monto": "2000000.00",
+      "fecha": "2026-03-26T11:09:00.869Z",
+      "categoria": "comercio_productos",
+      "proveedor": 19
+    }
+  },
+  {
+    "model": "gastos.gastos",
+    "pk": 7,
+    "fields": {
+      "descripcion": "Compra a proveedor: rh",
+      "monto": "18750000.00",
+      "fecha": "2026-03-26T11:12:13.544Z",
+      "categoria": "comercio_productos",
+      "proveedor": 20
+    }
+  },
+  {
+    "model": "gastos.gastos",
+    "pk": 8,
+    "fields": {
+      "descripcion": "Compra a proveedor: CityPapa",
+      "monto": "2000000.00",
+      "fecha": "2026-03-30T22:03:41.095Z",
+      "categoria": "comercio_productos",
+      "proveedor": 21
+    }
+  },
+  {
+    "model": "gastos.gastos",
+    "pk": 9,
+    "fields": {
+      "descripcion": "Pago a proveedor: CityPapa",
+      "monto": "13000000.00",
+      "fecha": "2026-03-30T22:04:17.920Z",
+      "categoria": "comercio_productos",
+      "proveedor": 21
+    }
+  },
+  {
+    "model": "ventas.venta",
+    "pk": 30,
+    "fields": {
+      "cliente": 7,
+      "producto": null,
+      "cantidad": 11,
+      "fecha": "2026-03-26T11:09:45.892Z",
+      "total": "740000.00",
+      "precio_compra": "0.00",
+      "precio_venta": "0.00",
+      "ganancia": "-30000.00",
+      "tipo_pago": "completo",
+      "monto_pagado": "740000.00",
+      "fecha_vencimiento": null,
+      "estado_pago": "pagado",
+      "metodo_pago": "efectivo"
+    }
+  },
+  {
+    "model": "ventas.venta",
+    "pk": 31,
+    "fields": {
+      "cliente": 7,
+      "producto": 25,
+      "cantidad": 12,
+      "fecha": "2026-03-30T21:58:07.786Z",
+      "total": "3000000.00",
+      "precio_compra": "70000.00",
+      "precio_venta": "250000.00",
+      "ganancia": "2160000.00",
+      "tipo_pago": "fiado",
+      "monto_pagado": "100000.00",
+      "fecha_vencimiento": "2026-04-14",
+      "estado_pago": "pendiente",
+      "metodo_pago": "efectivo"
+    }
+  },
+  {
+    "model": "ventas.venta",
+    "pk": 32,
+    "fields": {
+      "cliente": 4,
+      "producto": 28,
+      "cantidad": 40,
+      "fecha": "2026-03-30T22:07:29.165Z",
+      "total": "8000000.00",
+      "precio_compra": "62500.00",
+      "precio_venta": "200000.00",
+      "ganancia": "5500000.00",
+      "tipo_pago": "completo",
+      "monto_pagado": "8000000.00",
+      "fecha_vencimiento": null,
+      "estado_pago": "pagado",
+      "metodo_pago": "efectivo"
+    }
+  },
+  {
+    "model": "ventas.detalleventa",
+    "pk": 7,
+    "fields": {
+      "venta": 30,
+      "producto": 24,
+      "cantidad": 4,
+      "precio_compra": "70000.00",
+      "precio_venta": "80000.00",
+      "subtotal": "320000.00",
+      "ganancia": "40000.00"
+    }
+  },
+  {
+    "model": "ventas.detalleventa",
+    "pk": 8,
+    "fields": {
+      "venta": 30,
+      "producto": 23,
+      "cantidad": 7,
+      "precio_compra": "70000.00",
+      "precio_venta": "60000.00",
+      "subtotal": "420000.00",
+      "ganancia": "-70000.00"
+    }
+  },
+  {
+    "model": "ventas.detalleventa",
+    "pk": 9,
+    "fields": {
+      "venta": 31,
+      "producto": 25,
+      "cantidad": 12,
+      "precio_compra": "70000.00",
+      "precio_venta": "250000.00",
+      "subtotal": "3000000.00",
+      "ganancia": "2160000.00"
+    }
+  },
+  {
+    "model": "ventas.detalleventa",
+    "pk": 10,
+    "fields": {
+      "venta": 32,
+      "producto": 28,
+      "cantidad": 40,
+      "precio_compra": "62500.00",
+      "precio_venta": "200000.00",
+      "subtotal": "8000000.00",
+      "ganancia": "5500000.00"
+    }
+  }
+]

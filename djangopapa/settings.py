@@ -80,10 +80,21 @@ WSGI_APPLICATION = 'djangopapa.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': 'djangopapa.db',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'djangopapa.db',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'djangopapa',
+        'USER': 'postgres',
+        'PASSWORD': '1017931005Rios',
+        'PORT': '5432',
+        'HOST': 'localhost'
     }
 }
 
