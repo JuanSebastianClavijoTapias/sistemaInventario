@@ -4,7 +4,7 @@ from .models import Clientes
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Clientes
-        fields = ['nombre', 'apellido', 'telefono']
+        fields = ['nombre', 'apellido']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-input',
@@ -13,9 +13,5 @@ class ClienteForm(forms.ModelForm):
             'apellido': forms.TextInput(attrs={
                 'class': 'form-input',
                 'placeholder': 'Apellido del cliente'
-            }),
-            'telefono': forms.TextInput(attrs={
-                'class': 'form-input',
-                'placeholder': 'Teléfono de contacto'
             }),
         }

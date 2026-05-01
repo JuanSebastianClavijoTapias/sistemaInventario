@@ -1,12 +1,16 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
+from django.db import transaction
+from django.views.decorators.http import require_POST
 from datetime import timedelta
 import calendar
 import json
 from decimal import Decimal
-from .models import Venta, DetalleVenta
+from .models import Venta, DetalleVenta, Cobro
+from .forms import VentaForm, DetalleVentaForm, CobroForm, EditarVentaForm
 from apps.clientes.models import Clientes
 from apps.productos.models import Productos
 
@@ -303,3 +307,340 @@ def ventas_form(request):
     }
     
     return render(request, 'ventas.html', context)
+
+
+@login_required
+def lista_ventas(request):
+    """
+    Lista todas las ventas con opciones de filtrado y búsqueda.
+    """
+    ventas = Venta.objects.select_related('cliente', 'producto').prefetch_related(
+        'detalles', 'detalles__producto', 'cobros'
+    ).order_by('-fecha')
+    
+    # Filtros
+    filtro_estado = request.GET.get('estado', '')
+    filtro_cliente = request.GET.get('cliente', '')
+    filtro_rango = request.GET.get('rango', 'todo')
+    
+    hoy = timezone.localdate()
+    
+    # Aplicar filtro de estado
+    if filtro_estado == 'pagado':
+        ventas = ventas.filter(estado_pago='pagado')
+    elif filtro_estado == 'pendiente':
+        ventas = ventas.filter(estado_pago='pendiente')
+    elif filtro_estado == 'vencido':
+        ventas = ventas.filter(estado_pago='vencido')
+    
+    # Aplicar filtro de cliente
+    if filtro_cliente:
+        ventas = ventas.filter(cliente__idCliente=filtro_cliente)
+    
+    # Aplicar filtro de rango de fechas
+    if filtro_rango == 'hoy':
+        ventas = ventas.filter(fecha__date=hoy)
+    elif filtro_rango == 'semana':
+        inicio_semana = hoy - timedelta(days=7)
+        ventas = ventas.filter(fecha__date__gte=inicio_semana)
+    elif filtro_rango == 'mes':
+        inicio_mes = hoy.replace(day=1)
+        ventas = ventas.filter(fecha__date__gte=inicio_mes)
+    
+    # Calcular totales
+    totales = ventas.aggregate(
+        total_ventas=Sum('total'),
+        total_pagado=Sum('monto_pagado'),
+        total_pendiente=Sum('total') - Sum('monto_pagado'),
+        cantidad_ventas=Count('idVenta')
+    )
+    
+    clientes = Clientes.objects.all().order_by('nombre')
+    
+    context = {
+        'ventas': ventas[:100],  # Limitar a 100 para performance
+        'clientes': clientes,
+        'filtro_estado': filtro_estado,
+        'filtro_cliente': filtro_cliente,
+        'filtro_rango': filtro_rango,
+        'totales': totales,
+    }
+    
+    return render(request, 'ventas_lista.html', context)
+
+
+@login_required
+def detalle_venta(request, venta_id):
+    """
+    Muestra el detalle completo de una venta con opción de editar o agregar pagos.
+    """
+    venta = get_object_or_404(Venta, idVenta=venta_id)
+    detalles = venta.detalles.select_related('producto').all()
+    cobros = venta.cobros.all().order_by('-fecha')
+    
+    context = {
+        'venta': venta,
+        'detalles': detalles,
+        'cobros': cobros,
+    }
+    
+    return render(request, 'venta_detalle.html', context)
+
+
+@login_required
+def editar_venta(request, venta_id):
+    """
+    Permite editar una venta existente:
+    - Agregar nuevos productos
+    - Aumentar cantidades de productos existentes
+    
+    Al realizar cualquier cambio, recalcula automáticamente los totales.
+    """
+    venta = get_object_or_404(Venta, idVenta=venta_id)
+    
+    if request.method == 'POST':
+        form = EditarVentaForm(venta=venta, data=request.POST)
+        if form.is_valid():
+            accion = form.cleaned_data['accion']
+            producto = form.cleaned_data['producto']
+            cantidad = form.cleaned_data['cantidad']
+            precio_venta = Decimal(str(form.cleaned_data['precio_venta']))
+            
+            try:
+                with transaction.atomic():
+                    if accion == 'agregar_producto':
+                        # Verificar que el producto no esté ya en la venta
+                        existe = venta.detalles.filter(producto=producto).exists()
+                        if existe:
+                            messages.error(
+                                request,
+                                f'El producto {producto.nombre} ya está en esta venta. '
+                                'Use "Aumentar cantidad" para modificar la cantidad.'
+                            )
+                            return redirect('editar_venta', venta_id=venta_id)
+                        
+                        # Crear nuevo detalle
+                        precio_compra = Decimal(str(producto.precio_compra))
+                        subtotal = precio_venta * Decimal(str(cantidad))
+                        ganancia = (precio_venta - precio_compra) * Decimal(str(cantidad))
+                        
+                        DetalleVenta.objects.create(
+                            venta=venta,
+                            producto=producto,
+                            cantidad=cantidad,
+                            precio_compra=precio_compra,
+                            precio_venta=precio_venta,
+                            subtotal=subtotal,
+                            ganancia=ganancia,
+                        )
+                        
+                        messages.success(
+                            request,
+                            f'Producto {producto.nombre} agregado: {cantidad} kg'
+                        )
+                    
+                    elif accion == 'aumentar_cantidad':
+                        # Obtener detalle existente
+                        detalle = venta.detalles.get(producto=producto)
+                        precio_compra = detalle.precio_compra
+                        
+                        # Recalcular con la nueva cantidad
+                        nueva_cantidad = detalle.cantidad + cantidad
+                        nuevo_subtotal = precio_venta * Decimal(str(nueva_cantidad))
+                        nueva_ganancia = (precio_venta - precio_compra) * Decimal(str(nueva_cantidad))
+                        
+                        # Actualizar detalle
+                        detalle.cantidad = nueva_cantidad
+                        detalle.precio_venta = precio_venta
+                        detalle.subtotal = nuevo_subtotal
+                        detalle.ganancia = nueva_ganancia
+                        detalle.save()
+                        
+                        messages.success(
+                            request,
+                            f'Cantidad de {producto.nombre} aumentada a {nueva_cantidad} kg'
+                        )
+                    
+                    # Recalcular totales de la venta
+                    recalcular_totales_venta(venta)
+                    venta.actualizar_estado_pago()
+                    
+            except DetalleVenta.DoesNotExist:
+                messages.error(request, 'No se encontró el producto en la venta')
+            except Exception as e:
+                messages.error(request, f'Error al actualizar la venta: {str(e)}')
+            
+            return redirect('detalle_venta', venta_id=venta_id)
+    else:
+        form = EditarVentaForm(venta=venta)
+    
+    detalles = venta.detalles.select_related('producto').all()
+    
+    context = {
+        'venta': venta,
+        'form': form,
+        'detalles': detalles,
+    }
+    
+    return render(request, 'venta_editar.html', context)
+
+
+@login_required
+def agregar_pago(request, venta_id):
+    """
+    Permite agregar un pago/abono a una venta a crédito.
+    Recalcula automáticamente el estado de pago.
+    """
+    venta = get_object_or_404(Venta, idVenta=venta_id)
+    
+    # Validar que sea una venta a crédito
+    if venta.tipo_pago != 'fiado':
+        messages.error(request, 'Esta venta ya fue pagada completamente')
+        return redirect('detalle_venta', venta_id=venta_id)
+    
+    # Validar que aún haya saldo pendiente
+    if venta.saldo_pendiente <= 0:
+        messages.info(request, 'Esta venta ya está completamente pagada')
+        return redirect('detalle_venta', venta_id=venta_id)
+    
+    if request.method == 'POST':
+        form = CobroForm(venta=venta, data=request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    monto = form.cleaned_data['monto']
+                    
+                    # Crear registro de cobro
+                    Cobro.objects.create(
+                        venta=venta,
+                        monto=monto,
+                    )
+                    
+                    # Actualizar monto_pagado en la venta
+                    venta.monto_pagado += monto
+                    venta.save()
+                    
+                    # Recalcular estado de pago
+                    venta.actualizar_estado_pago()
+                    
+                    saldo = venta.saldo_pendiente
+                    
+                    if saldo <= 0:
+                        messages.success(
+                            request,
+                            f'Abono registrado por ${monto:,.2f}. ¡Venta completamente pagada!'
+                        )
+                    else:
+                        messages.success(
+                            request,
+                            f'Abono registrado por ${monto:,.2f}. Saldo pendiente: ${saldo:,.2f}'
+                        )
+                    
+            except Exception as e:
+                messages.error(request, f'Error al registrar el abono: {str(e)}')
+            
+            return redirect('detalle_venta', venta_id=venta_id)
+    else:
+        form = CobroForm(venta=venta)
+    
+    context = {
+        'venta': venta,
+        'form': form,
+        'saldo_pendiente': venta.saldo_pendiente,
+    }
+    
+    return render(request, 'venta_pago.html', context)
+
+
+@login_required
+def eliminar_detalle(request, venta_id, detalle_id):
+    """
+    Permite eliminar un producto de la venta (solo para ventas sin pagar).
+    Recalcula totales automáticamente.
+    """
+    venta = get_object_or_404(Venta, idVenta=venta_id)
+    detalle = get_object_or_404(DetalleVenta, id=detalle_id, venta=venta)
+    
+    # Validación: No permitir eliminar si ya hay pagos parciales
+    if venta.monto_pagado > 0 and venta.tipo_pago == 'fiado':
+        messages.error(
+            request,
+            'No puede modificar productos de una venta que ya tiene pagos registrados'
+        )
+        return redirect('detalle_venta', venta_id=venta_id)
+    
+    try:
+        with transaction.atomic():
+            producto_nombre = detalle.producto.nombre
+            detalle.delete()
+            
+            # Recalcular totales
+            recalcular_totales_venta(venta)
+            
+            # Si no quedan detalles, no se puede mantener la venta abierta
+            if not venta.detalles.exists():
+                messages.warning(request, 'La venta no tiene productos. Puede eliminarla.')
+            else:
+                messages.success(request, f'Producto {producto_nombre} eliminado')
+            
+    except Exception as e:
+        messages.error(request, f'Error al eliminar el producto: {str(e)}')
+    
+    return redirect('editar_venta', venta_id=venta_id)
+
+
+# ============================================================================
+# FUNCIONES AUXILIARES (UTILIDADES)
+# ============================================================================
+
+def recalcular_totales_venta(venta):
+    """
+    Recalcula los totales de una venta basado en sus detalles (DetalleVenta).
+    
+    Esta función es crítica para mantener la consistencia de datos después
+    de modificar productos en una venta. Se llama automáticamente cuando se:
+    - Agregan productos
+    - Aumentan cantidades
+    - Eliminan productos
+    
+    Args:
+        venta (Venta): La instancia de venta a recalcular
+    """
+    detalles = venta.detalles.all()
+    
+    if not detalles.exists():
+        # Si no hay detalles, poner todo en 0
+        venta.cantidad = 0
+        venta.total = Decimal('0')
+        venta.ganancia = Decimal('0')
+    else:
+        # Sumar todos los detalles usando agregación de ORM
+        agregados = detalles.aggregate(
+            total_cantidad=Sum('cantidad'),
+            total_venta=Sum('subtotal'),
+            total_ganancia=Sum('ganancia')
+        )
+        
+        venta.cantidad = agregados['total_cantidad'] or 0
+        venta.total = agregados['total_venta'] or Decimal('0')
+        venta.ganancia = agregados['total_ganancia'] or Decimal('0')
+        
+        # Si es venta única, actualizar precio_compra y precio_venta
+        if detalles.count() == 1:
+            detalle = detalles.first()
+            venta.precio_compra = detalle.precio_compra
+            venta.precio_venta = detalle.precio_venta
+            venta.producto = detalle.producto
+        else:
+            # Para múltiples productos, dejar los promedios
+            venta.producto = None
+            total_cantidad = venta.cantidad
+            if total_cantidad > 0:
+                venta.precio_compra = detalles.aggregate(
+                    avg=Sum('precio_compra') / total_cantidad
+                )['avg'] or Decimal('0')
+                venta.precio_venta = detalles.aggregate(
+                    avg=Sum('subtotal') / total_cantidad
+                )['avg'] or Decimal('0')
+    
+    venta.save()

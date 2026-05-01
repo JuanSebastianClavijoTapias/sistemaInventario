@@ -62,10 +62,7 @@
             font-weight: 600;
             color: #333;
         }
-        .cliente-telefono {
-            color: #666;
-            font-size: 14px;
-        }
+
         .cliente-acciones {
             display: flex;
             gap: 10px;
@@ -257,10 +254,6 @@
                         <label for="id_apellido">Apellido</label>
                         {{ form.apellido }}
                     </div>
-                    <div class="form-group">
-                        <label for="id_telefono">Teléfono</label>
-                        {{ form.telefono }}
-                    </div>
                 </div>
                 <button type="submit" class="btn-agregar clientes-btn">
                     <i class="fas fa-plus"></i> Agregar Cliente
@@ -305,17 +298,16 @@
                 <h2 class="section-title"><i class="fas fa-search"></i> Buscar Clientes</h2>
             </div>
             <div class="search-box">
-                <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, apellido o teléfono...">
+                <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre o apellido...">
                 <button class="search-icon">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
             <div class="todos-clientes-list" id="todosClientesList">
                 {% for cliente in clientes %}
-                <div class="cliente-all-item" data-nombre="{{ cliente.nombre|lower }}" data-apellido="{{ cliente.apellido|lower }}" data-telefono="{{ cliente.telefono }}">
+                <div class="cliente-all-item" data-nombre="{{ cliente.nombre|lower }}" data-apellido="{{ cliente.apellido|lower }}">
                     <div class="cliente-info">
                         <span class="cliente-nombre">{{ cliente.nombre }} {{ cliente.apellido }}</span>
-                        <span class="cliente-telefono"><i class="fas fa-phone"></i> {{ cliente.telefono }}</span>
                     </div>
                     <div class="cliente-acciones">
                         <a href="{% url 'cliente_compras' cliente.pk %}" class="btn-compras">
@@ -347,7 +339,6 @@
                 <div class="cliente-deuda-item {{ deuda.estado }}">
                     <div class="deuda-info">
                         <span class="cliente-nombre">{{ deuda.cliente.nombre }} {{ deuda.cliente.apellido }}</span>
-                        <span class="cliente-telefono"><i class="fas fa-phone"></i> {{ deuda.cliente.telefono }}</span>
                         <div class="deuda-detalle">
                             {{ deuda.ventas_pendientes }} venta(s) pendiente(s)
                             {% if deuda.dias_minimos is not None %}
@@ -385,7 +376,6 @@
                 <div class="cliente-pagado-item">
                     <div class="pagado-info">
                         <span class="cliente-nombre">{{ pagado.cliente.nombre }} {{ pagado.cliente.apellido }}</span>
-                        <span class="cliente-telefono"><i class="fas fa-phone"></i> {{ pagado.cliente.telefono }}</span>
                     </div>
                     <div class="cliente-acciones">
                         <div class="pagado-monto">${{ pagado.total_compras }}</div>
@@ -418,8 +408,7 @@
             clienteItems.forEach(function(item) {
                 const nombre = item.getAttribute('data-nombre') || '';
                 const apellido = item.getAttribute('data-apellido') || '';
-                const telefono = item.getAttribute('data-telefono') || '';
-                const fullText = nombre + ' ' + apellido + ' ' + telefono;
+                const fullText = nombre + ' ' + apellido;
 
                 if (fullText.includes(searchTerm) || searchTerm === '') {
                     item.classList.remove('hidden');

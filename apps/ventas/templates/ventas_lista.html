@@ -1,0 +1,336 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Ventas</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .filtros {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .filtro-fila {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .filtro-grupo {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filtro-grupo label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .filtro-grupo select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .btn-filtrar {
+            align-self: flex-end;
+            padding: 8px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-filtrar:hover {
+            background: #764ba2;
+        }
+        
+        .resumen-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-valor {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .tabla-ventas {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-pagado {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-pendiente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-vencido {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .acciones {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .no-datos {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .btn-volver:hover {
+            background: #667eea !important;
+            color: white !important;
+            transform: translateX(-3px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1><i class="fas fa-history"></i> Historial de Ventas</h1>
+                    <p>Gestione y visualice todas las transacciones de venta</p>
+                </div>
+                <a href="{% url 'ventas' %}" class="btn-volver" style="padding: 12px 20px; background: white; color: #667eea; border: 2px solid white; border-radius: 6px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;">
+                    <i class="fas fa-arrow-left"></i> 
+                </a>
+            </div>
+        </div>
+        
+        <!-- Filtros -->
+        <div class="filtros">
+            <form method="get">
+                <div class="filtro-fila">
+                    <div class="filtro-grupo">
+                        <label for="estado">Estado de Pago</label>
+                        <select name="estado" id="estado">
+                            <option value="">Todos</option>
+                            <option value="pagado" {% if filtro_estado == 'pagado' %}selected{% endif %}>Pagado</option>
+                            <option value="pendiente" {% if filtro_estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="vencido" {% if filtro_estado == 'vencido' %}selected{% endif %}>Vencido</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-grupo">
+                        <label for="cliente">Cliente</label>
+                        <select name="cliente" id="cliente">
+                            <option value="">Todos</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.idCliente }}" {% if filtro_cliente == cliente.idCliente|stringformat:"s" %}selected{% endif %}>
+                                    {{ cliente.nombre }} {{ cliente.apellido }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filtro-grupo">
+                        <label for="rango">Período</label>
+                        <select name="rango" id="rango">
+                            <option value="todo" {% if filtro_rango == 'todo' %}selected{% endif %}>Todo el tiempo</option>
+                            <option value="hoy" {% if filtro_rango == 'hoy' %}selected{% endif %}>Hoy</option>
+                            <option value="semana" {% if filtro_rango == 'semana' %}selected{% endif %}>Últimos 7 días</option>
+                            <option value="mes" {% if filtro_rango == 'mes' %}selected{% endif %}>Este mes</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-filtrar">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Estadísticas -->
+        {% if totales.cantidad_ventas %}
+        <div class="resumen-stats">
+            <div class="stat-card">
+                <div class="stat-label">Total de Ventas</div>
+                <div class="stat-valor">${{ totales.total_ventas|floatformat:0 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Pagado</div>
+                <div class="stat-valor">${{ totales.total_pagado|floatformat:0 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Por Cobrar</div>
+                <div class="stat-valor">${{ totales.total_pendiente|floatformat:0 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cantidad de Ventas</div>
+                <div class="stat-valor">{{ totales.cantidad_ventas }}</div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Tabla de Ventas -->
+        <div class="tabla-ventas">
+            {% if ventas %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Productos</th>
+                        <th>Total</th>
+                        <th>Pagado</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in ventas %}
+                    <tr>
+                        <td><strong>#{{ venta.idVenta }}</strong></td>
+                        <td>{{ venta.cliente.nombre }} {{ venta.cliente.apellido }}</td>
+                        <td>{{ venta.descripcion }}</td>
+                        <td>${{ venta.total|floatformat:0 }}</td>
+                        <td>${{ venta.monto_pagado|floatformat:0 }}</td>
+                        <td>
+                            {% if venta.estado_pago == 'pagado' %}
+                                <span class="badge badge-pagado">Pagado</span>
+                            {% elif venta.estado_pago == 'vencido' %}
+                                <span class="badge badge-vencido">Vencido</span>
+                            {% else %}
+                                <span class="badge badge-pendiente">Pendiente</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ venta.fecha|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <div class="acciones">
+                                <a href="{% url 'detalle_venta' venta.idVenta %}" class="btn-small btn-info">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                                <a href="{% url 'editar_venta' venta.idVenta %}" class="btn-small btn-warning">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-datos">
+                <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 10px;"></i>
+                <p>No hay ventas que mostrar con los filtros aplicados</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

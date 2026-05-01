@@ -421,6 +421,34 @@
             gap: 15px;
             margin-bottom: 15px;
         }
+        .btn-small {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        .btn-info:hover {
+            background: #138496;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        .venta-acciones {
+            display: flex;
+            gap: 5px;
+        }
         /* Modal de Ventas del Día */
         .modal-overlay {
             display: none;
@@ -825,6 +853,14 @@
                     <div class="venta-totales">
                         <div class="venta-total">${{ venta.total|floatformat:0 }}</div>
                         <div class="venta-ganancia"><i class="fas fa-chart-line"></i> +${{ venta.ganancia|floatformat:0 }}</div>
+                        <div class="venta-acciones" style="margin-top: 10px;">
+                            <a href="{% url 'detalle_venta' venta.idVenta %}" class="btn-small btn-info">
+                                <i class="fas fa-eye"></i> Ver
+                            </a>
+                            <a href="{% url 'editar_venta' venta.idVenta %}" class="btn-small btn-warning">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {% empty %}
@@ -832,6 +868,8 @@
                 {% endfor %}
             </div>
         </section>
+
+
     </div>
 
     <!-- Modal de Ventas del Día -->

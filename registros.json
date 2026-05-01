@@ -1,41 +1,5 @@
 [
   {
-    "model": "auth.user",
-    "pk": 1,
-    "fields": {
-      "password": "pbkdf2_sha256$1000000$9poUgpvGrEtaPp5qxjlhC8$yVO31s9j1Ub4AAKSOr+bGxyIFTvyL5XI4LFXIqx/n7w=",
-      "last_login": "2026-02-28T23:43:47.998Z",
-      "is_superuser": true,
-      "username": "admin",
-      "first_name": "",
-      "last_name": "",
-      "email": "admin@papa.com",
-      "is_staff": true,
-      "is_active": true,
-      "date_joined": "2026-02-25T15:07:33.239Z",
-      "groups": [],
-      "user_permissions": []
-    }
-  },
-  {
-    "model": "auth.user",
-    "pk": 2,
-    "fields": {
-      "password": "pbkdf2_sha256$1000000$fhT8JEqNMnMwsutZMMW93m$tdHMWZxHP7nGLyBE8oxm/d31Vpu/gmegKqMFhC8SXCA=",
-      "last_login": "2026-03-30T21:56:33.277Z",
-      "is_superuser": false,
-      "username": "julian",
-      "first_name": "",
-      "last_name": "",
-      "email": "julian@gmail.com",
-      "is_staff": false,
-      "is_active": true,
-      "date_joined": "2026-02-25T20:46:07.067Z",
-      "groups": [],
-      "user_permissions": []
-    }
-  },
-  {
     "model": "panelprincipal.configuracionsemana",
     "pk": 1,
     "fields": {
@@ -48,7 +12,7 @@
     "pk": 1,
     "fields": {
       "nombre": "Samuel",
-      "apellido": "Pi±eres",
+      "apellido": "Piñeres",
       "telefono": "92397932",
       "inicial": "0.00",
       "saldo": "0.00"
@@ -100,16 +64,6 @@
   },
   {
     "model": "proveedores.proveedores",
-    "pk": 18,
-    "fields": {
-      "nombre": "rh",
-      "telefono": "3200230",
-      "inicial": "0.00",
-      "saldo": "0.00"
-    }
-  },
-  {
-    "model": "proveedores.proveedores",
     "pk": 19,
     "fields": {
       "nombre": "rh",
@@ -120,70 +74,12 @@
   },
   {
     "model": "proveedores.proveedores",
-    "pk": 20,
-    "fields": {
-      "nombre": "rh",
-      "telefono": "3200230",
-      "inicial": "18750000.00",
-      "saldo": "0.00"
-    }
-  },
-  {
-    "model": "proveedores.proveedores",
     "pk": 21,
     "fields": {
       "nombre": "CityPapa",
       "telefono": "3004211908",
       "inicial": "15000000.00",
       "saldo": "0.00"
-    }
-  },
-  {
-    "model": "productos.productos",
-    "pk": 19,
-    "fields": {
-      "nombre": "Pelona",
-      "categoria": "pelona",
-      "precio_compra": "60000.00",
-      "precio_venta": "0.00",
-      "stock": 0,
-      "proveedor": 18
-    }
-  },
-  {
-    "model": "productos.productos",
-    "pk": 20,
-    "fields": {
-      "nombre": "Rechazo Medio",
-      "categoria": "rechazo_medio",
-      "precio_compra": "60000.00",
-      "precio_venta": "0.00",
-      "stock": 0,
-      "proveedor": 18
-    }
-  },
-  {
-    "model": "productos.productos",
-    "pk": 21,
-    "fields": {
-      "nombre": "Tercera",
-      "categoria": "tercera",
-      "precio_compra": "60000.00",
-      "precio_venta": "0.00",
-      "stock": 0,
-      "proveedor": 18
-    }
-  },
-  {
-    "model": "productos.productos",
-    "pk": 22,
-    "fields": {
-      "nombre": "Otros",
-      "categoria": "otros",
-      "precio_compra": "60000.00",
-      "precio_venta": "0.00",
-      "stock": 0,
-      "proveedor": 18
     }
   },
   {
@@ -243,7 +139,7 @@
       "precio_compra": "62500.00",
       "precio_venta": "0.00",
       "stock": 12,
-      "proveedor": 20
+      "proveedor": 19
     }
   },
   {
@@ -255,7 +151,7 @@
       "precio_compra": "62500.00",
       "precio_venta": "0.00",
       "stock": 160,
-      "proveedor": 20
+      "proveedor": 19
     }
   },
   {
@@ -267,7 +163,7 @@
       "precio_compra": "62500.00",
       "precio_venta": "0.00",
       "stock": 88,
-      "proveedor": 20
+      "proveedor": 19
     }
   },
   {
@@ -313,7 +209,7 @@
       "monto": "18750000.00",
       "fecha": "2026-03-26T11:12:13.544Z",
       "categoria": "comercio_productos",
-      "proveedor": 20
+      "proveedor": 19
     }
   },
   {
@@ -447,4 +343,4 @@
       "ganancia": "5500000.00"
     }
   }
-]
+]2

@@ -90,13 +90,13 @@ class ClienteListView(FormMixin, ListView):
 
 class ClienteCreateView(CreateView):
     model = Clientes
-    fields = ['nombre', 'apellido', 'telefono']
+    fields = ['nombre', 'apellido']
     template_name = 'clientes.html'
     success_url = reverse_lazy('cliente_list')
 
 class ClienteUpdateView(UpdateView):
     model = Clientes
-    fields = ['nombre', 'apellido', 'telefono']
+    fields = ['nombre', 'apellido']
     template_name = 'clientes_form.html'
     success_url = reverse_lazy('cliente_list')
 

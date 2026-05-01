@@ -90,9 +90,9 @@ WSGI_APPLICATION = 'djangopapa.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'djangopapa',
+        'NAME': 'inventario_papa',
         'USER': 'postgres',
-        'PASSWORD': '1017931005Rios',
+        'PASSWORD': '123456',
         'PORT': '5432',
         'HOST': 'localhost'
     }
