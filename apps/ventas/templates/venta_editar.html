@@ -122,11 +122,24 @@
             cursor: pointer;
             font-weight: normal;
         }
+
+        .table-wrapper {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 15px;
+        }
         
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
+        }
+
+        .table-wrapper table {
+            margin-top: 0;
+            min-width: 560px;
         }
         
         thead {
@@ -245,6 +258,86 @@
             color: #1b5e20;
             font-family: 'Courier New', monospace;
         }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            .card,
+            .header {
+                padding: 16px;
+            }
+
+            .radio-group,
+            .botones {
+                flex-direction: column;
+            }
+
+            .resumen {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                padding: 14px;
+                gap: 12px;
+            }
+
+            .resumen-valor {
+                font-size: 20px;
+            }
+
+            th,
+            td {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .table-wrapper {
+                overflow-x: visible;
+            }
+
+            .table-wrapper table,
+            .table-wrapper tbody,
+            .table-wrapper tr,
+            .table-wrapper td {
+                display: block;
+                width: 100%;
+            }
+
+            .table-wrapper table {
+                min-width: 0;
+            }
+
+            .table-wrapper thead {
+                display: none;
+            }
+
+            .table-wrapper tbody tr {
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                padding: 12px;
+                margin-bottom: 12px;
+                background: #fff;
+            }
+
+            .table-wrapper td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 16px;
+                padding: 8px 0;
+                text-align: right;
+            }
+
+            .table-wrapper td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #333;
+                text-align: left;
+            }
+
+            .table-wrapper td:last-child {
+                border-bottom: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -292,28 +385,30 @@
         <div class="card">
             <div class="card-title">Productos en la Venta</div>
             {% if detalles %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Cantidad (kg)</th>
-                        <th>Precio Unit.</th>
-                        <th>Subtotal</th>
-                        <th>Ganancia</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for detalle in detalles %}
-                    <tr>
-                        <td>{{ detalle.producto.nombre }}</td>
-                        <td>{{ detalle.cantidad }}</td>
-                        <td>${{ detalle.precio_venta|floatformat:0 }}</td>
-                        <td>${{ detalle.subtotal|floatformat:0 }}</td>
-                        <td>${{ detalle.ganancia|floatformat:0 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad (kg)</th>
+                            <th>Precio Unit.</th>
+                            <th>Subtotal</th>
+                            <th>Ganancia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detalle in detalles %}
+                        <tr>
+                            <td data-label="Producto">{{ detalle.producto.nombre }}</td>
+                            <td data-label="Cantidad (kg)">{{ detalle.cantidad }}</td>
+                            <td data-label="Precio Unit.">${{ detalle.precio_venta|floatformat:0 }}</td>
+                            <td data-label="Subtotal">${{ detalle.subtotal|floatformat:0 }}</td>
+                            <td data-label="Ganancia">${{ detalle.ganancia|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% else %}
             <p style="color: #666; text-align: center; padding: 20px;">No hay productos en esta venta</p>
             {% endif %}
