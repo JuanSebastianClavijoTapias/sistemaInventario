@@ -24,3 +24,4 @@ coverage.xml
 *.sqlite3
 staticfiles/
 media/
+djangopapa/local_settings.py
