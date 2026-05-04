@@ -54,12 +54,15 @@ class ClienteListView(FormMixin, ListView):
                 elif any(d <= 1 for d in dias_validos):
                     estado_critico = 'urgente'
                 
+                # Calcular días mínimos de forma segura
+                dias_minimos = min(dias_validos) if dias_validos else None
+                
                 clientes_con_deuda.append({
                     'cliente': cliente,
                     'total_deuda': total_deuda,
                     'ventas_pendientes': ventas_pendientes.count(),
                     'estado': estado_critico,
-                    'dias_minimos': min(d for d in dias_vencimiento if d is not None) if dias_vencimiento else None
+                    'dias_minimos': dias_minimos
                 })
             else:
                 # Cliente sin deudas
@@ -126,7 +129,6 @@ def cliente_compras_json(request, pk):
     data = {
         'cliente': {
             'nombre': f"{cliente.nombre} {cliente.apellido}",
-            'telefono': cliente.telefono,
         },
         'compras': [
             {
