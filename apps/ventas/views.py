@@ -17,10 +17,15 @@ from apps.productos.models import Productos
 def ventas_form(request):
     if request.method == 'POST':
         cliente_id = request.POST.get('cliente')
-        tipo_pago = request.POST.get('tipo_pago', 'completo')
-        metodo_pago = request.POST.get('metodo_pago', 'efectivo')
-        monto_pagado = request.POST.get('monto_pagado', '0')
         dias_credito = request.POST.get('dias_credito', '15')
+
+        # Montos de pago
+        try:
+            monto_efectivo = Decimal(request.POST.get('monto_efectivo', '0') or '0')
+            monto_transferencia = Decimal(request.POST.get('monto_transferencia', '0') or '0')
+        except Exception:
+            messages.error(request, 'Los montos de pago deben ser números válidos.')
+            return redirect('ventas')
 
         # Multi-item data
         productos_ids = request.POST.getlist('producto[]')
@@ -81,26 +86,49 @@ def ventas_form(request):
         total_cantidad = sum(item['cantidad'] for item in items)
 
         # Process payment
-        try:
-            monto_pagado_val = Decimal(monto_pagado) if monto_pagado else Decimal('0')
-        except (ValueError, TypeError):
-            messages.error(request, 'El monto pagado debe ser un número válido.')
+        monto_pagado_val = monto_efectivo + monto_transferencia
+
+        if monto_pagado_val > total:
+            messages.error(request, 'El monto pagado no puede ser mayor al total de la venta.')
             return redirect('ventas')
 
-        if tipo_pago == 'completo':
+        # Determine tipo_pago and estado
+        if monto_pagado_val >= total:
+            tipo_pago = 'completo'
             monto_pagado_val = total
+            monto_efectivo = min(monto_efectivo, total)
+            monto_transferencia = total - monto_efectivo
             fecha_vencimiento = None
             estado_pago = 'pagado'
         else:
-            if monto_pagado_val > total:
-                messages.error(request, 'El monto pagado no puede ser mayor al total de la venta.')
-                return redirect('ventas')
+            tipo_pago = 'fiado'
             try:
                 dias_credito = int(dias_credito)
             except ValueError:
                 dias_credito = 15
             fecha_vencimiento = timezone.localdate() + timedelta(days=dias_credito)
-            estado_pago = 'pendiente' if monto_pagado_val < total else 'pagado'
+            estado_pago = 'pendiente'
+
+        # Determine metodo_pago from amounts
+        tiene_credito = tipo_pago == 'fiado'
+        tiene_efectivo = monto_efectivo > 0
+        tiene_transferencia = monto_transferencia > 0
+        if tiene_credito:
+            if tiene_efectivo and tiene_transferencia:
+                metodo_pago = 'mixto_fiado'
+            elif tiene_efectivo:
+                metodo_pago = 'efectivo_fiado'
+            elif tiene_transferencia:
+                metodo_pago = 'transferencia_fiado'
+            else:
+                metodo_pago = 'fiado'
+        else:
+            if tiene_efectivo and tiene_transferencia:
+                metodo_pago = 'mixto'
+            elif tiene_transferencia:
+                metodo_pago = 'transferencia'
+            else:
+                metodo_pago = 'efectivo'
 
         is_single = len(items) == 1
 
@@ -116,6 +144,8 @@ def ventas_form(request):
             tipo_pago=tipo_pago,
             metodo_pago=metodo_pago,
             monto_pagado=monto_pagado_val,
+            monto_efectivo=monto_efectivo,
+            monto_transferencia=monto_transferencia,
             fecha_vencimiento=fecha_vencimiento,
             estado_pago=estado_pago
         )

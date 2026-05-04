@@ -122,21 +122,22 @@ class ProveedorListView(ListView):
                 proveedor=proveedor
             )
 
-        # Create products for each classification (precio_venta=0, se define en la venta)
+        # Create or update products for each classification
         for item in items:
             producto, created = Productos.objects.get_or_create(
                 categoria=item['categoria'],
-                proveedor=proveedor,
                 defaults={
                     'nombre': item['nombre'],
                     'precio_compra': precio_unitario,
                     'precio_venta': 0,
-                    'stock': item['cantidad']
+                    'stock': item['cantidad'],
+                    'proveedor': proveedor,
                 }
             )
             if not created:
                 producto.stock += item['cantidad']
                 producto.precio_compra = precio_unitario
+                producto.proveedor = proveedor
                 producto.save()
         
         # Check if there are unclassified bultos

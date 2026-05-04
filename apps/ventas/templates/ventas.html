@@ -1,4 +1,4 @@
-{% load static l10n %}
+{% load static l10n currency_filters %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -624,13 +624,6 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="metodo_pago">Método de Pago</label>
-                        <select name="metodo_pago" id="metodo_pago">
-                            <option value="efectivo">💵 Efectivo</option>
-                            <option value="tarjeta">💳 Tarjeta</option>
-                        </select>
-                    </div>
                 </div>
 
                 <!-- Multi-item section -->
@@ -647,13 +640,13 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="form-group" style="flex: 0.6;">
-                                <label>Precio Venta</label>
-                                <input type="number" name="precio_venta[]" min="1" step="1" required placeholder="Precio por bulto" oninput="calcularTotalVenta()">
-                            </div>
                             <div class="form-group" style="flex: 0.5;">
                                 <label>Cantidad</label>
                                 <input type="number" name="cantidad[]" min="1" required oninput="calcularTotalVenta()">
+                            </div>
+                            <div class="form-group" style="flex: 0.6;">
+                                <label>Precio Venta</label>
+                                <input type="text" inputmode="numeric" name="precio_venta[]" required placeholder="Precio por bulto" oninput="formatearPrecio(this); calcularTotalVenta()">
                             </div>
                             <div class="form-group" style="flex: 0.5;">
                                 <label>Subtotal</label>
@@ -673,24 +666,25 @@
                         <input type="text" id="total" readonly style="font-size: 18px; font-weight: bold; color: #4CAF50;">
                     </div>
                 </div>
+                <!-- Sección de Pago Unificado -->
+                <h3 style="margin: 15px 0 10px; color: #333;"><i class="fas fa-money-bill-wave"></i> Pago</h3>
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="tipo_pago">Tipo de Pago</label>
-                        <select name="tipo_pago" id="tipo_pago" required onchange="togglePagoFields()">
-                            <option value="completo">Pago Completo</option>
-                            <option value="fiado">Pago a Crédito</option>
-                        </select>
+                    <div class="form-group" style="flex: 0.5;">
+                        <label for="monto_efectivo">💵 Efectivo</label>
+                        <input type="text" inputmode="numeric" name="monto_efectivo" id="monto_efectivo" placeholder="0">
                     </div>
-                    <div class="form-group" id="monto_pagado_group" style="display: none;">
-                        <label for="monto_pagado">Monto Pagado</label>
-                        <input type="number" name="monto_pagado" id="monto_pagado" min="0" step="1" onchange="calcularTotalVenta()" oninput="mostrarPreviewMonto(this.value)">
-                        <div class="monto-preview" id="previewMontoPagado">
-                            <div class="preview-label">Estás ingresando</div>
-                            <div class="preview-valor">$0</div>
-                        </div>
+                    <div class="form-group" style="flex: 0.5;">
+                        <label for="monto_transferencia">📲 Transferencia</label>
+                        <input type="text" inputmode="numeric" name="monto_transferencia" id="monto_transferencia" placeholder="0">
                     </div>
-                    <div class="form-group" id="dias_credito_group" style="display: none;">
-                        <label for="dias_credito">Días de Crédito</label>
+                </div>
+                <div class="form-row" id="credito_info_row" style="display: none;">
+                    <div class="form-group" style="flex: 0.5;">
+                        <label>📋 Queda a Crédito</label>
+                        <input type="text" id="monto_credito_display" readonly style="background: #fff3cd; font-weight: bold; color: #856404; border-color: #ffc107;">
+                    </div>
+                    <div class="form-group" style="flex: 0.5;">
+                        <label for="dias_credito">📅 Días de Crédito</label>
                         <input type="number" name="dias_credito" id="dias_credito" min="1" value="15">
                     </div>
                 </div>
@@ -708,7 +702,7 @@
                 </div>
                 <div class="resumen-info">
                     <span class="resumen-label">Total Ventas del Día</span>
-                    <span class="resumen-valor" id="totalVentasDia">${{ total_ventas_dia }}</span>
+                    <span class="resumen-valor" id="totalVentasDia">{{ total_ventas_dia|formato_pesos }}</span>
                 </div>
             </div>
             <div class="resumen-card">
@@ -726,7 +720,7 @@
                 </div>
                 <div class="resumen-info">
                     <span class="resumen-label">Total por Cobrar</span>
-                    <span class="resumen-valor" id="totalPorCobrar">${{ total_por_cobrar }}</span>
+                    <span class="resumen-valor" id="totalPorCobrar">{{ total_por_cobrar|formato_pesos }}</span>
                 </div>
             </div>
         </section>
@@ -741,7 +735,7 @@
                     </div>
                     <div class="estadistica-info">
                         <span class="estadistica-label">Ventas de la Semana</span>
-                        <span class="estadistica-valor">${{ total_ventas_semana }}</span>
+                        <span class="estadistica-valor">{{ total_ventas_semana|formato_pesos }}</span>
                         <span class="estadistica-detalle">{{ cantidad_ventas_semana }} transacciones</span>
                     </div>
                 </div>
@@ -751,7 +745,7 @@
                     </div>
                     <div class="estadistica-info">
                         <span class="estadistica-label">Ventas del Mes ({{ nombre_mes }})</span>
-                        <span class="estadistica-valor">${{ total_ventas_mes }}</span>
+                        <span class="estadistica-valor">{{ total_ventas_mes|formato_pesos }}</span>
                         <span class="estadistica-detalle">{{ cantidad_ventas_mes }} transacciones</span>
                     </div>
                 </div>
@@ -763,7 +757,7 @@
                         <span class="estadistica-label">Cliente Top del Mes</span>
                         {% if top_cliente %}
                         <span class="estadistica-valor">{{ top_cliente.cliente__nombre }} {{ top_cliente.cliente__apellido }}</span>
-                        <span class="estadistica-detalle">${{ top_cliente.total_compras }} en {{ top_cliente.cantidad_compras }} compras</span>
+                        <span class="estadistica-detalle">{{ top_cliente.total_compras|formato_pesos }} en {{ top_cliente.cantidad_compras }} compras</span>
                         {% else %}
                         <span class="estadistica-valor">Sin datos</span>
                         <span class="estadistica-detalle">No hay ventas este mes</span>
@@ -836,23 +830,36 @@
                         {% with detalles=venta.detalles.all %}
                         {% if detalles %}
                             {% for detalle in detalles %}
-                            <p class="precio-detalle"><i class="fas fa-tags"></i> {{ detalle.producto.nombre }}: {{ detalle.cantidad }} x ${{ detalle.precio_venta|floatformat:0 }} = ${{ detalle.subtotal|floatformat:0 }}</p>
+                            <p class="precio-detalle"><i class="fas fa-tags"></i> {{ detalle.producto.nombre }}: {{ detalle.cantidad }} x {{ detalle.precio_venta|formato_pesos }} = {{ detalle.subtotal|formato_pesos }}</p>
                             {% endfor %}
                         {% else %}
-                            <p class="precio-detalle"><i class="fas fa-tags"></i> Compra: ${{ venta.precio_compra|floatformat:0 }} | Venta: ${{ venta.precio_venta|floatformat:0 }}</p>
+                            <p class="precio-detalle"><i class="fas fa-tags"></i> Compra: {{ venta.precio_compra|formato_pesos }} | Venta: {{ venta.precio_venta|formato_pesos }}</p>
                         {% endif %}
                         {% endwith %}
                         <p style="margin-top: 4px;">
-                            {% if venta.metodo_pago == 'tarjeta' %}
-                            <span style="background:#e3f2fd; color:#1565c0; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-credit-card"></i> Tarjeta</span>
+                            {% if venta.metodo_pago == 'transferencia' %}
+                            <span style="background:#e3f2fd; color:#1565c0; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-mobile-alt"></i> Transferencia</span>
+                            {% elif venta.metodo_pago == 'mixto' %}
+                            <span style="background:#f3e5f5; color:#6a1b9a; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-coins"></i> Efectivo {{ venta.monto_efectivo|formato_pesos }} + Transf. {{ venta.monto_transferencia|formato_pesos }}</span>
+                            {% elif venta.metodo_pago == 'fiado' %}
+                            <span style="background:#fff3e0; color:#e65100; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-handshake"></i> A Crédito</span>
+                            {% elif venta.metodo_pago == 'efectivo_fiado' %}
+                            <span style="background:#e8f5e9; color:#2e7d32; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-money-bill-wave"></i> Efectivo {{ venta.monto_efectivo|formato_pesos }}</span>
+                            <span style="background:#fff3e0; color:#e65100; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-handshake"></i> Crédito {{ venta.saldo_pendiente|formato_pesos }}</span>
+                            {% elif venta.metodo_pago == 'transferencia_fiado' %}
+                            <span style="background:#e3f2fd; color:#1565c0; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-mobile-alt"></i> Transf. {{ venta.monto_transferencia|formato_pesos }}</span>
+                            <span style="background:#fff3e0; color:#e65100; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-handshake"></i> Crédito {{ venta.saldo_pendiente|formato_pesos }}</span>
+                            {% elif venta.metodo_pago == 'mixto_fiado' %}
+                            <span style="background:#f3e5f5; color:#6a1b9a; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-coins"></i> Ef. {{ venta.monto_efectivo|formato_pesos }} + Tr. {{ venta.monto_transferencia|formato_pesos }}</span>
+                            <span style="background:#fff3e0; color:#e65100; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-handshake"></i> Crédito {{ venta.saldo_pendiente|formato_pesos }}</span>
                             {% else %}
                             <span style="background:#e8f5e9; color:#2e7d32; padding:2px 8px; border-radius:4px; font-size:12px;"><i class="fas fa-money-bill-wave"></i> Efectivo</span>
                             {% endif %}
                         </p>
                     </div>
                     <div class="venta-totales">
-                        <div class="venta-total">${{ venta.total|floatformat:0 }}</div>
-                        <div class="venta-ganancia"><i class="fas fa-chart-line"></i> +${{ venta.ganancia|floatformat:0 }}</div>
+                        <div class="venta-total">{{ venta.total|formato_pesos }}</div>
+                        <div class="venta-ganancia"><i class="fas fa-chart-line"></i> +{{ venta.ganancia|formato_pesos }}</div>
                         <div class="venta-acciones" style="margin-top: 10px;">
                             <a href="{% url 'detalle_venta' venta.idVenta %}" class="btn-small btn-info">
                                 <i class="fas fa-eye"></i> Ver
@@ -890,21 +897,73 @@
         const CAL_NOMBRE_MES = '{{ nombre_mes }}';
         const CAL_ANIO = '{% localize off %}{{ anio_actual }}{% endlocalize %}';
 
-        // Función para mostrar preview de montos formateados
-        function formatoPesos(valor) {
-            return '$' + Number(valor).toLocaleString('es-CO');
+        // Formatea número con puntos de miles (formato colombiano) sin usar toLocaleString
+        function puntosMiles(valor) {
+            return String(Math.round(Number(valor))).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
 
-        function mostrarPreviewMonto(valor) {
-            const preview = document.getElementById('previewMontoPagado');
-            
-            if (valor && valor > 0) {
-                preview.style.display = 'block';
-                preview.querySelector('.preview-valor').textContent = formatoPesos(valor);
-            } else {
-                preview.style.display = 'none';
-            }
+        function formatoPesos(valor) {
+            const n = Number(valor);
+            if (isNaN(n)) return '$0';
+            return '$' + puntosMiles(n);
         }
+
+        // Formatea un input numérico con puntos de miles al escribir
+        // El value real se guarda en data-raw para enviar al servidor
+        function formatearInputPesos(input) {
+            let raw = input.value.replace(/[.,]/g, '').replace(/[^0-9]/g, '');
+            input.dataset.raw = raw;
+            if (raw === '') { input.value = ''; return; }
+            input.value = puntosMiles(raw);
+        }
+
+        // Antes de enviar el form, restaura los valores sin puntos
+        function prepararEnvio(form) {
+            form.querySelectorAll('input[data-raw]').forEach(input => {
+                input.value = input.dataset.raw || '0';
+            });
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Attach formatter to static payment inputs
+            ['monto_efectivo', 'monto_transferencia'].forEach(function(id) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', function() {
+                        formatearInputPesos(this);
+                        calcularPago();
+                    });
+                }
+            });
+
+            // Attach formatter to static product row inputs
+            document.getElementById('items-container').addEventListener('input', function(e) {
+                if (e.target.matches('input[name="precio_venta[]"]') || e.target.matches('input[name="cantidad[]"]')) {
+                    if (e.target.matches('input[name="precio_venta[]"]') || e.target.matches('input[name="cantidad[]"]')) {
+                        // Raw numeric — keep as-is for calculation, no dot formatting on these
+                    }
+                }
+            });
+
+            // Intercept form submit to strip dots from all formatted inputs
+            const form = document.querySelector('form.form-agregar');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    ['monto_efectivo', 'monto_transferencia'].forEach(function(id) {
+                        const el = document.getElementById(id);
+                        if (el && el.dataset.raw !== undefined) {
+                            el.value = el.dataset.raw || '0';
+                        }
+                    });
+                    form.querySelectorAll('input[name="precio_venta[]"]').forEach(function(el) {
+                        if (el.dataset.raw !== undefined) {
+                            el.value = el.dataset.raw || '0';
+                        }
+                    });
+                });
+            }
+        });
 
         let itemIndex = 1;
 
@@ -920,13 +979,13 @@
                         <label>Producto</label>
                         <select name="producto[]" required onchange="calcularTotalVenta()">${optionsHTML}</select>
                     </div>
-                    <div class="form-group" style="flex: 0.6;">
-                        <label>Precio Venta</label>
-                        <input type="number" name="precio_venta[]" min="1" step="1" required placeholder="Precio por bulto" oninput="calcularTotalVenta()">
-                    </div>
                     <div class="form-group" style="flex: 0.5;">
                         <label>Cantidad</label>
                         <input type="number" name="cantidad[]" min="1" required oninput="calcularTotalVenta()">
+                    </div>
+                    <div class="form-group" style="flex: 0.6;">
+                        <label>Precio Venta</label>
+                        <input type="text" inputmode="numeric" name="precio_venta[]" required placeholder="Precio por bulto" oninput="formatearPrecio(this); calcularTotalVenta()">
                     </div>
                     <div class="form-group" style="flex: 0.5;">
                         <label>Subtotal</label>
@@ -955,6 +1014,13 @@
             });
         }
 
+        function formatearPrecio(input) {
+            let raw = input.value.replace(/[.,]/g, '').replace(/[^0-9]/g, '');
+            input.dataset.raw = raw;
+            if (raw === '') { input.value = ''; return; }
+            input.value = puntosMiles(raw);
+        }
+
         function calcularTotalVenta() {
             const rows = document.querySelectorAll('.item-row');
             let grandTotal = 0;
@@ -963,7 +1029,7 @@
                 const precioInput = row.querySelector('input[name="precio_venta[]"]');
                 const cantidadInput = row.querySelector('input[name="cantidad[]"]');
                 const subtotalDisplay = row.querySelector('.subtotal-item');
-                const precio = parseFloat(precioInput.value) || 0;
+                const precio = parseFloat(precioInput.dataset.raw || precioInput.value.replace(/\./g, '') || '0') || 0;
                 const cantidad = parseInt(cantidadInput.value) || 0;
                 const subtotal = Math.round(precio * cantidad);
 
@@ -974,28 +1040,35 @@
             const totalInput = document.getElementById('total');
             totalInput.value = grandTotal > 0 ? formatoPesos(grandTotal) : '';
 
-            const tipoPago = document.getElementById('tipo_pago').value;
-            if (tipoPago === 'completo') {
-                document.getElementById('monto_pagado').value = grandTotal;
-            }
+            calcularPago();
         }
-        
-        function togglePagoFields() {
-            const tipoPagoSelect = document.getElementById('tipo_pago');
-            const montoPagadoGroup = document.getElementById('monto_pagado_group');
-            const diasCreditoGroup = document.getElementById('dias_credito_group');
-            const montoPagadoInput = document.getElementById('monto_pagado');
-            
-            if (tipoPagoSelect.value === 'fiado') {
-                montoPagadoGroup.style.display = 'block';
-                diasCreditoGroup.style.display = 'block';
-                montoPagadoInput.required = true;
-                calcularTotalVenta();
+
+        function calcularPago() {
+            const rows = document.querySelectorAll('.item-row');
+            let grandTotal = 0;
+            rows.forEach(row => {
+                const precioEl = row.querySelector('input[name="precio_venta[]"]');
+                const precio = parseFloat(precioEl.dataset.raw || precioEl.value.replace(/\./g, '') || '0') || 0;
+                const cantidad = parseInt(row.querySelector('input[name="cantidad[]"]').value) || 0;
+                grandTotal += Math.round(precio * cantidad);
+            });
+
+            const efEl = document.getElementById('monto_efectivo');
+            const trEl = document.getElementById('monto_transferencia');
+            const efectivo = parseFloat(efEl.dataset.raw || efEl.value.replace(/\./g, '') || '0') || 0;
+            const transferencia = parseFloat(trEl.dataset.raw || trEl.value.replace(/\./g, '') || '0') || 0;
+            const pagado = efectivo + transferencia;
+            const credito = Math.max(0, grandTotal - pagado);
+
+            const creditoRow = document.getElementById('credito_info_row');
+            const creditoDisplay = document.getElementById('monto_credito_display');
+
+            if (credito > 0) {
+                creditoRow.style.display = 'flex';
+                creditoDisplay.value = formatoPesos(credito);
             } else {
-                montoPagadoGroup.style.display = 'none';
-                diasCreditoGroup.style.display = 'none';
-                montoPagadoInput.required = false;
-                montoPagadoInput.value = '';
+                creditoRow.style.display = 'none';
+                creditoDisplay.value = '';
             }
         }
         
@@ -1021,7 +1094,7 @@
                     // Agregar tooltip con información
                     const tooltip = document.createElement('span');
                     tooltip.className = 'tooltip';
-                    tooltip.textContent = '$' + Math.round(diasVentas[dia].total).toLocaleString('es-CO') + ' (' + diasVentas[dia].cantidad + ' ventas)';
+                    tooltip.textContent = formatoPesos(Math.round(diasVentas[dia].total)) + ' (' + diasVentas[dia].cantidad + ' ventas)';
                     diaElement.appendChild(tooltip);
 
                     // Click handler: normal click opens modal; Ctrl/Shift/Meta toggles multi-select
@@ -1084,7 +1157,7 @@
                                 <p><i class="fas fa-clock"></i> ${venta.hora}</p>
                             </div>
                             <div class="modal-venta-total">
-                                $${venta.total.toLocaleString('es-CO')}
+                                ${formatoPesos(venta.total)}
                             </div>
                         </div>
                     `;
@@ -1099,7 +1172,7 @@
                         </div>
                         <div class="modal-resumen-item">
                             <span>Total del día:</span>
-                            <strong>$${totalDia.toLocaleString('es-CO')}</strong>
+                            <strong>${formatoPesos(totalDia)}</strong>
                         </div>
                     </div>
                 `;
@@ -1137,7 +1210,7 @@
                                 <p><i class="fas fa-clock"></i> ${venta.hora}</p>
                             </div>
                             <div class="modal-venta-total">
-                                $${venta.total.toLocaleString('es-CO')}
+                                ${formatoPesos(venta.total)}
                             </div>
                         </div>
                     `;
@@ -1152,7 +1225,7 @@
                         </div>
                         <div class="modal-resumen-item">
                             <span>Total combinado:</span>
-                            <strong>$${totalDias.toLocaleString('es-CO')}</strong>
+                            <strong>${formatoPesos(totalDias)}</strong>
                         </div>
                     </div>
                 `;

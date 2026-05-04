@@ -9,7 +9,12 @@ from apps.productos.models import Productos
 
 METODO_PAGO_CHOICES = [
     ('efectivo', 'Efectivo'),
-    ('tarjeta', 'Tarjeta'),
+    ('transferencia', 'Transferencia'),
+    ('mixto', 'Efectivo + Transferencia'),
+    ('fiado', 'A Crédito'),
+    ('efectivo_fiado', 'Efectivo + Crédito'),
+    ('transferencia_fiado', 'Transferencia + Crédito'),
+    ('mixto_fiado', 'Efectivo + Transf. + Crédito'),
 ]
 
 class Venta(models.Model):
@@ -81,10 +86,22 @@ class Venta(models.Model):
         default='pagado'
     )
     metodo_pago = models.CharField(
-        max_length=10,
+        max_length=25,
         choices=METODO_PAGO_CHOICES,
         default='efectivo',
         verbose_name="Método de Pago"
+    )
+    monto_efectivo = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name="Monto en Efectivo"
+    )
+    monto_transferencia = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        verbose_name="Monto por Transferencia"
     )
     
     @property
