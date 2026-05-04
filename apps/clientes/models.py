@@ -7,6 +7,8 @@ class Clientes(models.Model):
     apellido = models.CharField(max_length=50)
     inicial = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     saldo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    telefono = models.CharField(max_length=20, null=True, blank=True)
+
     
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
