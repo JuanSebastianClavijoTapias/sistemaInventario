@@ -56,8 +56,7 @@ def calcular_datos_semana(fecha_inicio, fecha_fin):
     total_ventas_credito = ventas_credito.aggregate(total=Sum('total'))['total'] or 0
     cantidad_ventas_credito = ventas_credito.count()
     cobrado_de_creditos = ventas_credito.aggregate(total=Sum('monto_pagado'))['total'] or 0
-    pendiente_creditos = total_ventas_credito - cobrado_de_creditos
-    
+    pendiente_creditos = total_ventas_credito - cobrado_de_creditos     
     # Ventas pago completo
     ventas_completo = ventas_semana.filter(tipo_pago='completo')
     total_ventas_completo = ventas_completo.aggregate(total=Sum('total'))['total'] or 0
