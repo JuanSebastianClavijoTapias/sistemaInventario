@@ -192,24 +192,11 @@
             overflow-x: auto;
             border-radius: 8px;
         }
-
-        .table-wrapper {
-            width: 100%;
-            max-width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 15px;
-        }
         
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 0;
-        }
-
-        .table-wrapper table {
-            margin-top: 0;
-            min-width: 560px;
         }
         
         thead {
@@ -556,86 +543,6 @@
             background: #e0e0e0;
             transform: translateY(-2px);
         }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 12px;
-            }
-
-            .card,
-            .header {
-                padding: 16px;
-            }
-
-            .radio-group,
-            .botones {
-                flex-direction: column;
-            }
-
-            .resumen {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                padding: 14px;
-                gap: 12px;
-            }
-
-            .resumen-valor {
-                font-size: 20px;
-            }
-
-            th,
-            td {
-                padding: 10px;
-                font-size: 14px;
-            }
-
-            .table-wrapper {
-                overflow-x: visible;
-            }
-
-            .table-wrapper table,
-            .table-wrapper tbody,
-            .table-wrapper tr,
-            .table-wrapper td {
-                display: block;
-                width: 100%;
-            }
-
-            .table-wrapper table {
-                min-width: 0;
-            }
-
-            .table-wrapper thead {
-                display: none;
-            }
-
-            .table-wrapper tbody tr {
-                border: 1px solid #dee2e6;
-                border-radius: 8px;
-                padding: 12px;
-                margin-bottom: 12px;
-                background: #fff;
-            }
-
-            .table-wrapper td {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                gap: 16px;
-                padding: 8px 0;
-                text-align: right;
-            }
-
-            .table-wrapper td::before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: #333;
-                text-align: left;
-            }
-
-            .table-wrapper td:last-child {
-                border-bottom: none;
-            }
-        }
     </style>
 </head>
 <body>
@@ -694,7 +601,7 @@
             </div>
             
             {% if detalles %}
-<form method="post" id="formulario-editar-cantidades">
+            <form method="post" id="formulario-editar-cantidades">
                 {% csrf_token %}
                 <div class="table-wrapper">
                     <table>
@@ -702,16 +609,13 @@
                             <tr>
                                 <th>Producto</th>
                                 <th>Cantidad (kg)</th>
-                                <th>Precio Unit.</th>
-                                <th>Subtotal</th>
-                                <th>Ganancia</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for detalle in detalles %}
                             <tr data-detalle-id="{{ detalle.id }}">
-                                <td data-label="Producto"><strong>{{ detalle.producto.nombre }}</strong></td>
-                                <td data-label="Cantidad (kg)">
+                                <td><strong>{{ detalle.producto.nombre }}</strong></td>
+                                <td>
                                     <div class="cantidad-cell-container">
                                         <div class="cantidad-input-wrapper">
                                             <input type="number" name="cantidad_{{ detalle.id }}" class="cantidad-input" value="{{ detalle.cantidad }}" min="0" max="{{ detalle.cantidad }}" step="1" data-precio-venta="{{ detalle.precio_venta }}" data-precio-compra="{{ detalle.precio_compra }}" data-cantidad-original="{{ detalle.cantidad }}" data-detalle-id="{{ detalle.id }}">
@@ -732,9 +636,6 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td data-label="Precio Unit.">${{ detalle.precio_venta|floatformat:0 }}</td>
-                                <td data-label="Subtotal"><span class="col-subtotal">${{ detalle.subtotal|floatformat:0 }}</span></td>
-                                <td data-label="Ganancia"><span class="col-ganancia">${{ detalle.ganancia|floatformat:0 }}</span></td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -993,19 +894,10 @@
                     const nuevoSubtotal = nuevaCantidad * precioVenta;
                     const nuevaGanancia = nuevaCantidad * (precioVenta - precioCompra);
                     
-                    // Actualizar valores en el preview (popup)
+                    // Actualizar valores
                     const subtotalEl = preview.querySelector('.preview-subtotal');
                     const gananciaEl = preview.querySelector('.preview-ganancia');
                     const totalEl = preview.querySelector('.preview-total');
-                    
-                    // Actualizar columnas de la tabla
-                    const fila = td.closest('tr');
-                    if (fila) {
-                        const colSubtotal = fila.querySelector('.col-subtotal');
-                        const colGanancia = fila.querySelector('.col-ganancia');
-                        if (colSubtotal) colSubtotal.textContent = '$' + Math.round(nuevoSubtotal).toLocaleString('es-CO');
-                        if (colGanancia) colGanancia.textContent = '$' + Math.round(nuevaGanancia).toLocaleString('es-CO');
-                    }
                     
                     if (subtotalEl) {
                         subtotalEl.textContent = '$' + Math.round(nuevoSubtotal).toLocaleString('es-CO');
