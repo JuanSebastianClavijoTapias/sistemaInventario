@@ -7,275 +7,454 @@
     <title>Detalle de Venta #{{ venta.idVenta }}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f5f5f5; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-        
-        .header {
+        /* RESET */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin: 0;
+            padding: 0;
+        }
+
+        p {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            color: #1a1a2e;
+            padding: 30px 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        
-        .header h1 { margin: 0; }
-        
-        .estado-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .estado-pagado { background: #4CAF50; }
-        .estado-pendiente { background: #ff9800; }
-        .estado-vencido { background: #f44336; }
-        
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-            color: #333;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            flex-wrap: wrap;
             gap: 20px;
         }
-        
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            color: #1a1a2e;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .estado-badge {
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .estado-pagado {
+            background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%);
+            color: white;
+        }
+
+        .estado-pendiente {
+            background: linear-gradient(135deg, #ffa502 0%, #ff8c00 100%);
+            color: white;
+        }
+
+        .estado-vencido {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+
+        .fecha-venta {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* CARDS */
+        .card {
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            color: #1a1a2e;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: #667eea;
+            font-size: 22px;
+        }
+
+        /* INFO GRID */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
         .info-item {
             display: flex;
             flex-direction: column;
+            padding: 15px;
+            background: #f9f9ff;
+            border-left: 4px solid #667eea;
+            border-radius: 6px;
+            transition: all 0.3s ease;
         }
-        
+
+        .info-item:hover {
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .info-item i {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
         .info-label {
-            color: #666;
-            font-size: 12px;
+            color: #999;
+            font-size: 11px;
             text-transform: uppercase;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             font-weight: 600;
+            letter-spacing: 0.5px;
         }
-        
+
         .info-valor {
             font-size: 16px;
-            color: #333;
-            font-weight: 500;
+            color: #1a1a2e;
+            font-weight: 600;
         }
-        
+
+        /* TABLE */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 0;
         }
-        
+
         thead {
-            background-color: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
-        
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
+
         th {
+            padding: 16px 12px;
+            text-align: left;
             font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background-color: #f9f9ff;
+            transition: all 0.2s ease;
+        }
+
+        tbody td {
             color: #333;
         }
-        
-        tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-        
+
+        /* TOTALES */
         .totales {
-            display: flex;
-            justify-content: flex-end;
-            gap: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
             margin-top: 20px;
             padding-top: 15px;
-            border-top: 2px solid #dee2e6;
-            font-weight: 600;
+            border-top: 2px solid #f0f0f0;
         }
-        
+
         .total-item {
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            align-items: center;
+            text-align: center;
+            padding: 15px;
+            background: #f9f9ff;
+            border-radius: 8px;
         }
-        
-        .total-label { color: #666; font-size: 12px; }
-        .total-valor { font-size: 20px; color: #667eea; }
-        
+
+        .total-label {
+            color: #999;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .total-valor {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* SALDO SECTION */
+        .saldo-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 25px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 25px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .saldo-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .saldo-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .saldo-valor {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* BOTONES */
         .botones {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 25px;
+            flex-wrap: wrap;
         }
-        
+
         .btn {
-            padding: 10px 20px;
+            padding: 12px 28px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        
+
         .btn-primary {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        
+
         .btn-primary:hover {
-            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
-        
+
         .btn-success {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #1dd1a1 0%, #10ac84 100%);
             color: white;
         }
-        
+
         .btn-success:hover {
-            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29, 209, 161, 0.4);
         }
-        
+
         .btn-secondary {
-            background: #6c757d;
-            color: white;
+            background: #f0f0f0;
+            color: #333;
         }
-        
+
         .btn-secondary:hover {
-            background: #5a6268;
+            background: #e0e0e0;
+            transform: translateY(-2px);
         }
-        
+
+        /* ALERTAS */
         .alerta {
-            padding: 15px;
-            border-radius: 4px;
+            padding: 16px 20px;
+            border-radius: 8px;
             margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
         }
-        
+
         .alerta-info {
             background: #d1ecf1;
             color: #0c5460;
-            border: 1px solid #bee5eb;
+            border-left: 4px solid #17a2b8;
         }
-        
+
         .alerta-warning {
             background: #fff3cd;
             color: #856404;
-            border: 1px solid #ffeaa7;
+            border-left: 4px solid #ffc107;
         }
-        
-        .saldo-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        
-        .saldo-item {
-            text-align: center;
-        }
-        
-        .saldo-label { font-size: 12px; opacity: 0.9; }
-        .saldo-valor { font-size: 28px; font-weight: bold; margin-top: 5px; }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div>
-                <h1><i class="fas fa-file-invoice"></i> Venta #{{ venta.idVenta }}</h1>
-            </div>
-            <div class="estado-badge estado-{{ venta.estado_pago }}">
-                {{ venta.get_estado_pago_display }}
+            <div class="header-top">
+                <div>
+                    <h1><i class="fas fa-file-invoice-dollar"></i> Venta #{{ venta.idVenta }}</h1>
+                    <p class="fecha-venta"><i class="fas fa-calendar-alt"></i> {{ venta.fecha|date:"d \d\e F \d\e Y - H:i" }}</p>
+                </div>
+                <div class="header-meta">
+                    <div class="estado-badge estado-{{ venta.estado_pago }}">
+                        <i class="fas {% if venta.estado_pago == 'pagado' %}fa-check-circle{% elif venta.estado_pago == 'pendiente' %}fa-clock{% else %}fa-exclamation-circle{% endif %}"></i>
+                        {{ venta.get_estado_pago_display }}
+                    </div>
+                </div>
             </div>
         </div>
-        
+
         <!-- Información General -->
         <div class="card">
-            <div class="card-title">Información General</div>
+            <div class="card-title">
+                <i class="fas fa-info-circle"></i> Información General
+            </div>
             <div class="info-grid">
                 <div class="info-item">
+                    <i class="fas fa-user"></i>
                     <span class="info-label">Cliente</span>
                     <span class="info-valor">{{ venta.cliente.nombre }} {{ venta.cliente.apellido }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Teléfono</span>
-                    <span class="info-valor">{{ venta.cliente.telefono }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Fecha</span>
-                    <span class="info-valor">{{ venta.fecha|date:"d/m/Y H:i" }}</span>
-                </div>
-                <div class="info-item">
+                    <i class="fas fa-wallet"></i>
                     <span class="info-label">Tipo de Pago</span>
                     <span class="info-valor">{{ venta.get_tipo_pago_display }}</span>
                 </div>
                 <div class="info-item">
+                    <i class="fas fa-credit-card"></i>
                     <span class="info-label">Método de Pago</span>
                     <span class="info-valor">{{ venta.get_metodo_pago_display }}</span>
                 </div>
                 {% if venta.fecha_vencimiento %}
                 <div class="info-item">
+                    <i class="fas fa-hourglass-end"></i>
                     <span class="info-label">Vencimiento</span>
                     <span class="info-valor">{{ venta.fecha_vencimiento|date:"d/m/Y" }}</span>
                 </div>
                 {% endif %}
             </div>
         </div>
-        
+
         <!-- Productos -->
         <div class="card">
-            <div class="card-title">Productos</div>
+            <div class="card-title">
+                <i class="fas fa-boxes"></i> Productos
+            </div>
             {% if detalles %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Cantidad (kg)</th>
-                        <th>Precio Unit.</th>
-                        <th>Subtotal</th>
-                        <th>Ganancia</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for detalle in detalles %}
-                    <tr>
-                        <td>{{ detalle.producto.nombre }}</td>
-                        <td>{{ detalle.cantidad }}</td>
-                        <td>${{ detalle.precio_venta|floatformat:0 }}</td>
-                        <td>${{ detalle.subtotal|floatformat:0 }}</td>
-                        <td>${{ detalle.ganancia|floatformat:0 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad (kg)</th>
+                            <th>Precio Unit.</th>
+                            <th>Subtotal</th>
+                            <th>Ganancia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detalle in detalles %}
+                        <tr>
+                            <td>{{ detalle.producto.nombre }}</td>
+                            <td>{{ detalle.cantidad }}</td>
+                            <td>${{ detalle.precio_venta|floatformat:0 }}</td>
+                            <td>${{ detalle.subtotal|floatformat:0 }}</td>
+                            <td>${{ detalle.ganancia|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             <div class="totales">
                 <div class="total-item">
                     <span class="total-label">Total Cantidad</span>
@@ -291,51 +470,61 @@
                 </div>
             </div>
             {% else %}
-            <p style="color: #666; text-align: center; padding: 20px;">No hay productos en esta venta</p>
+            <p style="color: #999; text-align: center; padding: 30px;">
+                <i class="fas fa-inbox" style="font-size: 24px; margin-bottom: 10px; display: block; color: #ccc;"></i>
+                No hay productos en esta venta
+            </p>
             {% endif %}
         </div>
-        
+
         <!-- Saldo (si es a crédito) -->
         {% if venta.tipo_pago == 'fiado' %}
         <div class="saldo-section">
             <div class="saldo-item">
+                <i class="fas fa-receipt" style="font-size: 24px; margin-bottom: 10px; opacity: 0.9;"></i>
                 <div class="saldo-label">TOTAL A PAGAR</div>
                 <div class="saldo-valor">${{ venta.total|floatformat:0 }}</div>
             </div>
             <div class="saldo-item">
+                <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 10px; opacity: 0.9;"></i>
                 <div class="saldo-label">PAGADO</div>
                 <div class="saldo-valor">${{ venta.monto_pagado|floatformat:0 }}</div>
             </div>
             <div class="saldo-item">
+                <i class="fas fa-exclamation-circle" style="font-size: 24px; margin-bottom: 10px; opacity: 0.9;"></i>
                 <div class="saldo-label">SALDO PENDIENTE</div>
                 <div class="saldo-valor">${{ venta.saldo_pendiente|floatformat:0 }}</div>
             </div>
         </div>
         {% endif %}
-        
+
         <!-- Cobros (si hay) -->
         {% if cobros %}
         <div class="card">
-            <div class="card-title">Historial de Pagos</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Monto</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cobro in cobros %}
-                    <tr>
-                        <td>{{ cobro.fecha|date:"d/m/Y H:i" }}</td>
-                        <td>${{ cobro.monto|floatformat:0 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="card-title">
+                <i class="fas fa-history"></i> Historial de Pagos
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-calendar-alt"></i> Fecha</th>
+                            <th><i class="fas fa-dollar-sign"></i> Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cobro in cobros %}
+                        <tr>
+                            <td>{{ cobro.fecha|date:"d/m/Y H:i" }}</td>
+                            <td><strong>${{ cobro.monto|floatformat:0 }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
         {% endif %}
-        
+
         <!-- Botones de Acción -->
         <div class="card">
             <div class="botones">
@@ -349,7 +538,7 @@
                 {% endif %}
                 {% if venta.tipo_pago == 'fiado' and venta.saldo_pendiente > 0 %}
                 <a href="{% url 'agregar_pago' venta.idVenta %}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Registrar Pago
+                    <i class="fas fa-plus-circle"></i> Registrar Pago
                 </a>
                 {% endif %}
             </div>

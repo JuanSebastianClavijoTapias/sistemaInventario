@@ -16,4 +16,12 @@ urlpatterns = [
     # Detalles
     path('<int:venta_id>/detalle/<int:detalle_id>/eliminar/', 
          views.eliminar_detalle, name='eliminar_detalle'),
+    
+    # Actualizar cantidad de detalle (AJAX)
+    path('<int:venta_id>/detalle/<int:detalle_id>/actualizar/', 
+         views.actualizar_detalle_venta, name='actualizar_detalle_venta'),
+    
+    # Eliminar detalle desde edición (AJAX)
+    path('<int:venta_id>/detalle/<int:detalle_id>/eliminar-ajax/', 
+         views.eliminar_detalle_venta, name='eliminar_detalle_venta'),
 ]

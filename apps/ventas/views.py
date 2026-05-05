@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from django.db import transaction
 from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 from datetime import timedelta
 import calendar
 import json
@@ -391,6 +392,7 @@ def detalle_venta(request, venta_id):
 def editar_venta(request, venta_id):
     """
     Permite editar una venta existente:
+    - Restar cantidades de productos (en la tabla editable)
     - Agregar nuevos productos
     - Aumentar cantidades de productos existentes
     
@@ -399,78 +401,134 @@ def editar_venta(request, venta_id):
     venta = get_object_or_404(Venta, idVenta=venta_id)
     
     if request.method == 'POST':
-        form = EditarVentaForm(venta=venta, data=request.POST)
-        if form.is_valid():
-            accion = form.cleaned_data['accion']
-            producto = form.cleaned_data['producto']
-            cantidad = form.cleaned_data['cantidad']
-            precio_venta = Decimal(str(form.cleaned_data['precio_venta']))
-            
+        # Verificar si se están actualizando cantidades de la tabla
+        cantidades_actualizadas = {key: value for key, value in request.POST.items() if key.startswith('cantidad_')}
+        
+        if cantidades_actualizadas:
+            # Procesar actualización de cantidades en la tabla
             try:
                 with transaction.atomic():
-                    if accion == 'agregar_producto':
-                        # Verificar que el producto no esté ya en la venta
-                        existe = venta.detalles.filter(producto=producto).exists()
-                        if existe:
-                            messages.error(
-                                request,
-                                f'El producto {producto.nombre} ya está en esta venta. '
-                                'Use "Aumentar cantidad" para modificar la cantidad.'
-                            )
-                            return redirect('editar_venta', venta_id=venta_id)
-                        
-                        # Crear nuevo detalle
-                        precio_compra = Decimal(str(producto.precio_compra))
-                        subtotal = precio_venta * Decimal(str(cantidad))
-                        ganancia = (precio_venta - precio_compra) * Decimal(str(cantidad))
-                        
-                        DetalleVenta.objects.create(
-                            venta=venta,
-                            producto=producto,
-                            cantidad=cantidad,
-                            precio_compra=precio_compra,
-                            precio_venta=precio_venta,
-                            subtotal=subtotal,
-                            ganancia=ganancia,
-                        )
-                        
-                        messages.success(
-                            request,
-                            f'Producto {producto.nombre} agregado: {cantidad} kg'
-                        )
+                    cambios = False
+                    for key, nueva_cantidad_str in cantidades_actualizadas.items():
+                        try:
+                            detalle_id = int(key.replace('cantidad_', ''))
+                            nueva_cantidad = int(nueva_cantidad_str) or 0
+                            
+                            detalle = DetalleVenta.objects.get(id=detalle_id, venta=venta)
+                            cantidad_original = detalle.cantidad
+                            
+                            # Validar que no intente aumentar
+                            if nueva_cantidad > cantidad_original:
+                                messages.warning(
+                                    request,
+                                    f'⚠️ {detalle.producto.nombre}: No se puede aumentar cantidad en esta sección. '
+                                    f'Se mantuvo en {cantidad_original} kg.'
+                                )
+                                continue
+                            
+                            # Actualizar cantidad y recalcular subtotal/ganancia
+                            if nueva_cantidad != cantidad_original:
+                                cantidad_restada = cantidad_original - nueva_cantidad
+                                detalle.cantidad = nueva_cantidad
+                                detalle.subtotal = detalle.precio_venta * Decimal(str(nueva_cantidad))
+                                detalle.ganancia = (detalle.precio_venta - detalle.precio_compra) * Decimal(str(nueva_cantidad))
+                                detalle.save()
+                                cambios = True
+                                
+                                messages.info(
+                                    request,
+                                    f'{detalle.producto.nombre}: Restado {cantidad_restada} kg (ahora: {nueva_cantidad} kg)'
+                                )
+                        except (ValueError, DetalleVenta.DoesNotExist):
+                            continue
                     
-                    elif accion == 'aumentar_cantidad':
-                        # Obtener detalle existente
-                        detalle = venta.detalles.get(producto=producto)
-                        precio_compra = detalle.precio_compra
+                    if cambios:
+                        # Recalcular totales de la venta
+                        recalcular_totales_venta(venta)
+                        venta.actualizar_estado_pago()
+                        messages.success(request, 'Cantidades actualizadas correctamente.')
+                    else:
+                        messages.info(request, 'No se realizaron cambios.')
                         
-                        # Recalcular con la nueva cantidad
-                        nueva_cantidad = detalle.cantidad + cantidad
-                        nuevo_subtotal = precio_venta * Decimal(str(nueva_cantidad))
-                        nueva_ganancia = (precio_venta - precio_compra) * Decimal(str(nueva_cantidad))
-                        
-                        # Actualizar detalle
-                        detalle.cantidad = nueva_cantidad
-                        detalle.precio_venta = precio_venta
-                        detalle.subtotal = nuevo_subtotal
-                        detalle.ganancia = nueva_ganancia
-                        detalle.save()
-                        
-                        messages.success(
-                            request,
-                            f'Cantidad de {producto.nombre} aumentada a {nueva_cantidad} kg'
-                        )
-                    
-                    # Recalcular totales de la venta
-                    recalcular_totales_venta(venta)
-                    venta.actualizar_estado_pago()
-                    
-            except DetalleVenta.DoesNotExist:
-                messages.error(request, 'No se encontró el producto en la venta')
             except Exception as e:
-                messages.error(request, f'Error al actualizar la venta: {str(e)}')
+                messages.error(request, f'Error al actualizar cantidades: {str(e)}')
             
             return redirect('detalle_venta', venta_id=venta_id)
+        
+        else:
+            # Procesar formulario de agregar/aumentar productos
+            form = EditarVentaForm(venta=venta, data=request.POST)
+            if form.is_valid():
+                accion = form.cleaned_data['accion']
+                producto = form.cleaned_data['producto']
+                cantidad = form.cleaned_data['cantidad']
+                precio_venta = Decimal(str(form.cleaned_data['precio_venta']))
+                
+                try:
+                    with transaction.atomic():
+                        if accion == 'agregar_producto':
+                            # Verificar que el producto no esté ya en la venta
+                            existe = venta.detalles.filter(producto=producto).exists()
+                            if existe:
+                                messages.error(
+                                    request,
+                                    f'El producto {producto.nombre} ya está en esta venta. '
+                                    'Use "Aumentar cantidad" para modificar la cantidad.'
+                                )
+                                return redirect('editar_venta', venta_id=venta_id)
+                            
+                            # Crear nuevo detalle
+                            precio_compra = Decimal(str(producto.precio_compra))
+                            subtotal = precio_venta * Decimal(str(cantidad))
+                            ganancia = (precio_venta - precio_compra) * Decimal(str(cantidad))
+                            
+                            DetalleVenta.objects.create(
+                                venta=venta,
+                                producto=producto,
+                                cantidad=cantidad,
+                                precio_compra=precio_compra,
+                                precio_venta=precio_venta,
+                                subtotal=subtotal,
+                                ganancia=ganancia,
+                            )
+                            
+                            messages.success(
+                                request,
+                                f'Producto {producto.nombre} agregado: {cantidad} kg'
+                            )
+                        
+                        elif accion == 'aumentar_cantidad':
+                            # Obtener detalle existente
+                            detalle = venta.detalles.get(producto=producto)
+                            precio_compra = detalle.precio_compra
+                            
+                            # Recalcular con la nueva cantidad
+                            nueva_cantidad = detalle.cantidad + cantidad
+                            nuevo_subtotal = precio_venta * Decimal(str(nueva_cantidad))
+                            nueva_ganancia = (precio_venta - precio_compra) * Decimal(str(nueva_cantidad))
+                            
+                            # Actualizar detalle
+                            detalle.cantidad = nueva_cantidad
+                            detalle.precio_venta = precio_venta
+                            detalle.subtotal = nuevo_subtotal
+                            detalle.ganancia = nueva_ganancia
+                            detalle.save()
+                            
+                            messages.success(
+                                request,
+                                f'Cantidad de {producto.nombre} aumentada a {nueva_cantidad} kg'
+                            )
+                        
+                        # Recalcular totales de la venta
+                        recalcular_totales_venta(venta)
+                        venta.actualizar_estado_pago()
+                        
+                except DetalleVenta.DoesNotExist:
+                    messages.error(request, 'No se encontró el producto en la venta')
+                except Exception as e:
+                    messages.error(request, f'Error al actualizar la venta: {str(e)}')
+                
+                return redirect('detalle_venta', venta_id=venta_id)
     else:
         form = EditarVentaForm(venta=venta)
     
@@ -644,3 +702,93 @@ def recalcular_totales_venta(venta):
                 )['avg'] or Decimal('0')
     
     venta.save()
+
+
+@login_required
+@require_POST
+def actualizar_detalle_venta(request, venta_id, detalle_id):
+    """
+    Actualiza la cantidad de un detalle de venta via AJAX.
+    Recalcula automáticamente subtotales y ganancias.
+    
+    Esperado en el request.body: JSON con { "cantidad": numero }
+    """
+    venta = get_object_or_404(Venta, idVenta=venta_id)
+    detalle = get_object_or_404(DetalleVenta, id=detalle_id, venta=venta)
+    
+    try:
+        data = json.loads(request.body)
+        nueva_cantidad = int(data.get('cantidad', 0))
+        
+        # Validación
+        if nueva_cantidad < 0:
+            return JsonResponse({'success': False, 'error': 'La cantidad no puede ser negativa'})
+        
+        if nueva_cantidad == 0:
+            # Eliminar el detalle
+            detalle.delete()
+            recalcular_totales_venta(venta)
+            return JsonResponse({'success': True, 'eliminado': True})
+        
+        # Actualizar cantidad
+        detalle.cantidad = nueva_cantidad
+        detalle.subtotal = detalle.precio_venta * Decimal(str(nueva_cantidad))
+        detalle.ganancia = (detalle.precio_venta - detalle.precio_compra) * Decimal(str(nueva_cantidad))
+        detalle.save()
+        
+        # Recalcular totales de la venta
+        recalcular_totales_venta(venta)
+        venta.actualizar_estado_pago()
+        
+        return JsonResponse({
+            'success': True,
+            'nuevo_subtotal': float(detalle.subtotal),
+            'nueva_ganancia': float(detalle.ganancia),
+            'total_venta': float(venta.total),
+            'ganancia_venta': float(venta.ganancia),
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Datos JSON inválidos'})
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'La cantidad debe ser un número'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'Error: {str(e)}'})
+
+
+@login_required
+@require_POST
+def eliminar_detalle_venta(request, venta_id, detalle_id):
+    """
+    Elimina un producto de una venta via AJAX.
+    Recalcula automáticamente los totales.
+    """
+    venta = get_object_or_404(Venta, idVenta=venta_id)
+    detalle = get_object_or_404(DetalleVenta, id=detalle_id, venta=venta)
+    
+    try:
+        producto_nombre = detalle.producto.nombre
+        detalle.delete()
+        
+        # Recalcular totales
+        recalcular_totales_venta(venta)
+        venta.actualizar_estado_pago()
+        
+        # Si no quedan detalles, la venta queda sin productos
+        if not venta.detalles.exists():
+            return JsonResponse({
+                'success': True,
+                'mensaje': f'Producto {producto_nombre} eliminado. La venta no tiene productos.',
+                'venta_vacia': True
+            })
+        else:
+            return JsonResponse({
+                'success': True,
+                'mensaje': f'Producto {producto_nombre} eliminado',
+                'total_venta': float(venta.total),
+                'ganancia_venta': float(venta.ganancia),
+            })
+    
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'Error: {str(e)}'})
+
