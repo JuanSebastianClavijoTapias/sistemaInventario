@@ -14,7 +14,7 @@
         }
         
         body { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
             min-height: 100vh;
             padding-bottom: 40px;
         }
@@ -32,7 +32,31 @@
             border-radius: 12px;
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-left: 5px solid #667eea;
+            border-left: 5px solid #43a047;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .btn-volver {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+            color: white;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            font-size: 18px;
+            text-decoration: none;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(67, 160, 71, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-volver:hover {
+            transform: translateX(-3px);
+            box-shadow: 0 6px 16px rgba(67, 160, 71, 0.5);
         }
         
         .header h1 { 
@@ -94,6 +118,29 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
+        /* Layout de dos columnas */
+        .page-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 25px;
+            align-items: start;
+        }
+
+        .sidebar-resumen {
+            position: sticky;
+            top: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .page-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-resumen {
+                position: static;
+                order: -1;
+            }
+        }
+
         .card-title {
             font-size: 20px;
             font-weight: 700;
@@ -108,7 +155,7 @@
         }
         
         .card-title i {
-            color: #667eea;
+            color: #43a047;
             font-size: 22px;
         }
         
@@ -146,8 +193,8 @@
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            border-color: #66bb6a;
+            box-shadow: 0 0 0 4px rgba(102, 187, 106, 0.2);
         }
         
         .form-error {
@@ -177,7 +224,7 @@
             cursor: pointer;
             width: 18px;
             height: 18px;
-            accent-color: #667eea;
+            accent-color: #43a047;
         }
         
         .radio-item label {
@@ -200,7 +247,7 @@
         }
         
         thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
             color: white;
         }
         
@@ -245,31 +292,26 @@
             font-size: 14px !important;
             transition: all 0.3s ease !important;
         }
+
+        .precio-input {
+            width: 110px !important;
+            padding: 8px 12px !important;
+            border: 2px solid #e0e0e0 !important;
+            border-radius: 6px !important;
+            font-weight: 600;
+            text-align: center;
+            font-size: 14px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .precio-input:focus {
+            border-color: #66bb6a !important;
+            box-shadow: 0 0 0 3px rgba(102, 187, 106, 0.2) !important;
+        }
         
         .cantidad-input:focus {
-            border-color: #667eea !important;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15) !important;
-        }
-        
-        .preview-calculo {
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            padding: 12px;
-            display: none !important;
-            opacity: 0;
-            transform: scaleY(0.8);
-            transform-origin: top;
-            transition: all 0.2s ease;
-            flex: 1;
-            min-width: 180px;
-        }
-        
-        .preview-calculo.visible {
-            display: block !important;
-            opacity: 1;
-            transform: scaleY(1);
-            animation: slideDown 0.3s ease;
+            border-color: #66bb6a !important;
+            box-shadow: 0 0 0 3px rgba(102, 187, 106, 0.2) !important;
         }
         
         .btn-editar-cantidad, .btn-eliminar-cantidad {
@@ -288,14 +330,14 @@
         }
         
         .btn-editar-cantidad {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
             color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.35);
         }
         
         .btn-editar-cantidad:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 16px rgba(67, 160, 71, 0.4);
         }
         
         .btn-eliminar-cantidad {
@@ -335,13 +377,13 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
             color: white;
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(67, 160, 71, 0.4);
         }
         
         .btn-secondary {
@@ -371,7 +413,7 @@
         }
         
         .resumen {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
             color: white;
             padding: 25px;
             border-radius: 12px;
@@ -438,67 +480,6 @@
             font-family: 'Poppins', sans-serif;
         }
         
-        .preview-calculo {
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 0;
-            display: none !important;
-            opacity: 0;
-            transform: scaleY(0.8);
-            transform-origin: top;
-            transition: all 0.2s ease;
-            flex: 1;
-            min-width: 180px;
-        }
-        
-        .preview-calculo.visible {
-            display: block !important;
-            opacity: 1;
-            transform: scaleY(1);
-            animation: slideDown 0.3s ease;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: scaleY(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scaleY(1);
-            }
-        }
-        
-        .preview-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-            font-size: 13px;
-        }
-        
-        .preview-row:last-child {
-            margin-bottom: 0;
-            padding-top: 8px;
-            border-top: 2px solid #ccc;
-            font-weight: 700;
-            color: #667eea;
-            margin-top: 8px;
-            font-size: 14px;
-        }
-        
-        .preview-label {
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .preview-valor {
-            color: #1a1a2e;
-            font-weight: 600;
-        }
-    
-        
         .botones {
             display: flex;
             gap: 12px;
@@ -525,13 +506,13 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
             color: white;
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(67, 160, 71, 0.4);
         }
         
         .btn-secondary {
@@ -549,8 +530,13 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1><i class="fas fa-edit"></i> Editar Venta #{{ venta.idVenta }}</h1>
-            <p><i class="fas fa-clock"></i> Realizada: {{ venta.fecha|date:"d/m/Y H:i" }}</p>
+            <a href="{% url 'detalle_venta' venta.idVenta %}" class="btn-volver" title="Volver al detalle">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1><i class="fas fa-edit"></i> Editar Venta #{{ venta.idVenta }}</h1>
+                <p><i class="fas fa-clock"></i> Realizada: {{ venta.fecha|date:"d/m/Y H:i" }}</p>
+            </div>
         </div>
         
         <!-- Mensajes -->
@@ -565,30 +551,9 @@
         </div>
         {% endif %}
         
-        <!-- Resumen actual -->
-        <div class="card">
-            <div class="card-title"><i class="fas fa-chart-pie"></i> Resumen Actual de la Venta</div>
-            <div class="resumen">
-                <div class="resumen-item">
-                    <span class="resumen-label">Total</span>
-                    <span class="resumen-valor" id="resumen-total">${{ venta.total|floatformat:0 }}</span>
-                </div>
-                <div class="resumen-item">
-                    <span class="resumen-label">Cantidad (kg)</span>
-                    <span class="resumen-valor" id="resumen-cantidad">{{ venta.cantidad }}</span>
-                </div>
-                <div class="resumen-item">
-                    <span class="resumen-label">Ganancia</span>
-                    <span class="resumen-valor" id="resumen-ganancia">${{ venta.ganancia|floatformat:0 }}</span>
-                </div>
-                <div class="resumen-item">
-                    <span class="resumen-label">Productos</span>
-                    <span class="resumen-valor">{{ detalles.count }}</span>
-                </div>
-            </div>
-        </div>
-        
+        <div class="page-layout">
         <!-- Productos actuales - EDITABLE -->
+        <div class="main-content">
         <div class="card">
             <div class="card-title"><i class="fas fa-boxes"></i> Editar Productos</div>
             
@@ -609,6 +574,7 @@
                             <tr>
                                 <th>Producto</th>
                                 <th>Cantidad (kg)</th>
+                                <th>Precio Venta ($/kg)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -618,22 +584,12 @@
                                 <td>
                                     <div class="cantidad-cell-container">
                                         <div class="cantidad-input-wrapper">
-                                            <input type="number" name="cantidad_{{ detalle.id }}" class="cantidad-input" value="{{ detalle.cantidad }}" min="0" max="{{ detalle.cantidad }}" step="1" data-precio-venta="{{ detalle.precio_venta }}" data-precio-compra="{{ detalle.precio_compra }}" data-cantidad-original="{{ detalle.cantidad }}" data-detalle-id="{{ detalle.id }}">
+                                            <input type="number" name="cantidad_{{ detalle.id }}" class="cantidad-input" value="{{ detalle.cantidad }}" min="0" step="1" data-precio-venta="{{ detalle.precio_venta }}" data-precio-compra="{{ detalle.precio_compra }}" data-cantidad-original="{{ detalle.cantidad }}" data-detalle-id="{{ detalle.id }}">
                                         </div>
-                                        <div class="preview-calculo">
-                                            <div class="preview-row">
-                                                <span class="preview-label">Subtotal:</span>
-                                                <span class="preview-valor preview-subtotal">-</span>
-                                            </div>
-                                            <div class="preview-row">
-                                                <span class="preview-label">Ganancia:</span>
-                                                <span class="preview-valor preview-ganancia">-</span>
-                                            </div>
-                                            <div class="preview-row">
-                                                <span>TOTAL</span>
-                                                <span class="preview-total">-</span>
-                                            </div>
-                                        </div>
+                                    </div></td>
+                                <td data-label="Precio Venta">
+                                    <div class="cantidad-input-wrapper">
+                                        <input type="number" name="precio_{{ detalle.id }}" class="precio-input" value="{{ detalle.precio_venta|floatformat:0 }}" min="0" step="1" data-detalle-id="{{ detalle.id }}">
                                     </div>
                                 </td>
                             </tr>
@@ -652,170 +608,36 @@
             <p style="color: #666; text-align: center; padding: 20px;">No hay productos en esta venta</p>
             {% endif %}
         </div>
-        
-        <!-- Formulario de edición - AGREGAR O AUMENTAR -->
-        <div class="card">
-            <div class="card-title"><i class="fas fa-plus-circle"></i> Agregar o Aumentar Productos</div>
-            
-            <form method="post">
-                {% csrf_token %}
-                
-                <!-- Selección de acción -->
-                <div class="form-section">
-                    <label style="font-weight: 700; margin-bottom: 12px; color: #1a1a2e; display: block;">¿Qué desea hacer?</label>
-                    <div class="radio-group">
-                        <div class="radio-item">
-                            <input type="radio" id="accion_agregar" name="accion" value="agregar_producto">
-                            <label for="accion_agregar"><i class="fas fa-plus"></i> Agregar nuevo producto</label>
-                        </div>
-                        <div class="radio-item">
-                            <input type="radio" id="accion_aumentar" name="accion" value="aumentar_cantidad">
-                            <label for="accion_aumentar"><i class="fas fa-arrow-up"></i> Aumentar cantidad de existente</label>
-                        </div>
+        </div><!-- /.main-content -->
+
+        <!-- Resumen lateral -->
+        <div class="sidebar-resumen">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-chart-pie"></i> Resumen de la Venta</div>
+                <div class="resumen" style="display:flex; flex-direction:column; gap:16px;">
+                    <div class="resumen-item">
+                        <span class="resumen-label">Total</span>
+                        <span class="resumen-valor" id="resumen-total">${{ venta.total|floatformat:0 }}</span>
+                    </div>
+                    <div class="resumen-item">
+                        <span class="resumen-label">Cantidad (kg)</span>
+                        <span class="resumen-valor" id="resumen-cantidad">{{ venta.cantidad }}</span>
+                    </div>
+                    <div class="resumen-item">
+                        <span class="resumen-label">Ganancia</span>
+                        <span class="resumen-valor" id="resumen-ganancia">${{ venta.ganancia|floatformat:0 }}</span>
+                    </div>
+                    <div class="resumen-item">
+                        <span class="resumen-label">Productos</span>
+                        <span class="resumen-valor">{{ detalles.count }}</span>
                     </div>
                 </div>
-                
-                <!-- Campo producto -->
-                <div class="form-group">
-                    <label for="producto"><i class="fas fa-box"></i> Producto</label>
-                    {{ form.producto }}
-                    {% if form.producto.errors %}
-                        <div class="form-error">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            {% for error in form.producto.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-                
-                <!-- Campo cantidad -->
-                <div class="form-group">
-                    <label for="cantidad"><i class="fas fa-weight"></i> Cantidad a Agregar (kg)</label>
-                    {{ form.cantidad }}
-                    {% if form.cantidad.errors %}
-                        <div class="form-error">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            {% for error in form.cantidad.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-                
-                <!-- Campo precio venta -->
-                <div class="form-group">
-                    <label for="precio_venta"><i class="fas fa-dollar-sign"></i> Precio de Venta ($ por kg)</label>
-                    {{ form.precio_venta }}
-                    {% if form.precio_venta.errors %}
-                        <div class="form-error">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            {% for error in form.precio_venta.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-                
-                <!-- Cálculo de total -->
-                <div class="calculo-total" id="calculoTotal">
-                    <div class="calculo-label"><i class="fas fa-calculator"></i> Total a agregar:</div>
-                    <div class="calculo-valor" id="valorTotal">$0</div>
-                </div>
-                
-                <!-- Errores generales -->
-                {% if form.non_field_errors %}
-                <div class="alerta" style="background: #f8d7da; color: #721c24; border-left-color: #dc3545;">
-                    {% for error in form.non_field_errors %}
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                
-                <!-- Botones -->
-                <div class="botones">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i> Aplicar Cambios
-                    </button>
-                    <a href="{% url 'detalle_venta' venta.idVenta %}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Cancelar
-                    </a>
-                </div>
-            </form>
-        </div>
+            </div>
+        </div><!-- /.sidebar-resumen -->
+        </div><!-- /.page-layout -->
     </div>
-                
-    <script>
-        // Datos de productos en la venta
-        const productosEnVenta = {
-            {% for detalle in detalles %}
-            {{ detalle.producto.idProducto }}: '{{ detalle.producto.nombre }}',
-            {% endfor %}
-        };
-        
-        const selectProducto = document.querySelector('select[name="producto"]');
-        const inputCantidad = document.querySelector('input[name="cantidad"]');
-        const inputPrecio = document.querySelector('input[name="precio_venta"]');
-        const radioAgregar = document.getElementById('accion_agregar');
-        const radioAumentar = document.getElementById('accion_aumentar');
-        const calculoTotal = document.getElementById('calculoTotal');
-        const valorTotal = document.getElementById('valorTotal');
-        
-        // Almacenar opciones originales
-        const opcionesOriginales = Array.from(selectProducto.options).map(opt => ({
-            value: opt.value,
-            text: opt.text,
-            selected: opt.selected
-        }));
-        
-        // Función para filtrar productos
-        function filtrarProductos() {
-            selectProducto.innerHTML = '';
-            
-            if (radioAumentar.checked) {
-                // Solo mostrar productos que ya están en la venta
-                const opcionVacia = document.createElement('option');
-                opcionVacia.value = '';
-                opcionVacia.text = 'Selecciona un producto...';
-                selectProducto.appendChild(opcionVacia);
-                
-                opcionesOriginales.forEach(opt => {
-                    if (opt.value && productosEnVenta[opt.value]) {
-                        const option = document.createElement('option');
-                        option.value = opt.value;
-                        option.text = opt.text;
-                        selectProducto.appendChild(option);
-                    }
-                });
-            } else {
-                // Mostrar todos los productos
-                opcionesOriginales.forEach(opt => {
-                    const option = document.createElement('option');
-                    option.value = opt.value;
-                    option.text = opt.text;
-                    if (opt.selected) option.selected = true;
-                    selectProducto.appendChild(option);
-                });
-            }
-        }
-        
-        // Función para calcular total
-        function calcularTotal() {
-            const cantidad = parseFloat(inputCantidad.value) || 0;
-            const precio = parseFloat(inputPrecio.value) || 0;
-            const total = cantidad * precio;
-            
-            if (cantidad > 0 && precio > 0) {
-                valorTotal.textContent = '$' + Math.round(total).toLocaleString('es-CO');
-                calculoTotal.classList.add('visible');
-            } else {
-                calculoTotal.classList.remove('visible');
-            }
-        }
-        
 
-        
+    <script>
         // Función auxiliar para parsear números robustamente
         function parseMoneda(valorStr) {
             if (!valorStr) return 0;
@@ -865,57 +687,7 @@
         
         // Función para actualizar preview de cálculo en tiempo real
         function actualizarPreviewCantidad(input) {
-            try {
-                const td = input.closest('td');
-                const fila = input.closest('tr');
-                
-                if (!td || !fila) {
-                    return;
-                }
-                
-                const nuevaCantidad = parseInt(input.value) || 0;
-                
-                // Obtener los precios del input
-                const pvStr = input.getAttribute('data-precio-venta');
-                const pcStr = input.getAttribute('data-precio-compra');
-                
-                let precioVenta = parseMoneda(pvStr);
-                let precioCompra = parseMoneda(pcStr);
-                
-                // Obtener el preview dentro del mismo td
-                const preview = td.querySelector('.preview-calculo');
-                
-                if (!preview) {
-                    return;
-                }
-                
-                // Solo mostrar si la cantidad es mayor a 0 y tenemos precios válidos
-                if (nuevaCantidad > 0 && precioVenta > 0) {
-                    const nuevoSubtotal = nuevaCantidad * precioVenta;
-                    const nuevaGanancia = nuevaCantidad * (precioVenta - precioCompra);
-                    
-                    // Actualizar valores
-                    const subtotalEl = preview.querySelector('.preview-subtotal');
-                    const gananciaEl = preview.querySelector('.preview-ganancia');
-                    const totalEl = preview.querySelector('.preview-total');
-                    
-                    if (subtotalEl) {
-                        subtotalEl.textContent = '$' + Math.round(nuevoSubtotal).toLocaleString('es-CO');
-                    }
-                    if (gananciaEl) {
-                        gananciaEl.textContent = '$' + Math.round(nuevaGanancia).toLocaleString('es-CO');
-                    }
-                    if (totalEl) {
-                        totalEl.textContent = '$' + Math.round(nuevoSubtotal).toLocaleString('es-CO');
-                    }
-                    
-                    preview.classList.add('visible');
-                } else {
-                    preview.classList.remove('visible');
-                }
-            } catch (e) {
-                console.error('Error:', e);
-            }
+            // preview eliminado
         }
         
         // Función para actualizar el resumen de la venta
@@ -957,96 +729,48 @@
         
         // Event listeners para inputs de cantidad en la tabla
         document.querySelectorAll('.cantidad-input').forEach(input => {
-            // Copiar los precios del botón al input para mayor accesibilidad
-            const fila = input.closest('tr');
-            const botonGuardar = fila.querySelector('.btn-editar-cantidad');
-            if (botonGuardar) {
-                const pv = botonGuardar.getAttribute('data-precio-venta');
-                const pc = botonGuardar.getAttribute('data-precio-compra');
-                if (pv) input.setAttribute('data-precio-venta', pv);
-                if (pc) input.setAttribute('data-precio-compra', pc);
-            }
-            
-            const cantidadOriginal = parseInt(input.getAttribute('data-cantidad-original')) || 0;
-            
-            // Validar en tiempo real - bloquear valores >= cantidad original
-            input.addEventListener('input', function(e) {
+            input.addEventListener('input', function() {
                 let valor = parseInt(this.value) || 0;
-                const max = cantidadOriginal;
-                
-                // Si el valor es >= al original, restringir
-                if (valor > max) {
-                    this.value = max - 1;
-                    valor = max - 1;
-                }
-                
-                // Si es negativo, poner 0
                 if (valor < 0) {
                     this.value = 0;
                     valor = 0;
                 }
-                
-                // Cambiar color según si está restando
-                if (valor < cantidadOriginal) {
-                    this.style.borderColor = '#667eea';
-                    this.style.backgroundColor = '';
-                } else if (valor === cantidadOriginal) {
-                    this.style.borderColor = '#ffc107';
-                    this.style.backgroundColor = 'rgba(255, 193, 7, 0.1)';
-                }
-                
-                // Actualizar preview
                 actualizarPreviewCantidad(this);
-                
-                // Actualizar resumen de la venta
                 actualizarResumenVenta();
             });
-            
-            // Validar al perder foco
-            input.addEventListener('blur', function(e) {
-                let valor = parseInt(this.value) || 0;
-                const max = cantidadOriginal;
-                
-                if (valor > max) {
-                    this.value = max - 1;
-                }
-                if (valor < 0) {
-                    this.value = 0;
-                }
+
+            input.addEventListener('blur', function() {
+                if (parseInt(this.value) < 0) this.value = 0;
             });
-            
-            // También ejecutar al cargar la página si hay valor
+
             if (input.value && parseInt(input.value) > 0) {
                 setTimeout(() => actualizarPreviewCantidad(input), 100);
             }
         });
-        
-        // Event listeners del formulario de agregar/aumentar
-        if (radioAgregar && radioAumentar) {
-            radioAgregar.addEventListener('change', filtrarProductos);
-            radioAumentar.addEventListener('change', filtrarProductos);
-        }
-        if (inputCantidad && inputPrecio) {
-            inputCantidad.addEventListener('input', calcularTotal);
-            inputPrecio.addEventListener('input', calcularTotal);
-        }
-        
-        // Inicializar
-        if (radioAumentar && radioAumentar.checked) {
-            filtrarProductos();
-        }
-        
+
+        // Event listeners para inputs de precio en la tabla
+        document.querySelectorAll('.precio-input').forEach(precioInput => {
+            precioInput.addEventListener('input', function() {
+                const fila = this.closest('tr');
+                if (!fila) return;
+                const cantidadInput = fila.querySelector('.cantidad-input');
+                if (cantidadInput) {
+                    cantidadInput.setAttribute('data-precio-venta', this.value);
+                    actualizarPreviewCantidad(cantidadInput);
+                    actualizarResumenVenta();
+                }
+            });
+        });
+
         // Forzar inicialización de inputs después de un pequeño delay
         setTimeout(() => {
             document.querySelectorAll('.cantidad-input').forEach(input => {
                 const fila = input.closest('tr');
                 if (fila && input.value && parseInt(input.value) > 0) {
-                    // Disparar evento input para forzar actualización
                     const event = new Event('input', { bubbles: true });
                     input.dispatchEvent(event);
                 }
             });
-            // Actualizar resumen inicial
             actualizarResumenVenta();
         }, 500);
     </script>

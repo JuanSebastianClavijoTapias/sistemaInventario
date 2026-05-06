@@ -6,7 +6,6 @@ urlpatterns = [
     path('', views.ventas_form, name='ventas'),
     
     # Gestión de ventas
-    path('lista/', views.lista_ventas, name='lista_ventas'),
     path('<int:venta_id>/detalle/', views.detalle_venta, name='detalle_venta'),
     path('<int:venta_id>/editar/', views.editar_venta, name='editar_venta'),
     

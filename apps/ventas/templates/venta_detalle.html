@@ -18,7 +18,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #43a047 0%, #1b5e20 100%);
             min-height: 100vh;
             padding: 40px 20px;
         }
@@ -47,7 +47,7 @@
             border-radius: 12px;
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-left: 5px solid #667eea;
+            border-left: 5px solid #43a047;
             animation: slideDown 0.4s ease;
         }
 
@@ -138,7 +138,7 @@
         }
 
         .card-title i {
-            color: #667eea;
+            color: #43a047;
             font-size: 22px;
         }
 
@@ -154,18 +154,18 @@
             flex-direction: column;
             padding: 15px;
             background: #f9f9ff;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #43a047;
             border-radius: 6px;
             transition: all 0.3s ease;
         }
 
         .info-item:hover {
-            background: #f0f4ff;
+            background: #f1f8e9;
             transform: translateX(5px);
         }
 
         .info-item i {
-            color: #667eea;
+            color: #43a047;
             font-size: 18px;
             margin-bottom: 8px;
         }
@@ -198,7 +198,7 @@
         }
 
         thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
             color: white;
         }
 
@@ -258,13 +258,13 @@
         .total-valor {
             font-size: 24px;
             font-weight: 700;
-            color: #667eea;
+            color: #43a047;
             font-family: 'Poppins', sans-serif;
         }
 
         /* SALDO SECTION */
         .saldo-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
             color: white;
             padding: 30px;
             border-radius: 12px;
@@ -272,7 +272,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 25px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 30px rgba(46, 125, 50, 0.3);
         }
 
         .saldo-item {
@@ -324,13 +324,13 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
             color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(67, 160, 71, 0.4);
         }
 
         .btn-success {
@@ -353,7 +353,41 @@
             transform: translateY(-2px);
         }
 
-        /* ALERTAS */
+        /* INLINE EDIT */
+        .inline-input {
+            width: 90px;
+            padding: 6px 10px;
+            border: 2px solid #c8e6c9;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            transition: border-color 0.2s;
+            background: #f9fbe7;
+        }
+        .inline-input:focus {
+            outline: none;
+            border-color: #43a047;
+            background: white;
+        }
+        .btn-guardar-inline {
+            padding: 7px 14px;
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-guardar-inline:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(67,160,71,0.4);
+        }
         .alerta {
             padding: 16px 20px;
             border-radius: 8px;
@@ -431,6 +465,8 @@
                 <i class="fas fa-boxes"></i> Productos
             </div>
             {% if detalles %}
+            <form method="post" action="{% url 'editar_venta' venta.idVenta %}" id="form-editar-detalle">
+                {% csrf_token %}
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -446,8 +482,8 @@
                         {% for detalle in detalles %}
                         <tr>
                             <td>{{ detalle.producto.nombre }}</td>
-                            <td>{{ detalle.cantidad }}</td>
-                            <td>${{ detalle.precio_venta|floatformat:0 }}</td>
+                            <td><input type="number" name="cantidad_{{ detalle.id }}" class="inline-input" value="{{ detalle.cantidad }}" min="0" step="1"></td>
+                            <td><input type="number" name="precio_{{ detalle.id }}" class="inline-input" value="{{ detalle.precio_venta|floatformat:0 }}" min="0" step="1"></td>
                             <td>${{ detalle.subtotal|floatformat:0 }}</td>
                             <td>${{ detalle.ganancia|floatformat:0 }}</td>
                         </tr>
@@ -455,6 +491,12 @@
                     </tbody>
                 </table>
             </div>
+            <div style="text-align:right; margin-top:15px;">
+                <button type="submit" name="accion_editar" value="actualizar" class="btn-guardar-inline">
+                    <i class="fas fa-save"></i> Guardar cambios
+                </button>
+            </div>
+            </form>
             <div class="totales">
                 <div class="total-item">
                     <span class="total-label">Total Cantidad</span>
@@ -528,14 +570,9 @@
         <!-- Botones de Acción -->
         <div class="card">
             <div class="botones">
-                <a href="{% url 'lista_ventas' %}" class="btn btn-secondary">
+                <a href="{% url 'ventas' %}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver
                 </a>
-                {% if venta.estado_pago != 'pagado' %}
-                <a href="{% url 'editar_venta' venta.idVenta %}" class="btn btn-primary">
-                    <i class="fas fa-edit"></i> Editar Venta
-                </a>
-                {% endif %}
                 {% if venta.tipo_pago == 'fiado' and venta.saldo_pendiente > 0 %}
                 <a href="{% url 'agregar_pago' venta.idVenta %}" class="btn btn-success">
                     <i class="fas fa-plus-circle"></i> Registrar Pago

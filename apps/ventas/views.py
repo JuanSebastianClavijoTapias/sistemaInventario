@@ -341,66 +341,6 @@ def ventas_form(request):
 
 
 @login_required
-def lista_ventas(request):
-    """
-    Lista todas las ventas con opciones de filtrado y búsqueda.
-    """
-    ventas = Venta.objects.select_related('cliente', 'producto').prefetch_related(
-        'detalles', 'detalles__producto', 'cobros'
-    ).order_by('-fecha')
-    
-    # Filtros
-    filtro_estado = request.GET.get('estado', '')
-    filtro_cliente = request.GET.get('cliente', '')
-    filtro_rango = request.GET.get('rango', 'todo')
-    
-    hoy = timezone.localdate()
-    
-    # Aplicar filtro de estado
-    if filtro_estado == 'pagado':
-        ventas = ventas.filter(estado_pago='pagado')
-    elif filtro_estado == 'pendiente':
-        ventas = ventas.filter(estado_pago='pendiente')
-    elif filtro_estado == 'vencido':
-        ventas = ventas.filter(estado_pago='vencido')
-    
-    # Aplicar filtro de cliente
-    if filtro_cliente:
-        ventas = ventas.filter(cliente__idCliente=filtro_cliente)
-    
-    # Aplicar filtro de rango de fechas
-    if filtro_rango == 'hoy':
-        ventas = ventas.filter(fecha__date=hoy)
-    elif filtro_rango == 'semana':
-        inicio_semana = hoy - timedelta(days=7)
-        ventas = ventas.filter(fecha__date__gte=inicio_semana)
-    elif filtro_rango == 'mes':
-        inicio_mes = hoy.replace(day=1)
-        ventas = ventas.filter(fecha__date__gte=inicio_mes)
-    
-    # Calcular totales
-    totales = ventas.aggregate(
-        total_ventas=Sum('total'),
-        total_pagado=Sum('monto_pagado'),
-        total_pendiente=Sum('total') - Sum('monto_pagado'),
-        cantidad_ventas=Count('idVenta')
-    )
-    
-    clientes = Clientes.objects.all().order_by('nombre')
-    
-    context = {
-        'ventas': ventas[:100],  # Limitar a 100 para performance
-        'clientes': clientes,
-        'filtro_estado': filtro_estado,
-        'filtro_cliente': filtro_cliente,
-        'filtro_rango': filtro_rango,
-        'totales': totales,
-    }
-    
-    return render(request, 'ventas_lista.html', context)
-
-
-@login_required
 def detalle_venta(request, venta_id):
     """
     Muestra el detalle completo de una venta con opción de editar o agregar pagos.
@@ -435,7 +375,7 @@ def editar_venta(request, venta_id):
         cantidades_actualizadas = {key: value for key, value in request.POST.items() if key.startswith('cantidad_')}
         
         if cantidades_actualizadas:
-            # Procesar actualización de cantidades en la tabla
+            # Procesar actualización de cantidades (y precios) en la tabla
             try:
                 with transaction.atomic():
                     cambios = False
@@ -443,31 +383,33 @@ def editar_venta(request, venta_id):
                         try:
                             detalle_id = int(key.replace('cantidad_', ''))
                             nueva_cantidad = int(nueva_cantidad_str) or 0
-                            
+
                             detalle = DetalleVenta.objects.get(id=detalle_id, venta=venta)
                             cantidad_original = detalle.cantidad
-                            
-                            # Validar que no intente aumentar
-                            if nueva_cantidad > cantidad_original:
-                                messages.warning(
-                                    request,
-                                    f'⚠️ {detalle.producto.nombre}: No se puede aumentar cantidad en esta sección. '
-                                    f'Se mantuvo en {cantidad_original} kg.'
-                                )
-                                continue
-                            
-                            # Actualizar cantidad y recalcular subtotal/ganancia
-                            if nueva_cantidad != cantidad_original:
-                                cantidad_restada = cantidad_original - nueva_cantidad
+                            precio_original = detalle.precio_venta
+
+                            # Leer nuevo precio si viene en el POST
+                            precio_key = f'precio_{detalle_id}'
+                            nuevo_precio_str = request.POST.get(precio_key)
+                            if nuevo_precio_str:
+                                try:
+                                    nuevo_precio = Decimal(str(int(float(nuevo_precio_str))))
+                                    if nuevo_precio > 0:
+                                        detalle.precio_venta = nuevo_precio
+                                except (ValueError, Exception):
+                                    pass
+
+                            # Actualizar si cambió cantidad o precio
+                            if nueva_cantidad != cantidad_original or detalle.precio_venta != precio_original:
                                 detalle.cantidad = nueva_cantidad
                                 detalle.subtotal = detalle.precio_venta * Decimal(str(nueva_cantidad))
                                 detalle.ganancia = (detalle.precio_venta - detalle.precio_compra) * Decimal(str(nueva_cantidad))
                                 detalle.save()
                                 cambios = True
-                                
+
                                 messages.info(
                                     request,
-                                    f'{detalle.producto.nombre}: Restado {cantidad_restada} kg (ahora: {nueva_cantidad} kg)'
+                                    f'{detalle.producto.nombre}: {nueva_cantidad} kg a ${detalle.precio_venta}/kg'
                                 )
                         except (ValueError, DetalleVenta.DoesNotExist):
                             continue

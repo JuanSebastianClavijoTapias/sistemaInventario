@@ -862,10 +862,7 @@
                         <div class="venta-ganancia"><i class="fas fa-chart-line"></i> +{{ venta.ganancia|formato_pesos }}</div>
                         <div class="venta-acciones" style="margin-top: 10px;">
                             <a href="{% url 'detalle_venta' venta.idVenta %}" class="btn-small btn-info">
-                                <i class="fas fa-eye"></i> Ver
-                            </a>
-                            <a href="{% url 'editar_venta' venta.idVenta %}" class="btn-small btn-warning">
-                                <i class="fas fa-edit"></i> Editar
+                                <i class="fas fa-eye"></i> Ver y Editar
                             </a>
                         </div>
                     </div>
