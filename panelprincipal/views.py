@@ -119,7 +119,23 @@ def saludo(request):
     
     # Calcular datos de la semana actual
     datos_semana = calcular_datos_semana(fecha_inicio, fecha_fin)
-    
+
+    # Listas de ventas para modales del resumen semanal
+    ventas_semana_qs = Venta.objects.filter(
+        fecha__date__gte=fecha_inicio,
+        fecha__date__lte=fecha_fin
+    ).select_related('cliente')
+    ventas_semana_completo_lista = ventas_semana_qs.filter(tipo_pago='completo').order_by('-fecha')
+    ventas_semana_credito_lista = ventas_semana_qs.filter(tipo_pago='fiado').order_by('-fecha')
+    cobros_semana_lista = Cobro.objects.filter(
+        fecha__date__gte=fecha_inicio,
+        fecha__date__lte=fecha_fin
+    ).exclude(
+        venta__fecha__date__gte=fecha_inicio,
+        venta__fecha__date__lte=fecha_fin
+    ).select_related('venta', 'venta__cliente').order_by('-fecha')
+    ventas_semana_ganancia_lista = ventas_semana_qs.order_by('-fecha')
+
     # Calcular por cobrar: suma de saldos pendientes de ventas no pagadas (general)
     total_por_cobrar = Venta.objects.filter(estado_pago__in=['pendiente', 'vencido']).aggregate(
         total=Sum(F('total') - F('monto_pagado'))
@@ -168,6 +184,11 @@ def saludo(request):
         'total_cobros_semana': datos_semana['total_cobros_semana'],
         'gastos_por_categoria': datos_semana['gastos_por_categoria'],
         'cantidad_gastos_semana': datos_semana['cantidad_gastos'],
+        # Listas para modales
+        'ventas_semana_completo_lista': ventas_semana_completo_lista,
+        'ventas_semana_credito_lista': ventas_semana_credito_lista,
+        'cobros_semana_lista': cobros_semana_lista,
+        'ventas_semana_ganancia_lista': ventas_semana_ganancia_lista,
         # Info de la semana
         'fecha_inicio_semana': fecha_inicio,
         'fecha_fin_semana': fecha_fin,

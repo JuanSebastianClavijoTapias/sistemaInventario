@@ -589,7 +589,7 @@
                                     </div></td>
                                 <td data-label="Precio Venta">
                                     <div class="cantidad-input-wrapper">
-                                        <input type="number" name="precio_{{ detalle.id }}" class="precio-input" value="{{ detalle.precio_venta|floatformat:0 }}" min="0" step="1" data-detalle-id="{{ detalle.id }}">
+                                        <input type="text" inputmode="numeric" name="precio_{{ detalle.id }}" class="precio-input" value="{{ detalle.precio_venta|floatformat:0 }}" data-precio-compra="{{ detalle.precio_compra }}" data-detalle-id="{{ detalle.id }}">
                                     </div>
                                 </td>
                             </tr>
@@ -638,141 +638,88 @@
     </div>
 
     <script>
-        // Función auxiliar para parsear números robustamente
-        function parseMoneda(valorStr) {
-            if (!valorStr) return 0;
-            
-            // Convertir a string y limpiar
-            valorStr = String(valorStr).trim();
-            
-            // Si es un número sin formato especial, parseFloat directamente
-            if (/^\d+(\.\d+)?$/.test(valorStr)) {
-                return parseFloat(valorStr) || 0;
-            }
-            
-            // Remover símbolos de moneda
-            valorStr = valorStr.replace(/[$]/g, '');
-            
-            // Remover espacios
-            valorStr = valorStr.replace(/\s/g, '');
-            
-            // Remover todo excepto números, puntos y comas
-            valorStr = valorStr.replace(/[^0-9.,]/g, '');
-            
-            // Si solo tiene punto o solo coma, usar como separador decimal
-            if (valorStr.includes('.') && !valorStr.includes(',')) {
-                return parseFloat(valorStr) || 0;
-            }
-            
-            if (valorStr.includes(',') && !valorStr.includes('.')) {
-                return parseFloat(valorStr.replace(',', '.')) || 0;
-            }
-            
-            // Si tiene ambos, el último es el separador decimal
-            if (valorStr.includes('.') && valorStr.includes(',')) {
-                const lastDot = valorStr.lastIndexOf('.');
-                const lastComma = valorStr.lastIndexOf(',');
-                
-                if (lastComma > lastDot) {
-                    // Coma es decimal, punto es separador de miles
-                    valorStr = valorStr.replace(/\./g, '').replace(',', '.');
-                } else {
-                    // Punto es decimal, coma es separador de miles
-                    valorStr = valorStr.replace(/,/g, '');
-                }
-            }
-            
-            return parseFloat(valorStr) || 0;
+        // Formatear número como pesos colombianos (ej: 1500 → 1.500)
+        function formatCOP(num) {
+            const n = parseInt(num) || 0;
+            return n.toLocaleString('es-CO');
         }
-        
-        // Función para actualizar preview de cálculo en tiempo real
-        function actualizarPreviewCantidad(input) {
-            // preview eliminado
+
+        // Parsear valor con formato COP a entero
+        function parseCOP(str) {
+            if (!str && str !== 0) return 0;
+            return parseInt(String(str).replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
         }
-        
-        // Función para actualizar el resumen de la venta
+
+        // Actualizar el resumen lateral leyendo directamente los inputs
         function actualizarResumenVenta() {
             let totalVenta = 0;
             let cantidadTotal = 0;
             let gananciaTotal = 0;
-            
-            document.querySelectorAll('.cantidad-input').forEach(input => {
-                const cantidad = parseInt(input.value) || 0;
-                const precioVenta = parseMoneda(input.getAttribute('data-precio-venta'));
-                const precioCompra = parseMoneda(input.getAttribute('data-precio-compra'));
-                
+
+            document.querySelectorAll('tbody tr').forEach(fila => {
+                const cantInput = fila.querySelector('.cantidad-input');
+                const preInput = fila.querySelector('.precio-input');
+                if (!cantInput) return;
+
+                const cantidad    = parseInt(cantInput.value) || 0;
+                const precioVenta = parseCOP(preInput ? preInput.value : cantInput.getAttribute('data-precio-venta'));
+                const precioCompra = parseFloat(preInput ? preInput.getAttribute('data-precio-compra') : cantInput.getAttribute('data-precio-compra')) || 0;
+
                 if (cantidad > 0 && precioVenta > 0) {
-                    const subtotal = cantidad * precioVenta;
-                    const ganancia = cantidad * (precioVenta - precioCompra);
-                    
-                    totalVenta += subtotal;
+                    totalVenta    += cantidad * precioVenta;
                     cantidadTotal += cantidad;
-                    gananciaTotal += ganancia;
+                    gananciaTotal += cantidad * (precioVenta - precioCompra);
                 }
-            });
-            
-            // Actualizar los elementos del resumen
-            const resumenTotal = document.getElementById('resumen-total');
-            const resumenCantidad = document.getElementById('resumen-cantidad');
-            const resumenGanancia = document.getElementById('resumen-ganancia');
-            
-            if (resumenTotal) {
-                resumenTotal.textContent = '$' + Math.round(totalVenta).toLocaleString('es-CO');
-            }
-            if (resumenCantidad) {
-                resumenCantidad.textContent = cantidadTotal.toFixed(2);
-            }
-            if (resumenGanancia) {
-                resumenGanancia.textContent = '$' + Math.round(gananciaTotal).toLocaleString('es-CO');
-            }
-        }
-        
-        // Event listeners para inputs de cantidad en la tabla
-        document.querySelectorAll('.cantidad-input').forEach(input => {
-            input.addEventListener('input', function() {
-                let valor = parseInt(this.value) || 0;
-                if (valor < 0) {
-                    this.value = 0;
-                    valor = 0;
-                }
-                actualizarPreviewCantidad(this);
-                actualizarResumenVenta();
             });
 
+            const resumenTotal    = document.getElementById('resumen-total');
+            const resumenCantidad = document.getElementById('resumen-cantidad');
+            const resumenGanancia = document.getElementById('resumen-ganancia');
+
+            if (resumenTotal)    resumenTotal.textContent    = '$' + Math.round(totalVenta).toLocaleString('es-CO');
+            if (resumenCantidad) resumenCantidad.textContent = cantidadTotal.toFixed(2);
+            if (resumenGanancia) resumenGanancia.textContent = '$' + Math.round(gananciaTotal).toLocaleString('es-CO');
+        }
+
+        // ── Inputs de CANTIDAD ──
+        document.querySelectorAll('.cantidad-input').forEach(input => {
+            input.addEventListener('input', function() {
+                if (parseInt(this.value) < 0) this.value = 0;
+                actualizarResumenVenta();
+            });
             input.addEventListener('blur', function() {
                 if (parseInt(this.value) < 0) this.value = 0;
             });
-
-            if (input.value && parseInt(input.value) > 0) {
-                setTimeout(() => actualizarPreviewCantidad(input), 100);
-            }
         });
 
-        // Event listeners para inputs de precio en la tabla
-        document.querySelectorAll('.precio-input').forEach(precioInput => {
-            precioInput.addEventListener('input', function() {
-                const fila = this.closest('tr');
-                if (!fila) return;
-                const cantidadInput = fila.querySelector('.cantidad-input');
-                if (cantidadInput) {
-                    cantidadInput.setAttribute('data-precio-venta', this.value);
-                    actualizarPreviewCantidad(cantidadInput);
-                    actualizarResumenVenta();
-                }
+        // ── Inputs de PRECIO (formato COP en tiempo real) ──
+        document.querySelectorAll('.precio-input').forEach(input => {
+            // Formatear valor inicial
+            const rawInicial = parseInt(input.value) || 0;
+            if (rawInicial > 0) input.value = formatCOP(rawInicial);
+
+            input.addEventListener('input', function() {
+                const raw = parseCOP(this.value);
+                this.value = raw > 0 ? formatCOP(raw) : '';
+                actualizarResumenVenta();
+            });
+
+            input.addEventListener('focus', function() {
+                // Mover cursor al final al enfocar
+                const len = this.value.length;
+                this.setSelectionRange(len, len);
             });
         });
 
-        // Forzar inicialización de inputs después de un pequeño delay
-        setTimeout(() => {
-            document.querySelectorAll('.cantidad-input').forEach(input => {
-                const fila = input.closest('tr');
-                if (fila && input.value && parseInt(input.value) > 0) {
-                    const event = new Event('input', { bubbles: true });
-                    input.dispatchEvent(event);
-                }
+        // Quitar formato antes de enviar el formulario
+        document.getElementById('formulario-editar-cantidades').addEventListener('submit', function() {
+            document.querySelectorAll('.precio-input').forEach(input => {
+                input.value = parseCOP(input.value);
             });
-            actualizarResumenVenta();
-        }, 500);
+        });
+
+        // Inicializar resumen al cargar
+        actualizarResumenVenta();
     </script>
 </body>
 </html>

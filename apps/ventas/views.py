@@ -672,7 +672,11 @@ def recalcular_totales_venta(venta):
                 venta.precio_venta = detalles.aggregate(
                     avg=Sum('subtotal') / total_cantidad
                 )['avg'] or Decimal('0')
-    
+
+    # Si la venta es de pago completo, monto_pagado siempre debe ser igual al total
+    if venta.tipo_pago == 'completo':
+        venta.monto_pagado = venta.total
+
     venta.save()
 
 

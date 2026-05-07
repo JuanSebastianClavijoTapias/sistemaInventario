@@ -165,7 +165,7 @@
                         <i class="fas fa-history"></i> Historial
                     </a>
                 </div>
-            </div>2
+            </div>
         </section>
         
         <style>
@@ -256,7 +256,7 @@
             <h2 class="section-title">Resumen Semanal</h2>
             <div class="ventas-detalle-grid">
                 <!-- Total Recaudado -->
-                <div class="ventas-detalle-card recaudado">
+                <div class="ventas-detalle-card recaudado" data-modal="modal-recaudado">
                     <div class="ventas-detalle-icon">
                         <i class="fas fa-coins"></i>
                     </div>
@@ -268,7 +268,7 @@
                 </div>
                 
                 <!-- Ventas Pago Completo -->
-                <div class="ventas-detalle-card completo">
+                <div class="ventas-detalle-card completo" data-modal="modal-completo">
                     <div class="ventas-detalle-icon">
                         <i class="fas fa-check-circle"></i>
                     </div>
@@ -280,7 +280,7 @@
                 </div>
                 
                 <!-- Ventas a Crédito -->
-                <div class="ventas-detalle-card credito">
+                <div class="ventas-detalle-card credito" data-modal="modal-credito">
                     <div class="ventas-detalle-icon">
                         <i class="fas fa-clock"></i>
                     </div>
@@ -292,7 +292,7 @@
                 </div>
                 
                 <!-- Cobrado de Créditos -->
-                <div class="ventas-detalle-card cobrado-credito">
+                <div class="ventas-detalle-card cobrado-credito" data-modal="modal-cobrado">
                     <div class="ventas-detalle-icon">
                         <i class="fas fa-hand-holding-usd"></i>
                     </div>
@@ -304,7 +304,7 @@
                 </div>
                 
                 <!-- Cobros Recibidos esta Semana -->
-                <div class="ventas-detalle-card cobros-semana">
+                <div class="ventas-detalle-card cobros-semana" data-modal="modal-cobros">
                     <div class="ventas-detalle-icon">
                         <i class="fas fa-cash-register"></i>
                     </div>
@@ -316,7 +316,7 @@
                 </div>
                 
                 <!-- Ganancia Total -->
-                <div class="ventas-detalle-card ganancia">
+                <div class="ventas-detalle-card ganancia" data-modal="modal-ganancia">
                     <div class="ventas-detalle-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
@@ -605,6 +605,1246 @@
        
     </div>
 
+    <!-- ===== MODALES RESUMEN SEMANAL ===== -->
+    <div id="modal-overlay" class="rmc-overlay" role="dialog" aria-modal="true" aria-label="Detalle de tarjeta">
+
+        <!-- ── modal-recaudado ── -->
+        <div class="rmc-modal" id="modal-recaudado">
+            <button class="rmc-cerrar" aria-label="Cerrar">&times;</button>
+            <div class="rmc-header" style="background:linear-gradient(135deg,#2e7d32,#43a047)">
+                <div class="rmc-header-left">
+                    <div class="rmc-header-icono"><i class="fas fa-coins"></i></div>
+                    <div>
+                        <p class="rmc-header-sub">Resumen Semanal</p>
+                        <h3 class="rmc-header-titulo">Total Recaudado</h3>
+                    </div>
+                </div>
+                <span class="rmc-header-valor">${{ total_recaudado|floatformat:0 }}</span>
+            </div>
+            <div class="rmc-body">
+                <div class="rmc-stats-grid">
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-check-circle rmc-stat-icon" style="color:#43a047"></i>
+                        <span class="rmc-stat-label">Al contado</span>
+                        <span class="rmc-stat-val">${{ total_ventas_completo|floatformat:0 }}</span>
+                    </div>
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-undo rmc-stat-icon" style="color:#1565c0"></i>
+                        <span class="rmc-stat-label">Cobros ant.</span>
+                        <span class="rmc-stat-val">${{ total_cobros_semana|floatformat:0 }}</span>
+                    </div>
+                </div>
+                {% if ventas_semana_completo_lista %}
+                <div class="rmc-seccion">
+                    <h4 class="rmc-seccion-titulo">
+                        <i class="fas fa-receipt"></i> Ventas al contado
+                        <span class="rmc-seccion-badge">{{ cantidad_ventas_completo }}</span>
+                    </h4>
+                    <div class="rmc-lista">
+                        {% for v in ventas_semana_completo_lista %}
+                        <div class="rmc-venta-card" style="--accent:#43a047">
+                            <div class="rmc-vc-top">
+                                <span class="rmc-vc-nombre">{{ v.cliente.nombre }} {{ v.cliente.apellido }}</span>
+                                <span class="rmc-vc-monto">${{ v.total|floatformat:0 }}</span>
+                            </div>
+                            <div class="rmc-vc-bottom">
+                                <span class="rmc-vc-meta"><i class="far fa-calendar-alt"></i> {{ v.fecha|date:"d/m/Y" }} &nbsp;·&nbsp; {{ v.cantidad }} und.</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% if cobros_semana_lista %}
+                <div class="rmc-seccion">
+                    <h4 class="rmc-seccion-titulo">
+                        <i class="fas fa-undo"></i> Cobros de créditos anteriores
+                        <span class="rmc-seccion-badge azul">{{ cobros_semana_lista|length }}</span>
+                    </h4>
+                    <div class="rmc-lista">
+                        {% for c in cobros_semana_lista %}
+                        <div class="rmc-venta-card" style="--accent:#1565c0">
+                            <div class="rmc-vc-top">
+                                <span class="rmc-vc-nombre">{{ c.venta.cliente.nombre }} {{ c.venta.cliente.apellido }}</span>
+                                <span class="rmc-vc-monto azul">${{ c.monto|floatformat:0 }}</span>
+                            </div>
+                            <div class="rmc-vc-bottom">
+                                <span class="rmc-vc-meta"><i class="fas fa-hashtag"></i> Venta #{{ c.venta.idVenta }} &nbsp;·&nbsp; {{ c.fecha|date:"d/m/Y" }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% if not ventas_semana_completo_lista and not cobros_semana_lista %}
+                <p class="rmc-lista-vacia"><i class="fas fa-inbox"></i><br>Sin movimientos esta semana</p>
+                {% endif %}
+                <p class="rmc-desc">Dinero que efectivamente entró en caja: ventas cobradas al contado más pagos recibidos de créditos de semanas anteriores.</p>
+            </div>
+        </div>
+
+        <!-- ── modal-completo ── -->
+        <div class="rmc-modal" id="modal-completo">
+            <button class="rmc-cerrar" aria-label="Cerrar">&times;</button>
+            <div class="rmc-header" style="background:linear-gradient(135deg,#2e7d32,#66bb6a)">
+                <div class="rmc-header-left">
+                    <div class="rmc-header-icono"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <p class="rmc-header-sub">Resumen Semanal</p>
+                        <h3 class="rmc-header-titulo">Ventas Pago Completo</h3>
+                    </div>
+                </div>
+                <span class="rmc-header-valor">${{ total_ventas_completo|floatformat:0 }}</span>
+            </div>
+            <div class="rmc-body">
+                <div class="rmc-stats-grid">
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-shopping-cart rmc-stat-icon" style="color:#2e7d32"></i>
+                        <span class="rmc-stat-label">Ventas</span>
+                        <span class="rmc-stat-val">{{ cantidad_ventas_completo }}</span>
+                    </div>
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-coins rmc-stat-icon" style="color:#2e7d32"></i>
+                        <span class="rmc-stat-label">Promedio</span>
+                        <span class="rmc-stat-val">{% if cantidad_ventas_completo > 0 %}${% widthratio total_ventas_completo cantidad_ventas_completo 1 %}{% else %}—{% endif %}</span>
+                    </div>
+                </div>
+                {% if ventas_semana_completo_lista %}
+                <div class="rmc-seccion">
+                    <h4 class="rmc-seccion-titulo">
+                        <i class="fas fa-list-ul"></i> Detalle de ventas
+                        <span class="rmc-seccion-badge">{{ cantidad_ventas_completo }}</span>
+                    </h4>
+                    <div class="rmc-lista">
+                        {% for v in ventas_semana_completo_lista %}
+                        <div class="rmc-venta-card" style="--accent:#43a047">
+                            <div class="rmc-vc-top">
+                                <span class="rmc-vc-nombre">{{ v.cliente.nombre }} {{ v.cliente.apellido }}</span>
+                                <span class="rmc-vc-monto">${{ v.total|floatformat:0 }}</span>
+                            </div>
+                            <div class="rmc-vc-bottom">
+                                <span class="rmc-vc-meta"><i class="far fa-calendar-alt"></i> {{ v.fecha|date:"d/m/Y" }} &nbsp;·&nbsp; {{ v.cantidad }} und.</span>
+                                <span class="rmc-vc-tag verde">Ganancia: ${{ v.ganancia|floatformat:0 }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <p class="rmc-lista-vacia"><i class="fas fa-inbox"></i><br>Sin ventas al contado esta semana</p>
+                {% endif %}
+                <p class="rmc-desc">Ventas pagadas completamente al momento de la transacción, sin dejar saldo pendiente.</p>
+            </div>
+        </div>
+
+        <!-- ── modal-credito ── -->
+        <div class="rmc-modal" id="modal-credito">
+            <button class="rmc-cerrar" aria-label="Cerrar">&times;</button>
+            <div class="rmc-header" style="background:linear-gradient(135deg,#e65100,#ff9800)">
+                <div class="rmc-header-left">
+                    <div class="rmc-header-icono"><i class="fas fa-clock"></i></div>
+                    <div>
+                        <p class="rmc-header-sub">Resumen Semanal</p>
+                        <h3 class="rmc-header-titulo">Dado a Crédito</h3>
+                    </div>
+                </div>
+                <span class="rmc-header-valor">${{ total_ventas_credito|floatformat:0 }}</span>
+            </div>
+            <div class="rmc-body">
+                <div class="rmc-stats-grid tres">
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-file-invoice rmc-stat-icon" style="color:#e65100"></i>
+                        <span class="rmc-stat-label">Ventas fiadas</span>
+                        <span class="rmc-stat-val">{{ cantidad_ventas_credito }}</span>
+                    </div>
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-check rmc-stat-icon" style="color:#43a047"></i>
+                        <span class="rmc-stat-label">Cobrado</span>
+                        <span class="rmc-stat-val verde">${{ cobrado_de_creditos|floatformat:0 }}</span>
+                    </div>
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-hourglass-half rmc-stat-icon" style="color:#e53935"></i>
+                        <span class="rmc-stat-label">Pendiente</span>
+                        <span class="rmc-stat-val rojo">${{ pendiente_creditos|floatformat:0 }}</span>
+                    </div>
+                </div>
+                {% if ventas_semana_credito_lista %}
+                <div class="rmc-seccion">
+                    <h4 class="rmc-seccion-titulo">
+                        <i class="fas fa-list-ul"></i> Ventas fiadas
+                        <span class="rmc-seccion-badge naranja">{{ cantidad_ventas_credito }}</span>
+                    </h4>
+                    <div class="rmc-lista">
+                        {% for v in ventas_semana_credito_lista %}
+                        <div class="rmc-venta-card" style="--accent:#ff9800">
+                            <div class="rmc-vc-top">
+                                <span class="rmc-vc-nombre">{{ v.cliente.nombre }} {{ v.cliente.apellido }}</span>
+                                <span class="rmc-vc-monto">${{ v.total|floatformat:0 }}</span>
+                            </div>
+                            <div class="rmc-vc-bottom">
+                                <span class="rmc-vc-meta"><i class="far fa-calendar-alt"></i> {{ v.fecha|date:"d/m/Y" }}</span>
+                                {% if v.saldo_pendiente > 0 %}
+                                <span class="rmc-vc-tag rojo">Pendiente: ${{ v.saldo_pendiente|floatformat:0 }}</span>
+                                {% else %}
+                                <span class="rmc-vc-tag verde">Saldado</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <p class="rmc-lista-vacia"><i class="fas fa-inbox"></i><br>Sin ventas a crédito esta semana</p>
+                {% endif %}
+                <p class="rmc-desc">Valor total de las ventas fiadas realizadas esta semana.</p>
+            </div>
+        </div>
+
+        <!-- ── modal-cobrado ── -->
+        <div class="rmc-modal" id="modal-cobrado">
+            <button class="rmc-cerrar" aria-label="Cerrar">&times;</button>
+            <div class="rmc-header" style="background:linear-gradient(135deg,#0d47a1,#1e88e5)">
+                <div class="rmc-header-left">
+                    <div class="rmc-header-icono"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div>
+                        <p class="rmc-header-sub">Resumen Semanal</p>
+                        <h3 class="rmc-header-titulo">Cobrado de Créditos</h3>
+                    </div>
+                </div>
+                <span class="rmc-header-valor">${{ cobrado_de_creditos|floatformat:0 }}</span>
+            </div>
+            <div class="rmc-body">
+                <div class="rmc-stats-grid">
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-file-invoice rmc-stat-icon" style="color:#1e88e5"></i>
+                        <span class="rmc-stat-label">Ventas fiadas</span>
+                        <span class="rmc-stat-val">{{ cantidad_ventas_credito }}</span>
+                    </div>
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-hourglass-half rmc-stat-icon" style="color:#e53935"></i>
+                        <span class="rmc-stat-label">Pendiente</span>
+                        <span class="rmc-stat-val rojo">${{ pendiente_creditos|floatformat:0 }}</span>
+                    </div>
+                </div>
+                {% if ventas_semana_credito_lista %}
+                <div class="rmc-seccion">
+                    <h4 class="rmc-seccion-titulo">
+                        <i class="fas fa-list-ul"></i> Estado por venta
+                        <span class="rmc-seccion-badge azul">{{ cantidad_ventas_credito }}</span>
+                    </h4>
+                    <div class="rmc-lista">
+                        {% for v in ventas_semana_credito_lista %}
+                        <div class="rmc-venta-card" style="--accent:#1e88e5">
+                            <div class="rmc-vc-top">
+                                <span class="rmc-vc-nombre">{{ v.cliente.nombre }} {{ v.cliente.apellido }}</span>
+                                <span class="rmc-vc-monto azul">${{ v.monto_pagado|floatformat:0 }}</span>
+                            </div>
+                            <div class="rmc-vc-bottom">
+                                <span class="rmc-vc-meta">Total: ${{ v.total|floatformat:0 }} &nbsp;·&nbsp; {{ v.fecha|date:"d/m/Y" }}</span>
+                                {% if v.saldo_pendiente > 0 %}
+                                <span class="rmc-vc-tag rojo">–${{ v.saldo_pendiente|floatformat:0 }}</span>
+                                {% else %}
+                                <span class="rmc-vc-tag verde">Saldado</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <p class="rmc-lista-vacia"><i class="fas fa-inbox"></i><br>Sin ventas a crédito esta semana</p>
+                {% endif %}
+                <p class="rmc-desc">Dinero recibido de las ventas fiadas realizadas esta semana.</p>
+            </div>
+        </div>
+
+        <!-- ── modal-cobros ── -->
+        <div class="rmc-modal" id="modal-cobros">
+            <button class="rmc-cerrar" aria-label="Cerrar">&times;</button>
+            <div class="rmc-header" style="background:linear-gradient(135deg,#004d40,#00897b)">
+                <div class="rmc-header-left">
+                    <div class="rmc-header-icono"><i class="fas fa-cash-register"></i></div>
+                    <div>
+                        <p class="rmc-header-sub">Resumen Semanal</p>
+                        <h3 class="rmc-header-titulo">Cobros Recibidos</h3>
+                    </div>
+                </div>
+                <span class="rmc-header-valor">${{ total_cobros_semana|floatformat:0 }}</span>
+            </div>
+            <div class="rmc-body">
+                <div class="rmc-stats-grid">
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-history rmc-stat-icon" style="color:#00897b"></i>
+                        <span class="rmc-stat-label">Pagos recibidos</span>
+                        <span class="rmc-stat-val">{{ cobros_semana_lista|length }}</span>
+                    </div>
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-calendar-week rmc-stat-icon" style="color:#00897b"></i>
+                        <span class="rmc-stat-label">Fuente</span>
+                        <span class="rmc-stat-val" style="font-size:0.75rem;font-weight:600;">Sem. ant.</span>
+                    </div>
+                </div>
+                {% if cobros_semana_lista %}
+                <div class="rmc-seccion">
+                    <h4 class="rmc-seccion-titulo">
+                        <i class="fas fa-list-ul"></i> Cobros recibidos
+                        <span class="rmc-seccion-badge teal">{{ cobros_semana_lista|length }}</span>
+                    </h4>
+                    <div class="rmc-lista">
+                        {% for c in cobros_semana_lista %}
+                        <div class="rmc-venta-card" style="--accent:#00897b">
+                            <div class="rmc-vc-top">
+                                <span class="rmc-vc-nombre">{{ c.venta.cliente.nombre }} {{ c.venta.cliente.apellido }}</span>
+                                <span class="rmc-vc-monto teal">${{ c.monto|floatformat:0 }}</span>
+                            </div>
+                            <div class="rmc-vc-bottom">
+                                <span class="rmc-vc-meta"><i class="fas fa-hashtag"></i> Venta #{{ c.venta.idVenta }} &nbsp;·&nbsp; {{ c.fecha|date:"d/m/Y" }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <p class="rmc-lista-vacia"><i class="fas fa-inbox"></i><br>Sin cobros de semanas anteriores</p>
+                {% endif %}
+                <p class="rmc-desc">Pagos recibidos esta semana por créditos otorgados en semanas anteriores. No cuentan como venta nueva, pero sí como dinero recaudado.</p>
+            </div>
+        </div>
+
+        <!-- ── modal-ganancia ── -->
+        <div class="rmc-modal" id="modal-ganancia">
+            <button class="rmc-cerrar" aria-label="Cerrar">&times;</button>
+            <div class="rmc-header" style="background:linear-gradient(135deg,#4a148c,#8e24aa)">
+                <div class="rmc-header-left">
+                    <div class="rmc-header-icono"><i class="fas fa-chart-line"></i></div>
+                    <div>
+                        <p class="rmc-header-sub">Resumen Semanal</p>
+                        <h3 class="rmc-header-titulo">Ganancia Total</h3>
+                    </div>
+                </div>
+                <span class="rmc-header-valor">${{ total_ganancia|floatformat:0 }}</span>
+            </div>
+            <div class="rmc-body">
+                <div class="rmc-stats-grid tres">
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-chart-bar rmc-stat-icon" style="color:#8e24aa"></i>
+                        <span class="rmc-stat-label">Ventas</span>
+                        <span class="rmc-stat-val">{{ ventas_semana_ganancia_lista|length }}</span>
+                    </div>
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-receipt rmc-stat-icon" style="color:#e53935"></i>
+                        <span class="rmc-stat-label">Gastos</span>
+                        <span class="rmc-stat-val rojo">${{ total_gastos_finanzas|floatformat:0 }}</span>
+                    </div>
+                    <div class="rmc-stat-card">
+                        <i class="fas fa-balance-scale rmc-stat-icon" style="color:#1b5e20"></i>
+                        <span class="rmc-stat-label">Balance</span>
+                        <span class="rmc-stat-val verde">${{ balance_real|floatformat:0 }}</span>
+                    </div>
+                </div>
+                {% if ventas_semana_ganancia_lista %}
+                <div class="rmc-seccion">
+                    <h4 class="rmc-seccion-titulo">
+                        <i class="fas fa-list-ul"></i> Ganancia por venta
+                        <span class="rmc-seccion-badge morado">{{ ventas_semana_ganancia_lista|length }}</span>
+                    </h4>
+                    <div class="rmc-lista">
+                        {% for v in ventas_semana_ganancia_lista %}
+                        <div class="rmc-venta-card" style="--accent:#8e24aa">
+                            <div class="rmc-vc-top">
+                                <span class="rmc-vc-nombre">{{ v.cliente.nombre }} {{ v.cliente.apellido }}</span>
+                                <span class="rmc-vc-monto morado">${{ v.ganancia|floatformat:0 }}</span>
+                            </div>
+                            <div class="rmc-vc-bottom">
+                                <span class="rmc-vc-meta"><i class="far fa-calendar-alt"></i> {{ v.fecha|date:"d/m/Y" }} &nbsp;·&nbsp; {{ v.cantidad }} und.</span>
+                                <span class="rmc-vc-tag gris">Venta: ${{ v.total|floatformat:0 }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <p class="rmc-lista-vacia"><i class="fas fa-inbox"></i><br>Sin ventas esta semana</p>
+                {% endif %}
+                <p class="rmc-desc">Utilidad neta: diferencia entre precio de venta y precio de compra. El balance descuenta los gastos de la semana.</p>
+            </div>
+        </div>
+
+    </div><!-- /rmc-overlay -->
+
+    <style>
+        /* ═══════════════════════════════════════
+           CARDS TRIGGER
+        ═══════════════════════════════════════ */
+        [data-modal] { cursor: pointer; position: relative; }
+        [data-modal]::after {
+            content: '\f05a';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 8px; right: 10px;
+            font-size: 11px;
+            opacity: 0.3;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        [data-modal]:hover::after { opacity: 0.65; }
+        [data-modal].rmc-pressing {
+            transform: scale(0.96);
+            transition: transform 0.15s ease;
+            filter: brightness(0.93);
+        }
+
+        /* ═══════════════════════════════════════
+           OVERLAY
+        ═══════════════════════════════════════ */
+        .rmc-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+                overflow-y: auto;
+            backdrop-filter: blur(3px);
+        }
+        .rmc-overlay.activo { display: flex; }
+
+        /* ═══════════════════════════════════════
+           MODAL BOX
+        ═══════════════════════════════════════ */
+        .rmc-modal {
+            display: none;
+            background: #f4f6f8;
+            border-radius: 22px;
+            width: min(100%, 520px);
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.28);
+            position: relative;
+            animation: rmcEntrar 0.28s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        .rmc-modal.visible { display: block; }
+        .rmc-modal::-webkit-scrollbar { width: 4px; }
+        .rmc-modal::-webkit-scrollbar-track { background: transparent; }
+        .rmc-modal::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+
+        @keyframes rmcEntrar {
+            from { opacity: 0; transform: translateY(22px) scale(0.94); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ── Desktop: más ancho y más alto ── */
+        @media (min-width: 700px) {
+            .rmc-overlay { padding: 32px; }
+            .rmc-modal {
+                width: min(96vw, 1040px);
+                max-width: 1040px;
+                min-width: min(780px, calc(100vw - 64px));
+                max-height: 88vh;
+            }
+            .rmc-stats-grid { grid-template-columns: repeat(3, 1fr); }
+            .rmc-stats-grid.tres { grid-template-columns: repeat(3, 1fr); }
+            .rmc-lista { max-height: 360px; }
+        }
+
+        /* ── Móvil: bottom sheet ── */
+        @media (max-width: 600px) {
+            .rmc-overlay {
+                align-items: flex-end;
+                padding: 12px 0 0;
+            }
+            .rmc-modal {
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                border-radius: 22px 22px 0 0;
+                max-height: 88vh;
+            }
+            .rmc-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 20px 16px 18px;
+            }
+            .rmc-header-left {
+                width: 100%;
+                gap: 12px;
+            }
+            .rmc-header-valor {
+                align-self: flex-start;
+                white-space: normal;
+            }
+            .rmc-body { padding: 14px 14px 20px; }
+            .rmc-stats-grid,
+            .rmc-stats-grid.tres {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .rmc-vc-top,
+            .rmc-vc-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .rmc-vc-nombre,
+            .rmc-vc-meta {
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
+            }
+            @keyframes rmcEntrar {
+                from { opacity: 0; transform: translateY(100%); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+        }
+
+        @media (max-width: 420px) {
+            .rmc-overlay { padding-top: 8px; }
+            .rmc-stats-grid,
+            .rmc-stats-grid.tres { grid-template-columns: 1fr; }
+            .rmc-cerrar {
+                top: 10px;
+                right: 10px;
+            }
+        }
+
+        /* ═══════════════════════════════════════
+           BOTÓN CERRAR
+        ═══════════════════════════════════════ */
+        .rmc-cerrar {
+            position: absolute;
+            top: 12px; right: 14px;
+            z-index: 10;
+            background: rgba(255,255,255,0.25);
+            border: none;
+            font-size: 20px;
+            line-height: 1;
+            color: #fff;
+            cursor: pointer;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s;
+        }
+        .rmc-cerrar:hover { background: rgba(255,255,255,0.45); }
+
+        /* ═══════════════════════════════════════
+           HEADER CON DEGRADADO
+        ═══════════════════════════════════════ */
+        .rmc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 20px 22px;
+            border-radius: 22px 22px 0 0;
+            color: #fff;
+            gap: 12px;
+        }
+        .rmc-header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+        .rmc-header-icono {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .rmc-header-sub {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            opacity: 0.8;
+            margin: 0 0 3px;
+        }
+        .rmc-header-titulo {
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .rmc-header-valor {
+            font-size: 1.5rem;
+            font-weight: 800;
+            white-space: nowrap;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
+        @media (max-width: 420px) {
+            .rmc-header-valor { font-size: 1.15rem; }
+            .rmc-header-titulo { font-size: 0.92rem; }
+        }
+
+        /* ═══════════════════════════════════════
+           BODY
+        ═══════════════════════════════════════ */
+        .rmc-body {
+            padding: 16px 16px 20px;
+        }
+        @media (min-width: 700px) {
+            .rmc-body { padding: 24px 28px 30px; }
+        }
+
+        /* ═══════════════════════════════════════
+           STATS CARDS GRID
+        ═══════════════════════════════════════ */
+        .rmc-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .rmc-stats-grid.tres {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .rmc-stat-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 14px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+        .rmc-stat-icon { font-size: 18px; }
+        .rmc-stat-label {
+            font-size: 0.72rem;
+            color: #888;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .rmc-stat-val {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #222;
+            line-height: 1;
+        }
+        .rmc-stat-val.verde { color: #2e7d32; }
+        .rmc-stat-val.rojo  { color: #c62828; }
+
+        /* ═══════════════════════════════════════
+           SECCIÓN CON TÍTULO
+        ═══════════════════════════════════════ */
+        .rmc-seccion { margin-bottom: 14px; }
+        .rmc-seccion-titulo {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #555;
+            margin: 0 0 8px;
+        }
+        .rmc-seccion-titulo i { color: #999; font-size: 0.75rem; }
+        .rmc-seccion-badge {
+            margin-left: auto;
+            background: #43a047;
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        .rmc-seccion-badge.azul    { background: #1565c0; }
+        .rmc-seccion-badge.naranja { background: #e65100; }
+        .rmc-seccion-badge.teal    { background: #00695c; }
+        .rmc-seccion-badge.morado  { background: #6a1b9a; }
+
+        /* ═══════════════════════════════════════
+           LISTA SCROLL
+        ═══════════════════════════════════════ */
+        .rmc-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+        .rmc-lista::-webkit-scrollbar { width: 4px; }
+        .rmc-lista::-webkit-scrollbar-track { background: transparent; }
+        .rmc-lista::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+
+        /* ═══════════════════════════════════════
+           VENTA CARD
+        ═══════════════════════════════════════ */
+        .rmc-venta-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 11px 14px;
+            border-left: 4px solid var(--accent, #43a047);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+        }
+        .rmc-vc-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+            min-width: 0;
+        }
+        .rmc-vc-nombre {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #222;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .rmc-vc-monto {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #1b5e20;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .rmc-vc-monto.azul   { color: #1565c0; }
+        .rmc-vc-monto.teal   { color: #00695c; }
+        .rmc-vc-monto.morado { color: #6a1b9a; }
+        .rmc-vc-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+            gap: 6px;
+            min-width: 0;
+        }
+        .rmc-vc-meta {
+            font-size: 0.76rem;
+            color: #999;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .rmc-vc-meta i { margin-right: 3px; }
+        .rmc-vc-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .rmc-vc-tag.verde   { background: #e8f5e9; color: #2e7d32; }
+        .rmc-vc-tag.rojo    { background: #ffebee; color: #c62828; }
+        .rmc-vc-tag.gris    { background: #f0f0f0; color: #666; }
+
+        /* ═══════════════════════════════════════
+           EMPTY STATE & DESC
+        ═══════════════════════════════════════ */
+        .rmc-lista-vacia {
+            text-align: center;
+            color: #bbb;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            padding: 14px 0 6px;
+        }
+        .rmc-lista-vacia i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+        .rmc-desc {
+            font-size: 0.8rem;
+            color: #999;
+            line-height: 1.5;
+            margin: 12px 0 0;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+
+    {% comment %}
+
+
+            {% if ventas_semana_completo_lista %}
+            <p class="rmc-lista-titulo">Ventas al contado</p>
+            <div class="rmc-lista">
+                {% for v in ventas_semana_completo_lista %}
+                <div class="rmc-item">
+                    <div class="rmc-item-info">
+                        <span class="rmc-item-nombre">{{ v.cliente.nombre }} {{ v.cliente.apellido }}</span>
+                        <span class="rmc-item-sub">{{ v.fecha|date:"d/m" }}</span>
+                    </div>
+                    <span class="rmc-item-monto">${{ v.total|floatformat:0 }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if cobros_semana_lista %}
+            <p class="rmc-lista-titulo">Cobros de créditos anteriores</p>
+            <div class="rmc-lista">
+                {% for c in cobros_semana_lista %}
+                <div class="rmc-item">
+                    <div class="rmc-item-info">
+                        <span class="rmc-item-nombre">{{ c.venta.cliente.nombre }} {{ c.venta.cliente.apellido }}</span>
+                        <span class="rmc-item-sub">Venta #{{ c.venta.idVenta }} · {{ c.fecha|date:"d/m" }}</span>
+                    </div>
+                    <span class="rmc-item-monto cobro">${{ c.monto|floatformat:0 }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if not ventas_semana_completo_lista and not cobros_semana_lista %}
+            <p class="rmc-lista-vacia">Sin movimientos esta semana</p>
+            {% endif %}
+            <p class="rmc-desc">Dinero que efectivamente entró en caja: ventas cobradas al contado más pagos recibidos de créditos de semanas anteriores.</p>
+        </div>
+
+        <!-- modal-completo -->
+        <div class="rmc-modal" id="modal-completo">
+            <button class="rmc-cerrar" aria-label="Cerrar">&times;</button>
+            <div class="rmc-icono" style="background:linear-gradient(135deg,#43a047,#1b5e20)">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="rmc-titulo">Ventas Pago Completo</h3>
+            <p class="rmc-valor">${{ total_ventas_completo|floatformat:0 }}</p>
+            <div class="rmc-detalles">
+                <div class="rmc-fila">
+                    <span>Número de ventas</span>
+                    <strong>{{ cantidad_ventas_completo }}</strong>
+                </div>
+            </div>
+            {% if ventas_semana_completo_lista %}
+            <div class="rmc-lista">
+                {% for v in ventas_semana_completo_lista %}
+                <div class="rmc-item">
+                    <div class="rmc-item-info">
+                        <span class="rmc-item-nombre">{{ v.cliente.nombre }} {{ v.cliente.apellido }}</span>
+                        <span class="rmc-item-sub">{{ v.fecha|date:"d/m" }} · {{ v.cantidad }} und.</span>
+                    </div>
+                    <span class="rmc-item-monto">${{ v.total|floatformat:0 }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="rmc-lista-vacia">Sin ventas al contado esta semana</p>
+            {% endif %}
+            <p class="rmc-desc">Ventas que se pagaron completamente al momento de la transacción, sin dejar saldo pendiente.</p>
+        </div>
+
+        <!-- modal-credito -->
+        <div class="rmc-modal" id="modal-credito">
+            <button class="rmc-cerrar" aria-label="Cerrar">&times;</button>
+            <div class="rmc-icono" style="background:linear-gradient(135deg,#ff9800,#e65100)">
+                <i class="fas fa-clock"></i>
+            </div>
+            <h3 class="rmc-titulo">Dado a Crédito</h3>
+            <p class="rmc-valor">${{ total_ventas_credito|floatformat:0 }}</p>
+            <div class="rmc-detalles">
+                <div class="rmc-fila">
+                    <span>Número de ventas fiadas</span>
+                    <strong>{{ cantidad_ventas_credito }}</strong>
+                </div>
+                <div class="rmc-fila">
+                    <span>Ya cobrado</span>
+                    <strong style="color:#43a047">${{ cobrado_de_creditos|floatformat:0 }}</strong>
+                </div>
+                <div class="rmc-fila">
+                    <span>Pendiente</span>
+                    <strong style="color:#e53935">${{ pendiente_creditos|floatformat:0 }}</strong>
+                </div>
+            </div>
+            {% if ventas_semana_credito_lista %}
+            <div class="rmc-lista">
+                {% for v in ventas_semana_credito_lista %}
+                <div class="rmc-item rmc-item-credito">
+                    <div class="rmc-item-info">
+                        <span class="rmc-item-nombre">{{ v.cliente.nombre }} {{ v.cliente.apellido }}</span>
+                        <span class="rmc-item-sub">{{ v.fecha|date:"d/m" }} · Cobrado: ${{ v.monto_pagado|floatformat:0 }}</span>
+                    </div>
+                    <div class="rmc-item-col">
+                        <span class="rmc-item-monto">${{ v.total|floatformat:0 }}</span>
+                        {% if v.saldo_pendiente > 0 %}
+                        <span class="rmc-item-pendiente">–${{ v.saldo_pendiente|floatformat:0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="rmc-lista-vacia">Sin ventas a crédito esta semana</p>
+            {% endif %}
+            <p class="rmc-desc">Valor total de las ventas fiadas realizadas esta semana.</p>
+        </div>
+
+        <!-- modal-cobrado -->
+        <div class="rmc-modal" id="modal-cobrado">
+            <button class="rmc-cerrar" aria-label="Cerrar">&times;</button>
+            <div class="rmc-icono" style="background:linear-gradient(135deg,#1e88e5,#0d47a1)">
+                <i class="fas fa-hand-holding-usd"></i>
+            </div>
+            <h3 class="rmc-titulo">Cobrado de Créditos</h3>
+            <p class="rmc-valor">${{ cobrado_de_creditos|floatformat:0 }}</p>
+            <div class="rmc-detalles">
+                <div class="rmc-fila">
+                    <span>De {{ cantidad_ventas_credito }} ventas fiadas esta semana</span>
+                    <strong></strong>
+                </div>
+                <div class="rmc-fila">
+                    <span>Aún pendiente</span>
+                    <strong style="color:#e53935">${{ pendiente_creditos|floatformat:0 }}</strong>
+                </div>
+            </div>
+            {% if ventas_semana_credito_lista %}
+            <div class="rmc-lista">
+                {% for v in ventas_semana_credito_lista %}
+                <div class="rmc-item">
+                    <div class="rmc-item-info">
+                        <span class="rmc-item-nombre">{{ v.cliente.nombre }} {{ v.cliente.apellido }}</span>
+                        <span class="rmc-item-sub">Total: ${{ v.total|floatformat:0 }} · {{ v.fecha|date:"d/m" }}</span>
+                    </div>
+                    <div class="rmc-item-col">
+                        <span class="rmc-item-monto cobro">${{ v.monto_pagado|floatformat:0 }}</span>
+                        {% if v.saldo_pendiente > 0 %}
+                        <span class="rmc-item-pendiente">–${{ v.saldo_pendiente|floatformat:0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="rmc-lista-vacia">Sin ventas a crédito esta semana</p>
+            {% endif %}
+            <p class="rmc-desc">Dinero recibido de las ventas fiadas realizadas esta semana.</p>
+        </div>
+
+        <!-- modal-cobros -->
+        <div class="rmc-modal" id="modal-cobros">
+            <button class="rmc-cerrar" aria-label="Cerrar">&times;</button>
+            <div class="rmc-icono" style="background:linear-gradient(135deg,#00897b,#004d40)">
+                <i class="fas fa-cash-register"></i>
+            </div>
+            <h3 class="rmc-titulo">Cobros Recibidos</h3>
+            <p class="rmc-valor">${{ total_cobros_semana|floatformat:0 }}</p>
+            <div class="rmc-detalles">
+                <div class="rmc-fila">
+                    <span>Fuente</span>
+                    <strong>Créditos de semanas anteriores</strong>
+                </div>
+            </div>
+            {% if cobros_semana_lista %}
+            <div class="rmc-lista">
+                {% for c in cobros_semana_lista %}
+                <div class="rmc-item">
+                    <div class="rmc-item-info">
+                        <span class="rmc-item-nombre">{{ c.venta.cliente.nombre }} {{ c.venta.cliente.apellido }}</span>
+                        <span class="rmc-item-sub">Venta #{{ c.venta.idVenta }} · {{ c.fecha|date:"d/m" }}</span>
+                    </div>
+                    <span class="rmc-item-monto cobro">${{ c.monto|floatformat:0 }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="rmc-lista-vacia">Sin cobros de semanas anteriores</p>
+            {% endif %}
+            <p class="rmc-desc">Pagos recibidos esta semana por créditos otorgados en semanas anteriores. No cuentan como venta nueva, pero sí como dinero recaudado.</p>
+        </div>
+
+        <!-- modal-ganancia -->
+        <div class="rmc-modal" id="modal-ganancia">
+            <button class="rmc-cerrar" aria-label="Cerrar">&times;</button>
+            <div class="rmc-icono" style="background:linear-gradient(135deg,#8e24aa,#4a148c)">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="rmc-titulo">Ganancia Total</h3>
+            <p class="rmc-valor">${{ total_ganancia|floatformat:0 }}</p>
+            <div class="rmc-detalles">
+                <div class="rmc-fila">
+                    <span>Balance real (ganancia − gastos)</span>
+                    <strong>${{ balance_real|floatformat:0 }}</strong>
+                </div>
+                <div class="rmc-fila">
+                    <span>Gastos semana</span>
+                    <strong style="color:#e53935">${{ total_gastos_finanzas|floatformat:0 }}</strong>
+                </div>
+            </div>
+            {% if ventas_semana_ganancia_lista %}
+            <div class="rmc-lista">
+                {% for v in ventas_semana_ganancia_lista %}
+                <div class="rmc-item">
+                    <div class="rmc-item-info">
+                        <span class="rmc-item-nombre">{{ v.cliente.nombre }} {{ v.cliente.apellido }}</span>
+                        <span class="rmc-item-sub">{{ v.fecha|date:"d/m" }} · {{ v.cantidad }} und.</span>
+                    </div>
+                    <span class="rmc-item-monto ganancia">${{ v.ganancia|floatformat:0 }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="rmc-lista-vacia">Sin ventas esta semana</p>
+            {% endif %}
+            <p class="rmc-desc">Utilidad neta: diferencia entre precio de venta y precio de compra de todos los productos vendidos esta semana.</p>
+        </div>
+
+    <style>
+        /* ── Cards con modal: indicador sutil ── */
+        [data-modal] {
+            cursor: pointer;
+            position: relative;
+        }
+        [data-modal]::after {
+            content: '\f05a';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 12px;
+            opacity: 0.35;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        [data-modal]:hover::after {
+            opacity: 0.7;
+        }
+        [data-modal].rmc-pressing {
+            transform: scale(0.96);
+            transition: transform 0.15s ease;
+            filter: brightness(0.93);
+        }
+
+        /* ── Overlay ── */
+        .rmc-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+                background: rgba(0,0,0,0.45);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+                padding: 20px;
+                overflow-y: auto;
+                backdrop-filter: blur(3px);
+        }
+        .rmc-overlay.activo {
+            display: flex;
+        }
+
+        /* ── Modal box ── */
+        .rmc-modal {
+            display: none;
+                background: #f4f6f8;
+                border-radius: 22px;
+                padding: 0;
+                width: min(100%, 460px);
+                max-width: 460px;
+                max-height: 90vh;
+                overflow-y: auto;
+                overflow-x: hidden;
+                box-shadow: 0 32px 80px rgba(0,0,0,0.28);
+            position: relative;
+            animation: rmcEntrar 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        .rmc-modal.visible {
+            display: block;
+        }
+        @keyframes rmcEntrar {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+            @media (min-width: 700px) {
+                .rmc-overlay { padding: 32px; }
+                .rmc-modal {
+                    width: min(92vw, 920px);
+                    max-width: 920px;
+                    max-height: 88vh;
+                }
+                .rmc-lista { max-height: 360px; }
+            }
+
+        /* ── En móvil: bottom sheet ── */
+        @media (max-width: 600px) {
+            .rmc-overlay {
+                align-items: flex-end;
+                    padding: 12px 0 0;
+            }
+            .rmc-modal {
+                    width: 100%;
+                max-width: 100%;
+                    margin: 0;
+                    border-radius: 22px 22px 0 0;
+                    max-height: 88vh;
+                    padding: 0;
+            }
+            @keyframes rmcEntrar {
+                from { opacity: 0; transform: translateY(100%); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+        }
+
+        /* ── Contenido modal ── */
+        .rmc-cerrar {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            background: none;
+            border: none;
+            font-size: 22px;
+            line-height: 1;
+            color: #999;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 50%;
+            transition: background 0.15s, color 0.15s;
+        }
+        .rmc-cerrar:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .rmc-icono {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+            color: #fff;
+            font-size: 22px;
+        }
+        .rmc-titulo {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 4px;
+        }
+        .rmc-valor {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1b5e20;
+            margin: 0 0 16px;
+        }
+        .rmc-detalles {
+            background: #f7f9f7;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+        }
+        .rmc-fila {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            font-size: 0.875rem;
+            color: #555;
+            border-bottom: 1px solid #eee;
+        }
+        .rmc-fila:last-child {
+            border-bottom: none;
+        }
+        .rmc-fila strong {
+            font-size: 0.9rem;
+            color: #222;
+        }
+        .rmc-desc {
+            font-size: 0.82rem;
+            color: #777;
+            line-height: 1.5;
+            margin: 12px 0 0;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        /* ── Lista de ventas dentro del modal ── */
+        .rmc-lista-titulo {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+            margin: 12px 0 6px;
+        }
+        .rmc-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 0;
+            padding-right: 2px;
+            border-radius: 0;
+            border: none;
+        }
+        .rmc-lista::-webkit-scrollbar { width: 4px; }
+        .rmc-lista::-webkit-scrollbar-track { background: transparent; }
+        .rmc-lista::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+        .rmc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.85rem;
+        }
+        .rmc-item:last-child { border-bottom: none; }
+        .rmc-item:nth-child(even) { background: #fafafa; }
+        .rmc-item-info { flex: 1; min-width: 0; padding-right: 8px; }
+        .rmc-item-nombre {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .rmc-item-sub {
+            display: block;
+            font-size: 0.78rem;
+            color: #999;
+            margin-top: 1px;
+        }
+        .rmc-item-monto {
+            font-weight: 700;
+            color: #1b5e20;
+            white-space: nowrap;
+        }
+        .rmc-item-monto.cobro { color: #1565c0; }
+        .rmc-item-monto.ganancia { color: #6a1b9a; }
+        .rmc-item-col {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+        .rmc-item-pendiente {
+            font-size: 0.75rem;
+            color: #e53935;
+            font-weight: 600;
+        }
+        .rmc-lista-vacia {
+            font-size: 0.82rem;
+            color: #bbb;
+            text-align: center;
+            padding: 10px 0 6px;
+            font-style: italic;
+        }
+
+        .rmc-hint {
+            display: block;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 10px;
+        }
+        @media (hover: hover) {
+            .rmc-hint { display: none; }
+        }
+    </style>
+
+    {% endcomment %}
+
     <script>
         // Auto-cerrar alertas después de 5 segundos
         document.querySelectorAll('.alert-message').forEach(function(alert) {
@@ -614,6 +1854,80 @@
                 alert.style.transform = 'translateY(-15px)';
                 setTimeout(function() { alert.remove(); }, 500);
             }, 5000);
+        });
+
+        // ===== MODALES RESUMEN SEMANAL =====
+        var rmcOverlay = document.getElementById('modal-overlay');
+
+        function rmcAbrir(id) {
+            rmcOverlay.querySelectorAll('.rmc-modal').forEach(function(m) {
+                m.classList.remove('visible');
+            });
+            var modal = document.getElementById(id);
+            if (!modal) return;
+            modal.classList.add('visible');
+            rmcOverlay.classList.add('activo');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function rmcCerrar() {
+            rmcOverlay.classList.remove('activo');
+            document.body.style.overflow = '';
+        }
+
+        // Cerrar al hacer clic en el fondo del overlay
+        rmcOverlay.addEventListener('click', function(e) {
+            if (e.target === rmcOverlay) rmcCerrar();
+        });
+
+        // Cerrar con botón ×
+        rmcOverlay.querySelectorAll('.rmc-cerrar').forEach(function(btn) {
+            btn.addEventListener('click', rmcCerrar);
+        });
+
+        // Cerrar con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') rmcCerrar();
+        });
+
+        // Detectar si el dispositivo es táctil o de ratón
+        var esTactil = window.matchMedia('(hover: none)').matches;
+
+        var rmcTimer = null;
+        var rmcLongFired = false;
+
+        document.querySelectorAll('[data-modal]').forEach(function(card) {
+            var modalId = card.dataset.modal;
+
+            if (esTactil) {
+                // Móvil: long-press de 400 ms para evitar toque accidental
+                card.addEventListener('touchstart', function() {
+                    rmcLongFired = false;
+                    var el = this;
+                    el.classList.add('rmc-pressing');
+                    rmcTimer = setTimeout(function() {
+                        rmcLongFired = true;
+                        el.classList.remove('rmc-pressing');
+                        rmcAbrir(modalId);
+                    }, 400);
+                }, { passive: true });
+
+                card.addEventListener('touchend', function() {
+                    clearTimeout(rmcTimer);
+                    this.classList.remove('rmc-pressing');
+                }, { passive: true });
+
+                card.addEventListener('touchmove', function() {
+                    clearTimeout(rmcTimer);
+                    this.classList.remove('rmc-pressing');
+                }, { passive: true });
+
+            } else {
+                // Desktop: clic normal
+                card.addEventListener('click', function() {
+                    rmcAbrir(modalId);
+                });
+            }
         });
     </script>
 </body>

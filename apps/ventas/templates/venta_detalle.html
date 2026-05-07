@@ -18,7 +18,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #43a047 0%, #1b5e20 100%);
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
             min-height: 100vh;
             padding: 40px 20px;
         }
@@ -49,6 +49,27 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border-left: 5px solid #43a047;
             animation: slideDown 0.4s ease;
+        }
+
+        .btn-volver {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+            color: white;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            font-size: 18px;
+            text-decoration: none;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(67, 160, 71, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-volver:hover {
+            transform: translateX(-3px);
+            box-shadow: 0 6px 16px rgba(67, 160, 71, 0.5);
         }
 
         @keyframes slideDown {
@@ -415,9 +436,14 @@
         <!-- Header -->
         <div class="header">
             <div class="header-top">
-                <div>
-                    <h1><i class="fas fa-file-invoice-dollar"></i> Venta #{{ venta.idVenta }}</h1>
-                    <p class="fecha-venta"><i class="fas fa-calendar-alt"></i> {{ venta.fecha|date:"d \d\e F \d\e Y - H:i" }}</p>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <a href="{% url 'ventas' %}" class="btn-volver" title="Volver al módulo de ventas">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1><i class="fas fa-file-invoice-dollar"></i> Venta #{{ venta.idVenta }}</h1>
+                        <p class="fecha-venta"><i class="fas fa-calendar-alt"></i> {{ venta.fecha|date:"d \d\e F \d\e Y - H:i" }}</p>
+                    </div>
                 </div>
                 <div class="header-meta">
                     <div class="estado-badge estado-{{ venta.estado_pago }}">
@@ -482,8 +508,8 @@
                         {% for detalle in detalles %}
                         <tr>
                             <td>{{ detalle.producto.nombre }}</td>
-                            <td><input type="number" name="cantidad_{{ detalle.id }}" class="inline-input" value="{{ detalle.cantidad }}" min="0" step="1"></td>
-                            <td><input type="number" name="precio_{{ detalle.id }}" class="inline-input" value="{{ detalle.precio_venta|floatformat:0 }}" min="0" step="1"></td>
+                            <td><input type="number" name="cantidad_{{ detalle.id }}" class="inline-input cantidad-inline" value="{{ detalle.cantidad }}" min="0" step="1" data-precio-compra="{{ detalle.precio_compra }}"></td>
+                            <td><input type="text" inputmode="numeric" name="precio_{{ detalle.id }}" class="inline-input precio-inline" value="{{ detalle.precio_venta|floatformat:0 }}" data-precio-compra="{{ detalle.precio_compra }}"></td>
                             <td>${{ detalle.subtotal|floatformat:0 }}</td>
                             <td>${{ detalle.ganancia|floatformat:0 }}</td>
                         </tr>
@@ -497,18 +523,76 @@
                 </button>
             </div>
             </form>
+
+    <script>
+        function formatCOP(num) {
+            return (parseInt(num) || 0).toLocaleString('es-CO');
+        }
+        function parseCOP(str) {
+            return parseInt(String(str).replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
+        }
+
+        function actualizarTotales() {
+            var totalVenta = 0, totalCantidad = 0, totalGanancia = 0;
+            document.querySelectorAll('tbody tr').forEach(function(fila) {
+                var cantInput  = fila.querySelector('.cantidad-inline');
+                var precInput  = fila.querySelector('.precio-inline');
+                if (!cantInput || !precInput) return;
+                var cant        = parseInt(cantInput.value) || 0;
+                var precio      = parseCOP(precInput.value);
+                var precCompra  = parseFloat(cantInput.getAttribute('data-precio-compra')) || 0;
+                if (cant > 0 && precio > 0) {
+                    totalVenta    += cant * precio;
+                    totalCantidad += cant;
+                    totalGanancia += cant * (precio - precCompra);
+                }
+            });
+            document.getElementById('total-cantidad').textContent = totalCantidad.toFixed(2) + ' kg';
+            document.getElementById('total-venta').textContent    = '$' + Math.round(totalVenta).toLocaleString('es-CO');
+            document.getElementById('total-ganancia').textContent = '$' + Math.round(totalGanancia).toLocaleString('es-CO');
+        }
+
+        // Inputs de PRECIO
+        document.querySelectorAll('.precio-inline').forEach(function(input) {
+            var raw = parseInt(input.value) || 0;
+            if (raw > 0) input.value = formatCOP(raw);
+            input.addEventListener('input', function() {
+                var v = parseCOP(this.value);
+                this.value = v > 0 ? formatCOP(v) : '';
+                actualizarTotales();
+            });
+            input.addEventListener('focus', function() {
+                this.setSelectionRange(this.value.length, this.value.length);
+            });
+        });
+
+        // Inputs de CANTIDAD
+        document.querySelectorAll('.cantidad-inline').forEach(function(input) {
+            input.addEventListener('input', function() {
+                if (parseInt(this.value) < 0) this.value = 0;
+                actualizarTotales();
+            });
+        });
+
+        document.getElementById('form-editar-detalle').addEventListener('submit', function() {
+            document.querySelectorAll('.precio-inline').forEach(function(input) {
+                input.value = parseCOP(input.value);
+            });
+        });
+    </script>
+
             <div class="totales">
                 <div class="total-item">
                     <span class="total-label">Total Cantidad</span>
-                    <span class="total-valor">{{ venta.cantidad }} kg</span>
+                    <span class="total-valor" id="total-cantidad">{{ venta.cantidad }} kg</span>
                 </div>
                 <div class="total-item">
                     <span class="total-label">Total Venta</span>
-                    <span class="total-valor">${{ venta.total|floatformat:0 }}</span>
+                    <span class="total-valor" id="total-venta">${{ venta.total|floatformat:0 }}</span>
                 </div>
                 <div class="total-item">
                     <span class="total-label">Ganancia Total</span>
-                    <span class="total-valor">${{ venta.ganancia|floatformat:0 }}</span>
+                    <span class="total-valor" id="total-ganancia">${{ venta.ganancia|floatformat:0 }}</span>
                 </div>
             </div>
             {% else %}
@@ -568,18 +652,15 @@
         {% endif %}
 
         <!-- Botones de Acción -->
+        {% if venta.tipo_pago == 'fiado' and venta.saldo_pendiente > 0 %}
         <div class="card">
             <div class="botones">
-                <a href="{% url 'ventas' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
-                {% if venta.tipo_pago == 'fiado' and venta.saldo_pendiente > 0 %}
                 <a href="{% url 'agregar_pago' venta.idVenta %}" class="btn btn-success">
                     <i class="fas fa-plus-circle"></i> Registrar Pago
                 </a>
-                {% endif %}
             </div>
         </div>
+        {% endif %}
     </div>
 </body>
 </html>
