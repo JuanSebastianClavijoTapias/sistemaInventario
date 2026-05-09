@@ -133,7 +133,7 @@ def ventas_form(request):
 
         is_single = len(items) == 1
 
-        # Create the sale
+        # Create the sale with user for audit
         venta = Venta.objects.create(
             cliente=cliente,
             producto=items[0]['producto'] if is_single else None,
@@ -150,6 +150,10 @@ def ventas_form(request):
             fecha_vencimiento=fecha_vencimiento,
             estado_pago=estado_pago
         )
+        
+        # Asignar usuario para auditoría (antes de crearlo hubiera sido ideal, pero post_save también funciona)
+        venta._usuario_auditoria = request.user
+        venta.save()
 
         # Create detail records and update stock
         for item in items:
@@ -163,6 +167,8 @@ def ventas_form(request):
                 ganancia=item['ganancia'],
             )
             item['producto'].stock -= item['cantidad']
+            # Marcar como actualización de stock para que no se audite
+            item['producto']._auditoria_skip = True
             item['producto'].save()
 
         if tipo_pago == 'completo':

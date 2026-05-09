@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'apps.productos',
     'apps.gastos',
     'apps.ventas',
+    'apps.auditoria',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.auth.middleware.LoginRequiredMiddleware',
     'panelprincipal.middleware.SuscripcionMiddleware',
+    'apps.auditoria.middleware.AuditoriaMiddleware',
 ]
 
 ROOT_URLCONF = 'djangopapa.urls'

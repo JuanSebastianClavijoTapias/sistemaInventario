@@ -1,0 +1,241 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Auditoría - InventarioPiñeres</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .historial-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .filtros-section {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .filtros-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .filtros-row select, .filtros-row input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .btn-filtrar {
+            background: #2196F3;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-filtrar:hover {
+            background: #1976D2;
+        }
+        .registros-list {
+            margin-top: 20px;
+        }
+        .registro-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border-left: 4px solid #2196F3;
+            background: #f9f9f9;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .registro-item:hover {
+            background: #f0f0f0;
+        }
+        .registro-item.crear {
+            border-left-color: #4CAF50;
+        }
+        .registro-item.editar {
+            border-left-color: #FF9800;
+        }
+        .registro-item.eliminar {
+            border-left-color: #f44336;
+        }
+        .registro-item.pagar {
+            border-left-color: #2196F3;
+        }
+        .registro-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .registro-icon.crear {
+            background: #4CAF50;
+        }
+        .registro-icon.editar {
+            background: #FF9800;
+        }
+        .registro-icon.eliminar {
+            background: #f44336;
+        }
+        .registro-icon.pagar {
+            background: #2196F3;
+        }
+        .registro-content {
+            flex: 1;
+        }
+        .registro-titulo {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .registro-detalle {
+            font-size: 12px;
+            color: #666;
+        }
+        .registro-fecha {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination a, .pagination span {
+            padding: 8px 12px;
+            margin: 0 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #2196F3;
+        }
+        .pagination .current {
+            background: #2196F3;
+            color: white;
+            border-color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="page-header">
+            <a href="{% url 'inicio' %}" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="header-info">
+                <h1><i class="fas fa-history"></i> Historial de Auditoría</h1>
+                <p>Registro de todas las acciones realizadas en el sistema</p>
+            </div>
+        </header>
+
+        <!-- Filtros -->
+        <section class="filtros-section">
+            <form method="get" class="form-filtros">
+                <div class="filtros-row">
+                    <select name="accion">
+                        <option value="">-- Todas las acciones --</option>
+                        {% for value, label in acciones %}
+                        <option value="{{ value }}" {% if filtros.accion == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <select name="modelo">
+                        <option value="">-- Todos los modelos --</option>
+                        {% for key, label in modelos %}
+                        <option value="{{ key }}" {% if filtros.modelo == key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <input type="date" name="fecha_desde" value="{{ filtros.fecha_desde }}" placeholder="Desde">
+                    <input type="date" name="fecha_hasta" value="{{ filtros.fecha_hasta }}" placeholder="Hasta">
+                </div>
+                
+                <div class="filtros-row">
+                    <input type="text" name="busqueda" value="{{ filtros.busqueda }}" placeholder="Buscar en descripción...">
+                    <button type="submit" class="btn-filtrar">
+                        <i class="fas fa-search"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Registros -->
+        <section class="registros-list">
+            {% if registros %}
+                {% for registro in registros %}
+                <div class="registro-item {{ registro.accion }}" onclick="mostrarDetalles({{ registro.id }})">
+                    <div class="registro-icon {{ registro.accion }}">
+                        {% if registro.accion == 'crear' %}
+                            <i class="fas fa-plus"></i>
+                        {% elif registro.accion == 'editar' %}
+                            <i class="fas fa-edit"></i>
+                        {% elif registro.accion == 'eliminar' %}
+                            <i class="fas fa-trash"></i>
+                        {% elif registro.accion == 'pagar' %}
+                            <i class="fas fa-money-bill"></i>
+                        {% else %}
+                            <i class="fas fa-exchange-alt"></i>
+                        {% endif %}
+                    </div>
+                    <div class="registro-content">
+                        <div class="registro-titulo">{{ registro.obtener_resumen }}</div>
+                        <div class="registro-detalle">
+                            <strong>Modelo:</strong> {{ registro.modelo }} | 
+                            <strong>Usuario:</strong> {% if registro.usuario %}{{ registro.usuario.first_name }} {{ registro.usuario.last_name|default:"" }}{% if not registro.usuario.first_name %}{{ registro.usuario.username }}{% endif %}{% else %}Sistema{% endif %}
+                        </div>
+                        <div class="registro-fecha">
+                            <i class="fas fa-clock"></i> {{ registro.fecha_hora|date:"d/m/Y H:i:s" }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; padding: 40px; color: #999;">
+                    <i class="fas fa-inbox"></i> No hay registros de auditoría
+                </p>
+            {% endif %}
+        </section>
+
+        <!-- Paginación -->
+        {% if registros.has_other_pages %}
+        <div class="pagination">
+            {% if registros.has_previous %}
+                <a href="?page=1">« Primera</a>
+                <a href="?page={{ registros.previous_page_number }}">‹ Anterior</a>
+            {% endif %}
+            
+            <span class="current">{{ registros.number }} de {{ registros.paginator.num_pages }}</span>
+            
+            {% if registros.has_next %}
+                <a href="?page={{ registros.next_page_number }}">Siguiente ›</a>
+                <a href="?page={{ registros.paginator.num_pages }}">Última »</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function mostrarDetalles(registroId) {
+            // Implementar modal o redirigir a detalles completos
+            console.log('Ver detalles del registro:', registroId);
+        }
+    </script>
+</body>
+</html>

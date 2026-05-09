@@ -57,10 +57,12 @@
         }
         .cliente-info {
             flex: 1;
+            margin-bottom: 10px;
         }
         .cliente-nombre {
             font-weight: 600;
             color: #333;
+            font-size: 18px;
         }
 
         .cliente-acciones {
@@ -72,7 +74,10 @@
             border-radius: 5px;
             text-decoration: none;
             font-size: 13px;
-            transition: background 0.3s;
+            transition: background 1.5s;
+            width: 100%;
+            text-align: center;
+            display: block;
         }
         .btn-editar {
             background: #2196F3;
@@ -101,7 +106,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            margin-bottom: 60px;
         }
         .cliente-deuda-item {
             display: flex;
@@ -113,6 +118,7 @@
             margin-bottom: 10px;
             background: #fff5f5;
             border-left: 4px solid;
+            gap: 15px;
         }
         .cliente-deuda-item.pendiente {
             border-left-color: #ff9800;
@@ -148,6 +154,7 @@
         }
         .cliente-pagado-item {
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
             align-items: center;
             padding: 15px;
@@ -156,13 +163,30 @@
             margin-bottom: 10px;
             border-left: 4px solid #4CAF50;
         }
+
+        .cliente-pagado-item > .cliente-acciones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
         .pagado-info {
             flex: 1;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
         }
         .pagado-monto {
             font-size: 16px;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #4CAF50;
+            margin: 0;
+            width: 100%;
+            grid-column: 1 / -1;
         }
         /* Estilos para búsqueda de clientes */
         .search-section {
@@ -205,6 +229,8 @@
         .cliente-all-item {
             display: flex;
             justify-content: space-between;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             padding: 12px 15px;
             background: #f9f9f9;
@@ -225,6 +251,29 @@
             color: #666;
             display: none;
         }
+
+        /* Estilos responsivos para móvil */
+        @media (max-width: 768px) {
+            .cliente-deuda-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .deuda-info {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .cliente-acciones {
+                width: 100%;
+                justify-content: space-between;
+                gap: 10px;
+            }
+            .deuda-monto {
+                align-self: flex-end;
+                font-size: 20px;
+            }
+        }
+
+    
     </style>
 </head>
 <body>
@@ -262,8 +311,8 @@
         </section>
 
         <!-- Resumen -->
-        <section class="resumen-section">
-            <div class="resumen-card clientes-card">
+        <section class="resumen-section" style="gap: 27px;">
+            <div class="resumen-card clientes-card" style="margin: 0;">
                 <div class="resumen-icon">
                     <i class="fas fa-users"></i>
                 </div>
@@ -272,7 +321,7 @@
                     <span class="resumen-valor">{{ clientes|length }}</span>
                 </div>
             </div>
-            <div class="resumen-card">
+            <div class="resumen-card" style="margin: 0;">
                 <div class="resumen-icon warning">
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
@@ -281,7 +330,7 @@
                     <span class="resumen-valor">{{ clientes_con_deuda|length }}</span>
                 </div>
             </div>
-            <div class="resumen-card">
+            <div class="resumen-card" style="margin: 0;">
                 <div class="resumen-icon">
                     <i class="fas fa-check-circle"></i>
                 </div>
@@ -343,7 +392,7 @@
                             {{ deuda.ventas_pendientes }} venta(s) pendiente(s)
                             {% if deuda.dias_minimos is not None %}
                                 {% if deuda.dias_minimos < 0 %}
-                                    - Vencida hace {{ deuda.dias_minimos.abs }} día(s)
+                                    - Vencida hace {% widthratio deuda.dias_minimos 1 -1 %} día(s)
                                 {% elif deuda.dias_minimos == 0 %}
                                     - Vence hoy
                                 {% elif deuda.dias_minimos == 1 %}
